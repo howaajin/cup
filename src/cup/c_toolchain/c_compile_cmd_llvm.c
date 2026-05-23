@@ -131,7 +131,7 @@ void cmd_after_execute_parse_depfile(Node* node)
         case DEPFILE_ITEM_NORMAL_DEP:
             if (os_file_exists(dep))
             {
-                cmd_add_implicit_dep(node, dep);
+                cmd_add_implicit_input(node, dep);
             }
             break;
         default:;

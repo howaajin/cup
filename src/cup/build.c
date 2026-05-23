@@ -56,7 +56,7 @@ ENTRY(build_make_header)
 
 static void make_header_output_filter(Node* cmd, char const* line)
 {
-    cmd_add_implicit_dep(cmd, line);
+    cmd_add_implicit_input(cmd, line);
 }
 
 ENTRY(build_cup_h)

@@ -79,7 +79,7 @@ void c_compile_cmd_write_buffer_msvc(Node* node, char const* line)
             }
             if (dep)
             {
-                cmd_add_implicit_dep(node, dep);
+                cmd_add_implicit_input(node, dep);
             }
             return;
         }

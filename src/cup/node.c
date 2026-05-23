@@ -615,11 +615,11 @@ void cmd_after_execute(Node* node)
             cmd_record.outputs[i].build_time = file_node->mtime;
             cmd_record.outputs[i].content_hash = file_get_content_hash(file_node);
         }
-        size_t num_implicit_inputs = array_size(node->implicit_inputs2);
+        size_t num_implicit_inputs = array_size(node->implicit_inputs);
         array_resize(temp_allocator, cmd_record.implicit_inputs, num_implicit_inputs);
         for (size_t i = 0; i != num_implicit_inputs; i++)
         {
-            Node* file_node = node->implicit_inputs2[i];
+            Node* file_node = node->implicit_inputs[i];
             char const* path = file_node->path;
             CacheRecordFile* record = cache_get_or_add_in_file_record(cache, path);
             cmd_record.implicit_inputs[i].id = record->id;
@@ -637,7 +637,7 @@ void cmd_before_execute(Node* node)
     {
         puts(desc);
     }
-    array_resize(node_allocator, node->implicit_inputs2, 0);
+    array_resize(node_allocator, node->implicit_inputs, 0);
     for (size_t i = 0; i != array_size(node->outputs); i++)
     {
         Node* output = node->outputs[i];
@@ -858,10 +858,10 @@ void cmd_set_write_stderr_line_fn(Node* node, void (*fn)(Node* cmd, char const* 
     node->write_stderr_line_fn = fn;
 }
 
-void cmd_add_implicit_dep(Node* node, char const* dep)
+void cmd_add_implicit_input(Node* node, char const* dep)
 {
     Node* file = get_or_add_file(dep);
-    array_push(node_allocator, node->implicit_inputs2, file);
+    array_push(node_allocator, node->implicit_inputs, file);
 }
 
 void cmd_set_description(Node* node, char const* string)

@@ -143,7 +143,7 @@ struct Node
             void (*after_execute)(Node* node);
             Node** inputs;
             Node** outputs;
-            Node** implicit_inputs2;
+            Node** implicit_inputs;
             char* description;
             int exit_code;
             char const* file;
@@ -204,7 +204,7 @@ void cmd_set_write_stderr_line_fn(Node* node, void (*fn)(Node* cmd, char const* 
 void cmd_set_before_execute_fn(Node* node, FnBeforeExecute* fn);
 void cmd_set_after_execute_fn(Node* node, FnAfterExecute* fn);
 void cmd_set_description(Node* node, char const* string);
-void cmd_add_implicit_dep(Node* node, char const* dep);
+void cmd_add_implicit_input(Node* node, char const* dep);
 void cmd_add_option(Node* node, char const* option, char const* param, OptionType type);
 void cmd_set_env(Node* node, Node* env);
 char const* cmd_get_description(Node* node);
