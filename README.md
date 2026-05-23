@@ -57,7 +57,7 @@ TEST(my_test_case) {
 
 Use `cup -test` to run all registered tests.
 
-You may also be interested in **Cup for VS Code**  a VS Code extension supports `Cup`. provides enhanced Test Explorer UI for discovery, execution, and debugging.
+You may also be interested in **[Cup for VS Code](https://github.com/howaajin/cup_vscode)**  a VS Code extension supports `Cup`. provides enhanced Test Explorer UI for discovery, execution, and debugging.
 
 ## Example `build.c`
 
