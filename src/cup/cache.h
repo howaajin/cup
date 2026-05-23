@@ -19,11 +19,12 @@ typedef struct CacheRecordTestExe CacheRecordTestExe;
 enum CacheRecordType
 {
     CACHE_RECORD_TYPE_EMPTY = 0,
-    CACHE_RECORD_TYPE_IN_FILE = cc4('I', 'N', 'F', 'E'),
-    CACHE_RECORD_TYPE_OUT_FILE = cc4('O', 'U', 'T', 'F'),
-    CACHE_RECORD_TYPE_CMD = cc4('C', 'C', 'M', 'D'),
-    CACHE_RECORD_TYPE_CPP_MODULE = cc4('C', 'P', 'P', 'M'),
-    CACHE_RECORD_TYPE_TEST_EXE = cc4('T', 'E', 'X', 'E'),
+    CACHE_RECORD_TYPE_IN_FILE = ENUM_CODE('I', 'N', 'F', 'E'),
+    CACHE_RECORD_TYPE_OUT_FILE = ENUM_CODE('O', 'U', 'T', 'F'),
+    CACHE_RECORD_TYPE_CMD = ENUM_CODE('C', 'C', 'M', 'D'),
+    CACHE_RECORD_TYPE_CPP_MODULE = ENUM_CODE('C', 'P', 'P', 'M'),
+    CACHE_RECORD_TYPE_TEST_EXE = ENUM_CODE('T', 'E', 'X', 'E'),
+
 };
 
 struct CacheRecordFile
