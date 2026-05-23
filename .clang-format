@@ -1,0 +1,64 @@
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4
+IndentPPDirectives: None 
+
+ColumnLimit: 0
+UseTab: Never
+MaxEmptyLinesToKeep: 1
+
+KeepEmptyLinesAtTheStartOfBlocks: false
+AllowShortLoopsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AlignConsecutiveMacros:
+  Enabled: false
+  AcrossEmptyLines: false
+  AcrossComments: false
+AlignEscapedNewlines: Right
+BreakConstructorInitializers: BeforeComma
+#AlwaysBreakAfterDefinitionReturnType: TopLevel
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+SortUsingDeclarations: true
+  
+IndentCaseLabels: false
+AlignTrailingComments: false
+AlignConsecutiveAssignments:
+  Enabled: false
+  AcrossEmptyLines: false
+  AcrossComments: false
+AlignConsecutiveDeclarations:
+  Enabled: false
+  AcrossEmptyLines: false
+  AcrossComments: false
+
+AlignOperands: true
+PointerAlignment: Left
+Cpp11BracedListStyle: true
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterClass:      true
+    AfterControlStatement: Always
+    AfterEnum:       true
+    AfterFunction:   true
+    AfterNamespace:  true
+    AfterObjCDeclaration: true
+    AfterStruct:     true
+    AfterUnion:      true
+    AfterExternBlock: true
+    BeforeCatch:     true
+    BeforeElse:      true
+    IndentBraces:    false
+    SplitEmptyFunction: false
+    SplitEmptyRecord: false
+    SplitEmptyNamespace: false
+
+AlwaysBreakTemplateDeclarations: Yes
+AccessModifierOffset: -4
+AlignAfterOpenBracket: AlwaysBreak
+InsertBraces: false
+
+StatementMacros: [ CONSTRUCTOR, DESTRUCTOR, STRING_FORMAT_CHECK ]
+

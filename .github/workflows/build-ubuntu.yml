@@ -1,0 +1,51 @@
+name: Ubuntu Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup
+        run: |
+          LLVM_AR=$(ls /usr/bin/llvm-ar-* | sort -V | tail -n1)
+          echo "Using: $LLVM_AR"
+          sudo ln -sf "$LLVM_AR" /usr/bin/llvm-ar
+          llvm-ar --version
+
+      - name: Run bootstrap script
+        run: ./bootstrap.sh
+
+      - name: Build targets with cup
+        run: |
+          ./cup -t llvm -O3
+
+      - name: Verify generated files
+        shell: bash
+        run: |
+          FILES=(
+            "./cup"
+            "build/embedded/cup"
+            "build/header_only/cup.h"
+          )
+
+          MISSING=0
+          for file in "${FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Error: file not found '$file'"
+              MISSING=1
+            else
+              echo "Found file '$file'"
+            fi
+          done
+
+          if [ $MISSING -ne 0 ]; then
+            echo "Build artifacts missing, verification failed!"
+            exit 1
+          fi
+
+          echo "All required files generated successfully!"

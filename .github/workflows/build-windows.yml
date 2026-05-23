@@ -1,0 +1,45 @@
+name: Windows Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-project-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Add pre-installed LLVM to PATH
+        run: echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
+
+      - name: Run bootstrap script
+        shell: cmd
+        run: bootstrap.bat
+
+      - name: Build targets with cup
+        run: .\cup.exe -t llvm -O3
+
+      - name: Verify generated files
+        shell: pwsh
+        run: |
+          $FILES = @(
+            ".\cup.exe",
+            "build\embedded\cup.exe",
+            "build\header_only\cup.h"
+          )
+          $MISSING = 0
+          foreach ($file in $FILES) {
+            if (Test-Path $file) {
+              Write-Output "Found file '$file'"
+            } else {
+              Write-Output "Error: file not found '$file'"
+              $MISSING = 1
+            }
+          }
+          if ($MISSING -ne 0) {
+            Write-Output "Build artifacts missing, verification failed!"
+            exit 1
+          }
+          Write-Output "All required files generated successfully!"

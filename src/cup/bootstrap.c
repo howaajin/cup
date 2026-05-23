@@ -1,0 +1,65 @@
+#include "core/platform.h"
+
+#include "core/allocator.c"
+#include "core/allocators/arena_allocator.c"
+#include "core/allocators/c_allocator.c"
+#include "core/allocators/chained_allocator.c"
+#include "core/allocators/tiny_allocator.c"
+#include "core/json.c"
+#include "core/os.c"
+#include "core/path.c"
+#include "core/utilities.c"
+
+#include "cup/c_toolchain/c_toolchain.c"
+#include "cup/cache.c"
+#include "cup/cup.c"
+#include "cup/depfile.c"
+#include "cup/entry.c"
+#include "cup/executor/executor.c"
+#include "cup/fmt.c"
+#include "cup/graph.c"
+#include "cup/node.c"
+#include "cup/test_finder.c"
+#include "cup/var.c"
+
+#include "cup/c_toolchain/ar_cmd.c"
+#include "cup/c_toolchain/c_compile_cmd.c"
+#include "cup/c_toolchain/c_compile_cmd_gcc.c"
+#include "cup/c_toolchain/c_compile_cmd_llvm.c"
+#include "cup/c_toolchain/c_compile_cmd_msvc.c"
+#include "cup/c_toolchain/c_compile_cmd_zigcc.c"
+#include "cup/c_toolchain/cpp_module.c"
+#include "cup/c_toolchain/gen_compile_commands.c"
+#include "cup/c_toolchain/link_cmd.c"
+#include "cup/c_toolchain/scan_deps_cmd.c"
+#include "cup/c_toolchain/scan_test.c"
+
+#if CURRENT_PLATFORM == PLATFORM_WINDOWS
+#include "core/windows/allocator.c"
+#include "core/windows/directory.c"
+#include "core/windows/dylib.c"
+#include "core/windows/os.c"
+#include "cup/c_toolchain/c_toolchain_windows.c"
+#include "cup/executor/executor_windows.c"
+#include "cup/vs.c"
+#elif CURRENT_PLATFORM == PLATFORM_LINUX
+#include "core/common/allocator.c"
+#include "core/common/directory.c"
+#include "core/common/os.c"
+#include "core/linux/dylib.c"
+#include "core/linux/os.c"
+#include "cup/executor/executor_linux.c"
+#elif CURRENT_PLATFORM == PLATFORM_MACOS
+#include "core/common/allocator.c"
+#include "core/common/directory.c"
+#include "core/common/os.c"
+#include "core/mac/dylib.c"
+#include "core/mac/os.c"
+#include "cup/executor/executor_mac.c"
+#else
+#error "unknown platform"
+#endif
+
+#if CURRENT_PLATFORM == PLATFORM_LINUX || CURRENT_PLATFORM == PLATFORM_MACOS
+#include "cup/c_toolchain/c_toolchain_linux_mac.c"
+#endif

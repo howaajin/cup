@@ -1,0 +1,14 @@
+/.cache
+/.vscode
+/build
+/backup
+/src/cup/bin2c/*
+/src/core/hash.h
+/compile_commands.json
+/cup.exe
+/cup
+/.vs
+/*.sln
+/*.slnx
+/.idea
+/*.pdb

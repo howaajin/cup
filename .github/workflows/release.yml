@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v1.0.0)'
+        required: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            binary: cup
+          - os: windows-latest
+            platform: windows
+            binary: cup.exe
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          LLVM_AR=$(ls /usr/bin/llvm-ar-* | sort -V | tail -n1)
+          echo "Using: $LLVM_AR"
+          sudo ln -sf "$LLVM_AR" /usr/bin/llvm-ar
+          llvm-ar --version
+
+      - name: Setup (Windows)
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
+
+      - name: Bootstrap (Linux)
+        if: matrix.platform == 'linux'
+        run: ./bootstrap.sh
+
+      - name: Bootstrap (Windows)
+        if: matrix.platform == 'windows'
+        shell: cmd
+        run: bootstrap.bat
+
+      - name: Build (Linux)
+        if: matrix.platform == 'linux'
+        run: ./cup -t llvm -O3
+
+      - name: Build (Windows)
+        if: matrix.platform == 'windows'
+        run: .\cup.exe -t llvm -O3
+
+      - name: Stage Linux artifacts
+        if: matrix.platform == 'linux'
+        run: |
+          mkdir -p _release
+          cp cup _release/
+          cp build/header_only/cup.h _release/
+
+      - name: Stage Windows artifacts
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path _release -Force > $null
+          Copy-Item cup.exe _release/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cup-${{ matrix.platform }}
+          path: _release/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: _artifacts
+
+      - name: Create or Update Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          files: |
+            _artifacts/cup-linux/cup
+            _artifacts/cup-linux/cup.h
+            _artifacts/cup-windows/cup.exe
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+          overwrite_files: true

@@ -1,0 +1,45 @@
+name: macOS Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-project-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run bootstrap script
+        run: ./bootstrap.sh
+
+      - name: Build targets with cup
+        run: |
+          ./cup -t llvm -O3
+
+      - name: Verify generated files
+        shell: bash
+        run: |
+          FILES=(
+            "./cup"
+            "build/embedded/cup"
+            "build/header_only/cup.h"
+          )
+
+          MISSING=0
+          for file in "${FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Error: file not found '$file'"
+              MISSING=1
+            else
+              echo "Found file '$file'"
+            fi
+          done
+
+          if [ $MISSING -ne 0 ]; then
+            echo "Build artifacts missing, verification failed!"
+            exit 1
+          fi
+
+          echo "All required files generated successfully!"

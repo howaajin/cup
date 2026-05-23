@@ -1,0 +1,18 @@
+#pragma once
+
+#include "cup/node.h"
+
+#include <stdint.h>
+
+typedef struct EmbeddedFile EmbeddedFile;
+
+struct EmbeddedFile
+{
+    uint8_t const* src;
+    size_t* size;
+    char const* path;
+    FileType type;
+    size_t struct_bytes;
+};
+
+Node* create_gen_embedded_file_cmd(EmbeddedFile* embedded_file);

@@ -1,0 +1,504 @@
+#include "core/macros.h"
+#include "cup/cup.h"
+#include "cup/cup.private.h"
+
+static struct
+{
+    char const* path;
+    char const* out_path;
+} embedded_sources[] = {
+    {.path = "src/cup/test.h", .out_path = "src/cup/bin2c/test.h.c"},
+    {.path = "src/cup/test.c", .out_path = "src/cup/bin2c/test.c.c"},
+    {.path = "src/cup/test_main.c", .out_path = "src/cup/bin2c/test_main.c.c"},
+    {.path = "src/cup/build_script_tpl.c", .out_path = "src/cup/bin2c/build_script_tpl.c.c"},
+};
+
+ENTRY(build_bin2c)
+{
+    Node* src = SRC("{dir}/bin2c.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+    Node* exe = EXE("{out_dir}/bin2c");
+    Node* link = LINK(exe);
+    link_cmd_setup_self_build(link);
+    link_cmd_add_input(link, obj);
+    node_add_debugger_argument(exe, "build/test.c");
+    node_add_debugger_argument(exe, "src/cup/bin2c.c");
+}
+
+ENTRY(gen_embedded_files)
+{
+    Node* bin2c = EXE("{out_dir}/bin2c");
+    for (size_t i = 0; i != static_array_size(embedded_sources); i++)
+    {
+        Node* output = get_or_add_src(embedded_sources[i].out_path);
+        Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
+        Node* input = get_or_add_src(embedded_sources[i].path);
+        cmd_add_output_file_option(cmd, NULL, output);
+        cmd_add_input_file_option(cmd, NULL, input);
+    }
+}
+
+ENTRY(build_make_header)
+{
+    Node* make_header = EXE("{out_dir}/make_header");
+    Node* link = LINK(make_header);
+    link_cmd_setup_self_build(link);
+    {
+        link_cmd_set_arch(link, ARCH_X64);
+        Node* src = get_or_add_src("src/cup/make_header.c");
+        Node* obj = OBJ(src);
+        CC(src, obj);
+        link_cmd_add_input(link, obj);
+        link_cmd_add_input(link, OBJ(SRC("src/core/allocator.c")));
+    }
+}
+
+static void make_header_output_filter(Node* cmd, char const* line)
+{
+    cmd_add_implicit_dep(cmd, line);
+}
+
+ENTRY(build_cup_h)
+{
+    Node* amalgam = get_or_add_src("src/cup/amalgam.c");
+    Node* cup_h = FILE("{out_dir}/header_only/cup.h");
+    Node* make_header = EXE("{out_dir}/make_header");
+    Node* cmd = CMD_FROM_EXE(make_header, fmt("gen: {:n}", cup_h));
+    cmd_add_output_file_option(cmd, "-o ", cup_h);
+    cmd_add_option(cmd, NULL, "cup/amalgam.c", OPTION_INPUT);
+    cmd_add_input(cmd, amalgam);
+    for (size_t i = 0; i != static_array_size(embedded_sources); i++)
+    {
+        Node* src = get_or_add_src(embedded_sources[i].out_path);
+        cmd_add_input(cmd, src);
+    }
+    cmd_set_write_output_line_fn(cmd, make_header_output_filter);
+}
+
+static void self_with_source_built_restart(Node* cmd)
+{
+    cmd_after_execute(cmd);
+    // exit(0);
+    restart();
+}
+
+char const* cup_common_sources[] = {
+    "{dir}/cup.c",
+    "{dir}/c_toolchain/c_toolchain.c",
+    "{platform_c_toolchain_c}",
+    "{dir}/c_toolchain/c_compile_cmd.c",
+    "{dir}/c_toolchain/c_compile_cmd_gcc.c",
+    "{dir}/c_toolchain/c_compile_cmd_llvm.c",
+    "{dir}/c_toolchain/c_compile_cmd_zigcc.c",
+    "{dir}/c_toolchain/c_compile_cmd_msvc.c",
+    "{dir}/c_toolchain/link_cmd.c",
+    "{dir}/c_toolchain/ar_cmd.c",
+    "{dir}/c_toolchain/gen_compile_commands.c",
+    "{dir}/c_toolchain/scan_test.c",
+    "{dir}/embedded_file.c",
+    "{dir}/gen_build_c.c",
+    "{dir}/bin2c/build_script_tpl.c.c",
+    "{dir}/cache.c",
+    "{dir}/depfile.c",
+    "{dir}/entry.c",
+    "{dir}/graph.c",
+    "{dir}/node.c",
+    "{dir}/test_finder.c",
+    "{dir}/fmt.c",
+};
+
+ENTRY(build_cup_lib)
+{
+    Node* sources[] = {
+        SRC("{dir}/executor/executor.c"),
+        SRC("{dir}/executor/executor_{platform}.c"),
+        SRC("{dir}/c_toolchain/c_toolchain.c"),
+        SRC("{platform_c_toolchain_c}"),
+        SRC("{dir}/c_toolchain/c_compile_cmd.c"),
+        SRC("{dir}/c_toolchain/c_compile_cmd_gcc.c"),
+        SRC("{dir}/c_toolchain/c_compile_cmd_llvm.c"),
+        SRC("{dir}/c_toolchain/c_compile_cmd_zigcc.c"),
+        SRC("{dir}/c_toolchain/c_compile_cmd_msvc.c"),
+        SRC("{dir}/c_toolchain/link_cmd.c"),
+        SRC("{dir}/c_toolchain/ar_cmd.c"),
+        SRC("{dir}/c_toolchain/cpp_module.c"),
+        SRC("{dir}/c_toolchain/scan_test.c"),
+        SRC("{dir}/embedded_file.c"),
+        SRC("{dir}/bin2c/build_script_tpl.c.c"),
+        SRC("{dir}/cache.c"),
+        SRC("{dir}/depfile.c"),
+        SRC("{dir}/entry.c"),
+        SRC("{dir}/graph.c"),
+        SRC("{dir}/node.c"),
+        SRC("{dir}/var.c"),
+        SRC("{dir}/vs.c"),
+        SRC("{dir}/test_finder.c"),
+        SRC("{dir}/fmt.c"),
+    };
+    Node* cup_lib = LIB("{out_dir}/cup");
+    Node* cmd = AR(cup_lib);
+    for (size_t i = 0; i != static_array_size(sources); i++)
+    {
+        Node* obj = get_default_obj(sources[i]);
+        ar_cmd_add_input(cmd, obj);
+    }
+}
+
+ENTRY(build_embedded_file)
+{
+    Node* src = SRC("{dir}/embedded_file.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_gen_build_c)
+{
+    Node* src = SRC("{dir}/gen_build_c.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_cup)
+{
+    Node* src = SRC("{dir}/cup.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+    obj_add_link_obj_from_src(obj, SRC("src/core/utilities.c"));
+    obj_add_link_obj_from_src(obj, SRC("{platform_directory_c}"));
+    obj_add_link_obj_from_src(obj, SRC("{dir}/executor/executor.c"));
+    obj_add_link_obj_from_src(obj, SRC("{dir}/c_toolchain/c_toolchain.c"));
+    obj_add_link_obj_from_src(obj, SRC("{dir}/c_toolchain/scan_test.c"));
+    obj_add_link_obj_from_src(obj, SRC("{dir}/node.c"));
+}
+
+ENTRY(build_cache)
+{
+    Node* src = SRC("{dir}/cache.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_depfile)
+{
+    Node* src = SRC("{dir}/depfile.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_entry)
+{
+    Node* src = SRC("{dir}/entry.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_graph)
+{
+    Node* src = SRC("{dir}/graph.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_node)
+{
+    Node* src = SRC("{dir}/node.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+    obj_add_link_obj_from_src(obj, SRC("{dir}/graph.c"));
+    obj_add_link_obj_from_src(obj, SRC("{dir}/executor/executor.c"));
+    obj_add_link_obj_from_src(obj, SRC("{dir}/fmt.c"));
+    obj_add_link_obj_from_src(obj, SRC("{dir}/cache.c"));
+}
+
+ENTRY(build_test_finder)
+{
+    Node* src = SRC("{dir}/test_finder.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_fmt)
+{
+    Node* src = SRC("{dir}/fmt.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+    obj_add_link_obj_from_src(obj, SRC("{dir}/var.c"));
+}
+
+ENTRY(build_executor)
+{
+    Node* src = SRC("{dir}/executor/executor.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+    obj_add_link_obj_from_src(obj, SRC("src/core/allocator.c"));
+    obj_add_link_obj_from_src(obj, SRC("{dir}/executor/executor_{platform}.c"));
+}
+
+ENTRY(build_platform_executor)
+{
+    Node* src = SRC("{dir}/executor/executor_{platform}.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+    obj_add_link_obj_from_src(obj, SRC("src/core/allocator.c"));
+    obj_add_link_obj_from_src(obj, SRC("src/core/os.c"));
+    obj_add_link_obj_from_src(obj, SRC("{dir}/executor/executor.c"));
+}
+
+ENTRY(build_vs)
+{
+    Node* src = SRC("{dir}/vs.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_self_with_source)
+{
+    extern char** build_script_search_directories;
+    extern void collect_build_scripts(char const* directory, Allocator* allocator);
+
+    Allocator* allocator = allocator_temp();
+    add_build_script("build.c");
+    for (size_t i = 0; i != array_size(build_script_search_directories); i++)
+    {
+        collect_build_scripts(build_script_search_directories[i], allocator);
+    }
+    Node* self = EXE("{self_name}");
+    Node* link = LINK(self);
+    link_cmd_setup_self_build(link);
+    link_cmd_set_arch(link, ARCH_X64);
+
+    Node* cup_lib = LIB("{out_dir}/cup");
+    link_cmd_add_input(link, cup_lib);
+    Node* core_lib = LIB("{out_dir}/core");
+    link_cmd_add_input(link, core_lib);
+
+    Node** references = NULL;
+    array_push(allocator_temp(), references, SRC("{dir}/in_repo.c"));
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+    {
+        Node* pdb = FILE("{out_dir}/cup.exe.pdb");
+        link_cmd_set_pdb(link, pdb);
+        // icon
+        Node* res = FILE("{out_dir}/cup.res");
+        link_cmd_add_input(link, res);
+        // vs project generator
+        array_push(allocator_temp(), references, SRC("{dir}/vs.c"));
+    }
+    for (size_t i = 0; i != static_array_size(cup_common_sources); i++)
+    {
+        array_push(allocator_temp(), references, SRC(cup_common_sources[i]));
+    }
+    for (size_t i = 0; i != array_size(references); i++)
+    {
+        Node* obj = OBJ(references[i]);
+        link_cmd_add_input(link, obj);
+    }
+
+    extern StringSet* build_scripts;
+    for (uint32_t i = build_scripts->begin; i != build_scripts->end; i = hash_next(build_scripts, i))
+    {
+        Node* src = SRC(hash_key(build_scripts, i));
+        Node* obj = OBJ(src);
+        CC(src, obj);
+        link_cmd_add_input(link, obj);
+    }
+    cmd_set_after_execute_fn(link, self_with_source_built_restart);
+}
+
+ENTRY(build_cup_h_no_impl)
+{
+    Node* amalgam = get_or_add_src("src/cup/amalgam.c");
+    Node* cup_h = FILE("{out_dir}/embedded/cup.h");
+    Node* make_header = EXE("{out_dir}/make_header");
+    Node* cmd = CMD_FROM_EXE(make_header, fmt("gen: {:n}", cup_h));
+    cmd_add_output_file_option(cmd, "-o ", cup_h);
+    cmd_add_option(cmd, NULL, "cup/amalgam.c", OPTION_INPUT);
+    cmd_add_option(cmd, "-h", NULL, OPTION_FLAG);
+    cmd_add_input(cmd, amalgam);
+    for (size_t i = 0; i != static_array_size(embedded_sources); i++)
+    {
+        Node* src = SRC(embedded_sources[i].out_path);
+        cmd_add_input(cmd, src);
+    }
+    cmd_set_write_output_line_fn(cmd, make_header_output_filter);
+}
+
+ENTRY(build_embedded_cup_h_c)
+{
+    Node* bin2c = EXE("{out_dir}/bin2c");
+    Node* output = SRC("{out_dir}/embedded/cup.h.c");
+    Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
+    Node* input = FILE("{out_dir}/embedded/cup.h");
+    cmd_add_output_file_option(cmd, NULL, output);
+    cmd_add_input_file_option(cmd, NULL, input);
+}
+
+ENTRY(build_embedded_cup_lib_c)
+{
+    if (CURRENT_PLATFORM != PLATFORM_WINDOWS)
+    {
+        return;
+    }
+    Node* bin2c = EXE("{out_dir}/bin2c");
+    Node* output = SRC("{out_dir}/embedded/cup.lib.c");
+    Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
+    Node* input = FILE("{out_dir}/embedded/cup" LIB_EXT);
+    cmd_add_output_file_option(cmd, NULL, output);
+    cmd_add_input_file_option(cmd, NULL, input);
+}
+
+ENTRY(build_gen_test_src)
+{
+    Node* src = SRC("{dir}/gen_test_src.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_build_script_tpl)
+{
+    Node* src = SRC("{dir}/bin2c/build_script_tpl.c.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_cup_embedded)
+{
+    Node* exe = EXE("{out_dir}/embedded/{self_name}");
+    Node* link = LINK(exe);
+    link_cmd_setup_self_build(link);
+    link_cmd_set_arch(link, ARCH_X64);
+    Node* def = FILE("{dir}/cup.def");
+    link_cmd_set_def_file(link, def);
+    for (size_t i = 0; i != static_array_size(cup_common_sources); i++)
+    {
+        Node* src = SRC(cup_common_sources[i]);
+        Node* obj = OBJ(src);
+        link_cmd_add_input(link, obj);
+    }
+    {
+        Node* src = SRC("{dir}/gen_test_src.c");
+        Node* obj = OBJ(src);
+        link_cmd_add_input(link, obj);
+    }
+    Node* sources[] = {
+        SRC("{dir}/dllmain.c"),
+        SRC("{dir}/bin2c/test.c.c"),
+        SRC("{dir}/bin2c/test.h.c"),
+        SRC("{dir}/bin2c/test_main.c.c"),
+        SRC("{out_dir}/embedded/cup.h.c"),
+    };
+    for (size_t i = 0; i != static_array_size(sources); i++)
+    {
+        Node* src = sources[i];
+        Node* obj = OBJ(src);
+        CC(src, obj);
+        link_cmd_add_input(link, obj);
+    }
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+    {
+        // embedded lib
+        Node* src = SRC("{out_dir}/embedded/cup.lib.c");
+        Node* obj = OBJ(src);
+        CC(src, obj);
+        link_cmd_add_input(link, obj);
+
+        // icon
+        Node* res = FILE("{out_dir}/cup.res");
+        link_cmd_add_input(link, res);
+
+        // vs project generator
+        Node* src_vs = SRC("{dir}/vs.c");
+        Node* obj_vs = OBJ(src_vs);
+        link_cmd_add_input(link, obj_vs);
+    }
+    if (CURRENT_PLATFORM == PLATFORM_LINUX)
+    {
+        link_cmd_add_flag(link, "-rdynamic");
+    }
+}
+
+ENTRY(build_gen_icon_exe)
+{
+    Node* src = SRC("{dir}/gen_icon.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+    Node* link = LINK(EXE("{out_dir}/gen_icon"));
+    link_cmd_setup_self_build(link);
+    link_cmd_add_input(link, obj);
+    if (CURRENT_PLATFORM == PLATFORM_LINUX)
+    {
+        link_cmd_add_lib(link, "m");
+    }
+}
+
+ENTRY(build_cup_icon)
+{
+    Node* icon = FILE("{out_dir}/icon.ico");
+    Node* gen_icon = EXE("{out_dir}/gen_icon");
+    Node* cmd = CMD_FROM_EXE(gen_icon, fmt("gen: {:n}", icon));
+    cmd_add_output_file_option(cmd, NULL, icon);
+}
+
+ENTRY(build_cup_res)
+{
+    if (CURRENT_PLATFORM != PLATFORM_WINDOWS)
+    {
+        return;
+    }
+    Node* res = FILE("{out_dir}/cup.res");
+    ToolchainType toolchain_type = default_toolchain;
+    if (toolchain_type == TOOLCHAIN_TYPE_GCC)
+    {
+        Node* cmd = CMD("windres");
+        Node* icon = FILE("{out_dir}/icon.ico");
+        Node* rc = FILE("{dir}/cup.rc");
+        cmd_add_output_file_option(cmd, "-o", res);
+        cmd_add_input_file_option(cmd, NULL, rc);
+        cmd_add_option(cmd, "-O ", "coff", OPTION_FLAG);
+        cmd_add_input(cmd, icon);
+    }
+    else
+    {
+        char const* rc_name = NULL;
+        if (toolchain_type == TOOLCHAIN_TYPE_MSVC)
+        {
+            rc_name = "rc";
+        }
+        if (toolchain_type == TOOLCHAIN_TYPE_LLVM)
+        {
+            rc_name = "llvm-rc";
+        }
+        if (toolchain_type == TOOLCHAIN_TYPE_ZIG)
+        {
+            rc_name = "zig rc";
+        }
+        assert(rc_name);
+        extern ToolchainType self_build_toolchain;
+        Node* cmd = CMD(rc_name);
+        Node* env = get_toolchain_env_node(self_build_toolchain, ARCH_X64);
+        cmd_set_env(cmd, env);
+        Node* icon = FILE("{out_dir}/icon.ico");
+        Node* rc = FILE("{dir}/cup.rc");
+        cmd_add_option(cmd, "/nologo", NULL, OPTION_FLAG);
+        cmd_add_output_file_option(cmd, "/fo", res);
+        cmd_add_input_file_option(cmd, NULL, rc);
+        cmd_add_input(cmd, icon);
+    }
+}
+
+ENTRY(build_var)
+{
+    Node* src = SRC("{dir}/var.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+}
+
+ENTRY(build_in_repo)
+{
+    Node* src = SRC("{dir}/in_repo.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+    obj_add_link_obj_from_src(obj, SRC("src/cup/c_toolchain/c_toolchain.c"));
+    obj_add_link_obj_from_src(obj, SRC("src/cup/cup.c"));
+}
