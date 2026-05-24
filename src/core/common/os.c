@@ -330,4 +330,27 @@ int os_mtx_unlock(Mutex* mtx)
     return 1;
 }
 
-#
+int os_tss_create(os_tss_t* key, os_tss_dtor_t dtor)
+{
+    return (pthread_key_create(key, dtor) == 0) ? 1 : 0;
+}
+
+void* os_tss_get(os_tss_t key)
+{
+    return pthread_getspecific(key);
+}
+
+int os_tss_set(os_tss_t key, void* val)
+{
+    return (pthread_setspecific(key, val) == 0) ? 1 : 0;
+}
+
+void os_tss_delete(os_tss_t key)
+{
+    pthread_key_delete(key);
+}
+
+void os_call_once(os_once_flag* flag, void (*func)(void))
+{
+    pthread_once(flag, func);
+}

@@ -424,3 +424,39 @@ int os_mtx_unlock(Mutex* mtx)
     LeaveCriticalSection(*mtx);
     return 0;
 }
+
+_Static_assert(sizeof(os_tss_t) == sizeof(DWORD), "os_tss_t size mismatch");
+_Static_assert(sizeof(os_once_flag) == sizeof(INIT_ONCE), "os_once_flag size mismatch");
+
+static BOOL CALLBACK windows_once_callback(PINIT_ONCE InitOnce, PVOID Parameter, PVOID* Context)
+{
+    void (*func)(void) = (void (*)(void))Parameter;
+    func();
+    return TRUE;
+}
+
+void os_call_once(os_once_flag* flag, void (*func)(void))
+{
+    InitOnceExecuteOnce((PINIT_ONCE)flag, windows_once_callback, (void*)func, NULL);
+}
+
+int os_tss_create(os_tss_t* key, os_tss_dtor_t dtor)
+{
+    *key = (os_tss_t)FlsAlloc((PFLS_CALLBACK_FUNCTION)dtor);
+    return (*key == FLS_OUT_OF_INDEXES) ? 0 : 1;
+}
+
+void* os_tss_get(os_tss_t key)
+{
+    return FlsGetValue((DWORD)key);
+}
+
+int os_tss_set(os_tss_t key, void* val)
+{
+    return FlsSetValue((DWORD)key, val) ? 1 : 0;
+}
+
+void os_tss_delete(os_tss_t key)
+{
+    FlsFree((DWORD)key);
+}
