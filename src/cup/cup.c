@@ -154,7 +154,8 @@ static void parse_cmdline(void)
                 p = utilities_split_cmd(temp_allocator, p, &arg);
                 if (array_size(arg) == 0)
                 {
-                    break;
+                    print_help(false);
+                    exit(EXIT_FAILURE);
                 }
                 char const* cwd = get_var("workspace");
                 target_names = objects_from_sources_string(arg, cwd, target_names, allocator);
@@ -180,12 +181,18 @@ static void parse_cmdline(void)
                 p = utilities_split_cmd(temp_allocator, p, &arg);
                 if (array_size(arg) == 0)
                 {
-                    break;
+                    print_help(false);
+                    exit(EXIT_FAILURE);
                 }
                 if (string_equal(arg, "llvm")) set_default_toolchain(TOOLCHAIN_TYPE_LLVM);
-                if (string_equal(arg, "msvc")) set_default_toolchain(TOOLCHAIN_TYPE_MSVC);
-                if (string_equal(arg, "gcc")) set_default_toolchain(TOOLCHAIN_TYPE_GCC);
-                if (string_equal(arg, "zig")) set_default_toolchain(TOOLCHAIN_TYPE_ZIG);
+                else if (string_equal(arg, "msvc")) set_default_toolchain(TOOLCHAIN_TYPE_MSVC);
+                else if (string_equal(arg, "gcc")) set_default_toolchain(TOOLCHAIN_TYPE_GCC);
+                else if (string_equal(arg, "zig")) set_default_toolchain(TOOLCHAIN_TYPE_ZIG);
+                else
+                {
+                    print_help(false);
+                    exit(EXIT_FAILURE);
+                }
                 continue;
             }
             else if (string_equal(arg, "-test"))
@@ -213,6 +220,11 @@ static void parse_cmdline(void)
                 {
                     set_default_optimization(OPTIMIZATION_TYPE_RELEASE_SMALL);
                 }
+                else
+                {
+                    print_help(false);
+                    exit(EXIT_FAILURE);
+                }
                 continue;
             }
             else if (string_equal(arg, "-out_dir"))
@@ -220,7 +232,8 @@ static void parse_cmdline(void)
                 p = utilities_split_cmd(temp_allocator, p, &arg);
                 if (array_size(arg) == 0)
                 {
-                    break;
+                    print_help(false);
+                    exit(EXIT_FAILURE);
                 }
                 set_var("out_dir", arg);
                 continue;
@@ -232,7 +245,8 @@ static void parse_cmdline(void)
             }
             else if (arg[0] == '-')
             {
-                continue;
+                print_help(false);
+                exit(EXIT_FAILURE);
             }
             char* target = string_from_c_str(allocator, arg);
             array_push(allocator, target_names, target);
