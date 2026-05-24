@@ -87,7 +87,7 @@ TEST(test_header_only_msvc_windows, header_only)
     bool msvc_set_arch_env(ArchitectureType type);
     msvc_set_arch_env(ARCH_X64);
 
-    if (system("cl /? > NUL 2>&1") != 0)
+    if (system("cl > NUL 2>&1") != 0)
     {
         return;
     }
