@@ -12,8 +12,6 @@ static const uint32_t CACHE_VERSION = 2;
     (var) = allocator_calloc(allocator, 1, sizeof((var)[0])); \
     (var)->allocator = allocator
 
-void cache_clear(Cache* c);
-
 Cache* cache_create(Allocator* allocator)
 {
     Cache* c = allocator_calloc(allocator, 1, sizeof(Cache));
@@ -161,6 +159,8 @@ EndLoad:
     }
     return c;
 }
+
+void cache_clear(Cache* c);
 
 Cache* cache_load(Allocator* allocator, char const* path)
 {
