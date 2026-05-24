@@ -89,6 +89,47 @@ static char** objects_from_sources_string(char* sources_sep_with_semicolon, char
     return objects;
 }
 
+static void print_help(bool detailed)
+{
+    printf("Usage: cup [options] [targets]\n");
+    printf("\nOptions:\n");
+    printf("  -h                            Print short help\n");
+    printf("  -hh                           Print detailed help\n");
+    printf("  -out_dir <dir>                Set output directory\n");
+    printf("  -t <toolchain>                Set toolchain (llvm, msvc, gcc, zig)\n");
+    printf("  -O<level>                     Set optimization level (0, 3, s)\n");
+    printf("  -clean                        Clean build\n");
+    printf("  -dry                          Dry run (commands skipped but treated as success)\n");
+    printf("  -test                         Run tests\n");
+    printf("  -r, --bootstrap               Bootstrap (ignore build.c, build cup only)\n");
+    if (detailed)
+    {
+        printf("\nDetailed Options:\n");
+        printf("  -h\n");
+        printf("        Print a short summary of available options.\n");
+        printf("  -hh\n");
+        printf("        Print this detailed help with option descriptions.\n");
+        printf("  -out_dir <dir>\n");
+        printf("        Specify the output directory for build artifacts.\n");
+        printf("        Default: build/\n");
+        printf("  -t <toolchain>\n");
+        printf("        Select the toolchain to use for compilation.\n");
+        printf("        Supported: llvm, msvc, gcc, zig\n");
+        printf("  -O<level>\n");
+        printf("        0  : Debug (no optimization)\n");
+        printf("        3  : Release (optimize for speed)\n");
+        printf("        s  : Release (optimize for size)\n");
+        printf("  -clean\n");
+        printf("        Remove all build artifacts.\n");
+        printf("  -dry\n");
+        printf("        Commands are not executed but treated as successful.\n");
+        printf("  -test\n");
+        printf("        Build and run all test executables.\n");
+        printf("  -r, --bootstrap\n");
+        printf("        Ignore all custom build.c files and build cup itself only.\n");
+    }
+}
+
 static void parse_cmdline(void)
 {
     char const* cli = os_get_cmdline();
@@ -183,6 +224,11 @@ static void parse_cmdline(void)
                 }
                 set_var("out_dir", arg);
                 continue;
+            }
+            else if (string_equal(arg, "-h") || string_equal(arg, "-hh"))
+            {
+                print_help(string_equal(arg, "-hh"));
+                exit(EXIT_SUCCESS);
             }
             else if (arg[0] == '-')
             {
