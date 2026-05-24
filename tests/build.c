@@ -58,3 +58,13 @@ ENTRY(build_test_header_only)
     obj_add_link_node(obj, LIB("{out_dir}/cup"));
     obj_add_link_obj_from_src(obj, SRC("src/cup/in_repo.c"));
 }
+
+ENTRY(build_test_binary_mode)
+{
+    Node* src = SRC("{dir}/test_binary_mode.c");
+    Node* obj = OBJ(src);
+    CC(src, obj);
+    obj_add_link_node(obj, LIB("{out_dir}/core"));
+    obj_add_link_node(obj, LIB("{out_dir}/cup"));
+    obj_add_link_obj_from_src(obj, SRC("src/cup/in_repo.c"));
+}
