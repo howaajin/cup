@@ -171,6 +171,10 @@ static Node** link_cmd_collect_all_linked(LinkCmd* cmd, Allocator* temp_allocato
     for (size_t i = 0; i != array_size(cmd->input_option_files); i++)
     {
         Node* input = cmd->inputs[i];
+        if (input->build_cmd == NULL)
+        {
+            continue;
+        }
         node_ensure_prepared(input->build_cmd);
         temp_files = collect_linked_node_recursively(temp_allocator, input, temp_files, node_set, lib_set);
     }
