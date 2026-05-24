@@ -164,6 +164,7 @@ EndLoad:
 
 Cache* cache_load(Allocator* allocator, char const* path)
 {
+    os_ensure_dir_existed(path);
     Cache* c = cache_create(allocator);
     bool b_invalid_cache = false;
     FILE* f = os_fopen(path, "r+b");
