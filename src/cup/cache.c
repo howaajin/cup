@@ -2,6 +2,7 @@
 #include "core/macros.h"
 #include "core/os.h"
 #include "core/string.h"
+#include "cup/fmt.h"
 
 Cache* cache = NULL;
 
@@ -96,7 +97,8 @@ void init_cache(void)
 {
     if (cache == NULL)
     {
-        cache = cache_load(allocator_c(), "build/.cup_cache");
+        char const* path = fmt("{out_dir}/.cup_cache");
+        cache = cache_load(allocator_c(), path);
     }
 }
 

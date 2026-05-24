@@ -174,6 +174,16 @@ static void parse_cmdline(void)
                 }
                 continue;
             }
+            else if (string_equal(arg, "-out_dir"))
+            {
+                p = utilities_split_cmd(temp_allocator, p, &arg);
+                if (array_size(arg) == 0)
+                {
+                    break;
+                }
+                set_var("out_dir", arg);
+                continue;
+            }
             else if (arg[0] == '-')
             {
                 continue;
