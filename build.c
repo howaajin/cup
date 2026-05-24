@@ -55,7 +55,6 @@ ENTRY(add_default_link_flags, PRIORITY_AFTER_PREPARE)
 
 int main(int argc, char** argv)
 {
-    set_test_enabled(false);
     set_generate_vscode_files_enabled(false);
     if (get_default_optimization() != OPTIMIZATION_TYPE_DEBUG)
     {

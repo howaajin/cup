@@ -48,6 +48,7 @@ Node** targets = NULL;
 Dylib* cup_dll = NULL;
 
 static LockFileContext* process_lock_ctx;
+size_t max_build_errors = 1;
 
 void init_cache(void);
 void destroy_var(void);
@@ -198,6 +199,7 @@ static void parse_cmdline(void)
             else if (string_equal(arg, "-test"))
             {
                 b_run_tests = true;
+                set_test_enabled(true);
                 continue;
             }
             else if (string_equal(arg, "-r") || string_equal(arg, "--bootstrap"))
@@ -378,6 +380,7 @@ extern char const* desc_color_reset;
 static int build(Graph* graph)
 {
     int exit_code = EXIT_SUCCESS;
+    size_t fail_count = 0;
     Allocator* allocator = allocator_create_tiny(4096, 4096 * 64);
     size_t num_jobs = max_jobs;
     if (num_jobs == 0)
@@ -407,9 +410,10 @@ static int build(Graph* graph)
         else
         {
             exit_code = node->exit_code;
+            fail_count++;
         }
         report(node);
-        if (exit_code != EXIT_SUCCESS)
+        if (max_build_errors && fail_count >= max_build_errors)
         {
             break;
         }
@@ -1133,6 +1137,7 @@ static int dry_run(void)
 
 static int run_tests()
 {
+    build_self();
     Allocator* allocator = allocator_create_chained();
     Node** targets = NULL;
     for (size_t i = 0; i != array_size(nodes); i++)
@@ -1149,9 +1154,24 @@ static int run_tests()
         array_push(allocator, targets, run_test_cmd);
         node_ensure_prepared(run_test_cmd);
     }
-    build_self();
     Graph* graph = graph_create(allocator, targets, array_size(targets));
+    max_build_errors = array_size(targets);
     int exit_code = build(graph);
+    max_build_errors = 1;
+    size_t total = 0;
+    size_t passed = 0;
+    for (size_t i = 0; i != array_size(targets); i++)
+    {
+        total++;
+        if (targets[i]->exit_code == EXIT_SUCCESS)
+        {
+            passed++;
+        }
+    }
+    if (total)
+    {
+        fprintf(stdout, "\nresults: %zu total, %zu passed, %zu failed\n", total, passed, total - passed);
+    }
     allocator_destroy(allocator);
     return exit_code;
 }
