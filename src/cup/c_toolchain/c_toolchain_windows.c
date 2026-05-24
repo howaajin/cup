@@ -400,7 +400,7 @@ NotDirty:
 
 static wchar_t* envs[ARCH_COUNT];
 
-static bool msvc_set_arch_env(ArchitectureType type)
+bool msvc_set_arch_env(ArchitectureType type)
 {
     if (type == ARCH_UNSPECIFIED)
     {
