@@ -23,6 +23,10 @@ void verify_p1689(ScanDepsCmd* scan)
 
 TEST(test_scan_deps_cmd_llvm, scan_deps_cmd)
 {
+    if (system("clang --version") != 0)
+    {
+        return;
+    }
     char const src_path[] = "tests/cpp_module/module1.cppm";
     Node* src = SRC(src_path);
     Node* obj = OBJ(src);
@@ -47,6 +51,10 @@ TEST(test_scan_deps_cmd_llvm, scan_deps_cmd)
 
 TEST(test_scan_deps_cmd_msvc, scan_deps_cmd)
 {
+    if (CURRENT_PLATFORM != PLATFORM_WINDOWS)
+    {
+        return;
+    }
     char const src_path[] = "tests/cpp_module/module1.cppm";
     Node* src = SRC(src_path);
     Node* obj = OBJ(src);

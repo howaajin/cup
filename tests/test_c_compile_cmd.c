@@ -242,6 +242,10 @@ TEST(test_c_compile_cmd_llvm_cpp, c_compile_cmd)
 
 TEST(test_c_compile_cmd_llvm_cppm, c_compile_cmd)
 {
+    if (system("clang --version") != 0)
+    {
+        return;
+    }
     set_default_toolchain(TOOLCHAIN_TYPE_LLVM);
 
     Node* src = SRC("fake.ixx");
