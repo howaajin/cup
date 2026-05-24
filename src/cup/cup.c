@@ -516,7 +516,7 @@ static void clean(void)
     char const* dll_path = NULL;
     if (b_dll_mode)
     {
-        dll_path = fmt("{out_dir}/{self_name}");
+        dll_path = fmt("{out_dir}/{self_name}" DLL_EXT);
     }
     Node* self = get_or_add_file_with_type(fmt("{self}"), FILE_TYPE_EXE);
     StringPtrHash* h = cache->hash_path_to_output_file;
