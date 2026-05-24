@@ -641,13 +641,11 @@ static int scan_deps(void)
         {
             Node* bmi = module_from_src(cc->src);
             c_compile_cmd_set_export((Node*)cc, scan->export_name, bmi);
-            hash_put(cc->export_map, scan->export_name, bmi);
         }
         if (cc->export_name)
         {
             Node* bmi = module_from_src(cc->src);
             c_compile_cmd_set_export((Node*)cc, cc->export_name, bmi);
-            hash_put(cc->export_map, cc->export_name, cc->export_bmi);
         }
     }
     for (size_t i = 0; i != array_size(scan_deps_cmds); i++)

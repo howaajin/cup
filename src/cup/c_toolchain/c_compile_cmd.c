@@ -318,6 +318,10 @@ void c_compile_cmd_set_export(Node* node, char const* name, Node* bmi)
     cmd->export_bmi = bmi;
     cmd->export_bmi->build_cmd = node;
     c_compile_cmd_set_export_name(node, name);
+    if (cmd->export_map)
+    {
+        hash_put(cmd->export_map, cmd->export_name, bmi);
+    }
 }
 
 void c_compile_cmd_set_export_name(Node* node, char const* name)
