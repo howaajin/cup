@@ -10,17 +10,9 @@ where cl >nul 2>&1
 if %ERRORLEVEL% EQU 0 goto build_msvc
 
 set "VS_INSTALL_DIR="
-for /d %%a in ("%ProgramFiles(x86)%\Microsoft Visual Studio\*") do (
-    for /d %%b in ("%%a\*") do (
-        if exist "%%b\VC\Tools\MSVC\*" set "VS_INSTALL_DIR=%%b"
-    )
-)
-if not defined VS_INSTALL_DIR (
-    for /d %%a in ("%ProgramFiles%\Microsoft Visual Studio\*") do (
-        for /d %%b in ("%%a\*") do (
-            if exist "%%b\VC\Tools\MSVC\*" set "VS_INSTALL_DIR=%%b"
-        )
-    )
+set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+if exist "%VSWHERE%" (
+    for /f "usebackq delims=" %%i in (`"%VSWHERE%" -latest -products * -property installationPath`) do set "VS_INSTALL_DIR=%%i"
 )
 if defined VS_INSTALL_DIR goto init_msvc_env
 
@@ -35,11 +27,21 @@ exit /B 1
 set "ARCH=x64"
 set "MSVC_VER="
 for /f "delims=" %%v in ('dir /b /o-n /ad "%VS_INSTALL_DIR%\VC\Tools\MSVC" 2^>nul') do if not defined MSVC_VER set "MSVC_VER=%%v"
+if not defined MSVC_VER (
+    echo Error: MSVC toolchain not found under "%VS_INSTALL_DIR%". Install the "Desktop development with C++" workload in Visual Studio.
+    exit /B 1
+)
 set "SDK_ROOT="
 for /f "tokens=2*" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows Kits\Installed Roots" /v KitsRoot10 2^>nul ^| find "KitsRoot10"') do set "SDK_ROOT=%%b"
+if not defined SDK_ROOT (
+    echo Error: Windows SDK not found. Install it via Visual Studio Installer ^(or from standalone SDK installer^).
+    exit /B 1
+)
 set "SDK_VER="
-if defined SDK_ROOT (
-    for /f "delims=" %%v in ('dir /b /o-n /ad "%SDK_ROOT%\Include" 2^>nul ^| findstr /r "^10\."') do if not defined SDK_VER set "SDK_VER=%%v"
+for /f "delims=" %%v in ('dir /b /o-n /ad "%SDK_ROOT%\Include" 2^>nul ^| findstr /r "^10\."') do if not defined SDK_VER set "SDK_VER=%%v"
+if not defined SDK_VER (
+    echo Error: Windows SDK version not found in "%SDK_ROOT%\Include".
+    exit /B 1
 )
 set "MSVC_BIN=%VS_INSTALL_DIR%\VC\Tools\MSVC\%MSVC_VER%"
 set "INCLUDE=%SDK_ROOT%\Include\%SDK_VER%\ucrt;%SDK_ROOT%\Include\%SDK_VER%\um;%SDK_ROOT%\Include\%SDK_VER%\shared;%SDK_ROOT%\Include\%SDK_VER%\winrt;%SDK_ROOT%\Include\%SDK_VER%\cppwinrt;%MSVC_BIN%\include;"
