@@ -5,7 +5,7 @@
 #include "cup/c_toolchain/c_toolchain.h"
 #include "cup/test.h"
 
-static void test_compile_cup_h_impl(char const* path, char const* cmdline, char const* file, int line)
+static void test_compile_cup_h_impl(char const* path, char const* cmdline, char const* run_cmd, char const* file, int line)
 {
     char const src[] = "build/header_only/cup.h";
     if (!os_file_exists(src))
@@ -19,12 +19,12 @@ static void test_compile_cup_h_impl(char const* path, char const* cmdline, char 
     os_set_cwd(dir);
     assert_impl(system(cmdline) == 0, "compile failed", file, line);
     assert_impl(os_file_exists("cup" EXE_EXT), "cup not found", file, line);
-    assert_impl(system("./cup") == 0, "run cup failed", file, line);
+    assert_impl(system(run_cmd) == 0, "run cup failed", file, line);
     assert_impl(os_file_exists("build.c"), "build.c not generated", file, line);
     os_set_cwd(cwd);
 }
 
-#define test_compile_cup_h(path, cmdline) test_compile_cup_h_impl(path, cmdline, __FILE__, __LINE__)
+#define test_compile_cup_h(path, cmdline, run_cmd) test_compile_cup_h_impl(path, cmdline, run_cmd, __FILE__, __LINE__)
 
 TEST(test_header_only_clang_windows, header_only)
 {
@@ -38,7 +38,8 @@ TEST(test_header_only_clang_windows, header_only)
     }
     test_compile_cup_h(
         "build/tests/header_only_test_clang/cup.h",
-        "clang -x c cup.h -DMAIN_ENTRY -o cup.exe");
+        "clang -x c cup.h -DMAIN_ENTRY -o cup.exe",
+        "cup.exe");
     system("rmdir /s /q build\\tests\\header_only_test_clang");
 }
 
@@ -55,7 +56,8 @@ TEST(test_header_only_clang_linux, header_only)
     }
     test_compile_cup_h(
         "build/tests/header_only_test_clang/cup.h",
-        "clang -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions");
+        "clang -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions",
+        "./cup");
     system("rm -rf build/tests/header_only_test_clang/");
 }
 
@@ -71,7 +73,8 @@ TEST(test_header_only_clang_mac, header_only)
     }
     test_compile_cup_h(
         "build/tests/header_only_test_clang/cup.h",
-        "clang -x c cup.h -DMAIN_ENTRY -o cup -fms-extensions");
+        "clang -x c cup.h -DMAIN_ENTRY -o cup -fms-extensions",
+        "./cup");
     system("rm -rf build/tests/header_only_test_clang/");
 }
 
@@ -90,7 +93,8 @@ TEST(test_header_only_msvc_windows, header_only)
     }
     test_compile_cup_h(
         "build/tests/header_only_test_msvc/cup.h",
-        "cl /Fe:cup.exe /Tc cup.h /std:clatest /DMAIN_ENTRY /nologo");
+        "cl /Fe:cup.exe /Tc cup.h /std:clatest /DMAIN_ENTRY /nologo",
+        "cup.exe");
     system("rmdir /s /q build\\tests\\header_only_test_msvc");
 }
 
@@ -106,7 +110,8 @@ TEST(test_header_only_gcc_windows, header_only)
     }
     test_compile_cup_h(
         "build/tests/header_only_test_gcc/cup.h",
-        "gcc -x c cup.h -DMAIN_ENTRY -luserenv -lbcrypt -o cup.exe");
+        "gcc -x c cup.h -DMAIN_ENTRY -luserenv -lbcrypt -o cup.exe",
+        "cup.exe");
     system("rmdir /s /q build\\tests\\header_only_test_gcc");
 }
 
@@ -123,7 +128,8 @@ TEST(test_header_only_gcc_linux, header_only)
     }
     test_compile_cup_h(
         "build/tests/header_only_test_gcc/cup.h",
-        "gcc -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions");
+        "gcc -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions",
+        "./cup");
     system("rm -rf build/tests/header_only_test_gcc/");
 }
 
@@ -139,6 +145,7 @@ TEST(test_header_only_gcc_mac, header_only)
     }
     test_compile_cup_h(
         "build/tests/header_only_test_gcc/cup.h",
-        "gcc -x c cup.h -DMAIN_ENTRY -o cup -fms-extensions");
+        "gcc -x c cup.h -DMAIN_ENTRY -o cup -fms-extensions",
+        "./cup");
     system("rm -rf build/tests/header_only_test_gcc/");
 }
