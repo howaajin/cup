@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -17,7 +18,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <pthread.h>
 
 uint64_t os_get_mtime(char const* path)
 {
@@ -41,6 +41,11 @@ char* os_get_cwd(Allocator* allocator)
     char* cwd = string_from_c_str(allocator, p);
     free(p);
     return cwd;
+}
+
+bool os_set_cwd(char const* path)
+{
+    return chdir(path) == 0;
 }
 
 bool os_mkdir(char const* path)
