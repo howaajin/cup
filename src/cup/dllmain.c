@@ -1,16 +1,18 @@
+#include "core/allocator.h"
 #include "core/array.h"
 #include "core/dylib.h"
 #include "core/hash.h"
 #include "core/os.h"
-#include "core/platform.h"
-#include "core/utilities.h"
+#include "cup/c_toolchain/c_compile_cmd.h"
 #include "cup/c_toolchain/c_toolchain.h"
 #include "cup/c_toolchain/link_cmd.h"
 #include "cup/embedded_file.h"
 #include "cup/entry.h"
+#include "cup/node.h"
 #include "cup/var.h"
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -23,6 +25,7 @@ extern void restart(void);
 
 typedef int FnMain(int argc, char** argv);
 void collect_build_scripts(char const* directory, Allocator* allocator);
+void add_build_script(char const* path);
 
 #define ENTRY_REF(fn) \
     void fn(void);    \
