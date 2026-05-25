@@ -145,7 +145,7 @@ int bootstrap(void)
 #if CURRENT_PLATFORM == PLATFORM_WINDOWS
     Entry_register_gen_embedded_cup_lib();
 #endif
-    set_self_build_toolchain(c_toolchain_select_toolchain_automatically());
+    set_self_build_toolchain(get_default_toolchain());
     set_default_toolchain(self_build_toolchain);
     invoke_entries_before_prepare();
     for (size_t i = 0; i != array_size(nodes); i++)
