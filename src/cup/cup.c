@@ -53,12 +53,14 @@ size_t max_build_errors = 1;
 
 void init_cache(void);
 void destroy_var(void);
+void save_last_status(void);
 
 void destroy(void)
 {
     extern Cache* cache;
     if (cache)
     {
+        save_last_status();
         cache_compact_log(cache, fmt("{out_dir}/.cup_cache"));
         cache_destroy(cache);
         cache = NULL;
@@ -1207,24 +1209,7 @@ static void read_last_status(void)
     }
 }
 
-CONSTRUCTOR(init)
-static void init(void)
-{
-    os_set_console_utf8();
-    init_var();
-    parse_cmdline();
-    read_last_status();
-    init_node();
-    init_toolchain();
-    if (atexit(destroy) != 0)
-    {
-        printf("atexit failed!\n");
-        exit(EXIT_FAILURE);
-    }
-    init_mode();
-}
-
-static void save_last_status(void)
+void save_last_status(void)
 {
     char const* out_dir = get_var("out_dir");
     os_create_directory_tree(out_dir);
@@ -1249,6 +1234,23 @@ static void save_last_status(void)
     }
     char* content = string_from_print(allocator_temp(), "%s\n%s\n", tc_str, opt_str);
     os_write_all(status_path, content, array_size(content));
+}
+
+CONSTRUCTOR(init)
+static void init(void)
+{
+    os_set_console_utf8();
+    init_var();
+    parse_cmdline();
+    read_last_status();
+    init_node();
+    init_toolchain();
+    if (atexit(destroy) != 0)
+    {
+        printf("atexit failed!\n");
+        exit(EXIT_FAILURE);
+    }
+    init_mode();
 }
 
 int execute(void)
