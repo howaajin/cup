@@ -26,6 +26,7 @@ extern Node** nodes;
 extern Allocator* node_allocator;
 extern ToolchainType self_build_toolchain;
 extern ToolchainType default_toolchain;
+extern OptimizationType default_optimization_type;
 extern bool b_test_enabled;
 extern bool b_node_default_excluded;
 
@@ -1177,12 +1178,42 @@ static int run_tests()
 void init_mode(void);
 void init_toolchain(void);
 
+static void read_last_status(void)
+{
+    if (default_toolchain == TOOLCHAIN_TYPE_UNSPECIFIED ||
+        default_optimization_type == OPTIMIZATION_TYPE_UNSPECIFIED)
+    {
+        char const* status_path = fmt("{out_dir}/.last_status");
+        char* content = os_read_all(allocator_temp(), status_path);
+        if (content)
+        {
+            char* line = strtok(content, "\r\n");
+            if (line && default_toolchain == TOOLCHAIN_TYPE_UNSPECIFIED)
+            {
+                if (string_equal(line, "llvm")) set_default_toolchain(TOOLCHAIN_TYPE_LLVM);
+                else if (string_equal(line, "msvc")) set_default_toolchain(TOOLCHAIN_TYPE_MSVC);
+                else if (string_equal(line, "gcc")) set_default_toolchain(TOOLCHAIN_TYPE_GCC);
+                else if (string_equal(line, "zig")) set_default_toolchain(TOOLCHAIN_TYPE_ZIG);
+                else if (string_equal(line, "tcc")) set_default_toolchain(TOOLCHAIN_TYPE_TCC);
+            }
+            line = strtok(NULL, "\r\n");
+            if (line && default_optimization_type == OPTIMIZATION_TYPE_UNSPECIFIED)
+            {
+                if (string_equal(line, "debug")) set_default_optimization(OPTIMIZATION_TYPE_DEBUG);
+                else if (string_equal(line, "release_fast")) set_default_optimization(OPTIMIZATION_TYPE_RELEASE_FAST);
+                else if (string_equal(line, "release_small")) set_default_optimization(OPTIMIZATION_TYPE_RELEASE_SMALL);
+            }
+        }
+    }
+}
+
 CONSTRUCTOR(init)
 static void init(void)
 {
     os_set_console_utf8();
     init_var();
     parse_cmdline();
+    read_last_status();
     init_node();
     init_toolchain();
     if (atexit(destroy) != 0)
@@ -1191,6 +1222,33 @@ static void init(void)
         exit(EXIT_FAILURE);
     }
     init_mode();
+}
+
+static void save_last_status(void)
+{
+    char const* out_dir = get_var("out_dir");
+    os_create_directory_tree(out_dir);
+    char const* status_path = fmt("{out_dir}/.last_status");
+    char const* tc_str = NULL;
+    switch (default_toolchain)
+    {
+    case TOOLCHAIN_TYPE_MSVC: tc_str = "msvc"; break;
+    case TOOLCHAIN_TYPE_LLVM: tc_str = "llvm"; break;
+    case TOOLCHAIN_TYPE_ZIG: tc_str = "zig"; break;
+    case TOOLCHAIN_TYPE_GCC: tc_str = "gcc"; break;
+    case TOOLCHAIN_TYPE_TCC: tc_str = "tcc"; break;
+    default: tc_str = "unspecified"; break;
+    }
+    char const* opt_str = NULL;
+    switch (default_optimization_type)
+    {
+    case OPTIMIZATION_TYPE_DEBUG: opt_str = "debug"; break;
+    case OPTIMIZATION_TYPE_RELEASE_FAST: opt_str = "release_fast"; break;
+    case OPTIMIZATION_TYPE_RELEASE_SMALL: opt_str = "release_small"; break;
+    default: opt_str = "release"; break;
+    }
+    char* content = string_from_print(allocator_temp(), "%s\n%s\n", tc_str, opt_str);
+    os_write_all(status_path, content, array_size(content));
 }
 
 int execute(void)
@@ -1241,12 +1299,22 @@ int execute(void)
     }
     if (b_run_tests)
     {
-        return run_tests();
+        exit_code = run_tests();
+        if (exit_code == EXIT_SUCCESS)
+        {
+            save_last_status();
+        }
+        return exit_code;
     }
     exit_code = build_self();
     if (exit_code != EXIT_SUCCESS)
     {
         return exit_code;
     }
-    return build_targets();
+    exit_code = build_targets();
+    if (exit_code == EXIT_SUCCESS)
+    {
+        save_last_status();
+    }
+    return exit_code;
 }
