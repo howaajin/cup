@@ -3,7 +3,6 @@
 #include "cup/node.h"
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 Node* msvc_get_env_node(ToolchainType toolchain_type, ArchitectureType arch)
