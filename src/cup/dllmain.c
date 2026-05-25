@@ -27,11 +27,6 @@ typedef int FnMain(int argc, char** argv);
 void collect_build_scripts(char const* directory, Allocator* allocator);
 void add_build_script(char const* path);
 
-#define ENTRY_REF(fn) \
-    void fn(void);    \
-    Entry fn##entry = {#fn, fn, __FILE__, __LINE__ + 1, 0};
-
-ENTRY_REF(gen_embedded_cup_h_interface);
 ENTRY(gen_embedded_cup_h_interface)
 {
     static struct EmbeddedFile file = {
@@ -45,7 +40,6 @@ ENTRY(gen_embedded_cup_h_interface)
 }
 
 #if CURRENT_PLATFORM == PLATFORM_WINDOWS
-ENTRY_REF(gen_embedded_cup_lib);
 ENTRY(gen_embedded_cup_lib)
 {
     static struct EmbeddedFile file = {
@@ -65,7 +59,6 @@ static void after_self_built(Node* cmd)
     restart();
 }
 
-ENTRY_REF(build_cup_dll);
 ENTRY(build_cup_dll)
 {
     Allocator* allocator = allocator_create_chained();
@@ -114,8 +107,6 @@ ENTRY(build_cup_dll)
     allocator_destroy(allocator);
 }
 
-#undef ENTRY_REF
-
 bool try_run_dll(int argc, char** argv, int* exit_code)
 {
     char const* cup_dll_path = fmt("{out_dir}/{self_name}{dll_ext}");
@@ -146,15 +137,14 @@ extern int build_self(void);
 extern char const* get_src_file_dir(char const* path, Allocator* allocator);
 extern void invoke_entries_before_prepare(void);
 
-#define ENTRY_REF(fn) fn##entry
 int bootstrap(void)
 {
     entry_clean();
-    entry_push(ENTRY_REF(gen_embedded_cup_h_interface));
+    Entry_register_gen_embedded_cup_h_interface();
+    Entry_register_build_cup_dll();
 #if CURRENT_PLATFORM == PLATFORM_WINDOWS
-    entry_push(ENTRY_REF(gen_embedded_cup_lib));
+    Entry_register_gen_embedded_cup_lib();
 #endif
-    entry_push(ENTRY_REF(build_cup_dll));
     set_self_build_toolchain(c_toolchain_select_toolchain_automatically());
     set_default_toolchain(self_build_toolchain);
     invoke_entries_before_prepare();
@@ -167,7 +157,6 @@ int bootstrap(void)
     cmd_set_after_execute_fn(cmd, cmd_after_execute);
     return build_self();
 }
-#undef ENTRY_REF
 
 extern int execute(void);
 
