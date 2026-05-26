@@ -16,6 +16,8 @@ jobs:
             platform: linux
           - os: windows-latest
             platform: windows
+          - os: macos-latest
+            platform: macos
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -46,6 +48,14 @@ jobs:
         if: matrix.platform == 'windows'
         run: .\cup.exe -t msvc -O3
 
+      - name: Bootstrap (macOS)
+        if: matrix.platform == 'macos'
+        run: ./bootstrap.sh
+
+      - name: Build (macOS)
+        if: matrix.platform == 'macos'
+        run: ./cup -t llvm -O3
+
       - name: Stage Linux artifacts
         if: matrix.platform == 'linux'
         run: |
@@ -59,6 +69,12 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path _release -Force > $null
           Copy-Item build/embedded/cup.exe _release/
+
+      - name: Stage macOS artifacts
+        if: matrix.platform == 'macos'
+        run: |
+          mkdir -p _release
+          cp build/embedded/cup _release/
 
       - uses: actions/upload-artifact@v4
         with:
@@ -82,8 +98,9 @@ jobs:
           gh release delete "$TAG" --yes 2>/dev/null || true
           gh release create "$TAG" --generate-notes \
             "_artifacts/cup-linux/cup#cup Linux (x64)" \
+            "_artifacts/cup-linux/cup.h#cup.h" \
             "_artifacts/cup-windows/cup.exe#cup Windows (x64)" \
-            "_artifacts/cup-linux/cup.h#cup.h"
+            "_artifacts/cup-macos/cup#cup macOS (x64)"
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag }}
