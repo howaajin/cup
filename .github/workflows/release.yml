@@ -92,42 +92,26 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag }}
 
-      - name: Get release ID
+      - name: Upload assets
         run: |
-          echo "RELEASE_ID=$(gh release view "$TAG" --json id --jq .id)" >> $GITHUB_ENV
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.inputs.tag }}
-
-      - name: Upload Linux binary
-        run: |
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Content-Type: application/octet-stream" \
-            "/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets?name=cup&label=cup+linux+(x64)" \
-            --input "_artifacts/cup-linux/cup"
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: Upload Windows binary
-        run: |
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Content-Type: application/octet-stream" \
-            "/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets?name=cup.exe&label=cup+Windows(x64)" \
-            --input "_artifacts/cup-windows/cup.exe"
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: Upload cup.h
-        run: |
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Content-Type: application/octet-stream" \
-            "/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets?name=cup.h&label=cup.h" \
-            --input "_artifacts/cup-linux/cup.h"
+          REPO="${{ github.repository }}"
+          TAG="${{ github.event.inputs.tag }}"
+          RELEASE_ID=$(gh release view "$TAG" --json id --jq .id)
+          upload() {
+            local file="$1" name="$2" label="$3"
+            curl -L -s -o /dev/null -w "%{http_code}" \
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Content-Type: application/octet-stream" \
+              "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets" \
+              -G \
+              --data-urlencode "name=$name" \
+              --data-urlencode "label=$label" \
+              --data-binary "@$file"
+          }
+          upload "_artifacts/cup-linux/cup" "cup" "cup linux (x64)"
+          upload "_artifacts/cup-windows/cup.exe" "cup.exe" "cup Windows(x64)"
+          upload "_artifacts/cup-linux/cup.h" "cup.h" "cup.h"
         env:
           GH_TOKEN: ${{ github.token }}
