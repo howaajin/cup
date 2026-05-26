@@ -1310,10 +1310,6 @@ int execute(void)
     if (b_run_tests)
     {
         exit_code = run_tests();
-        if (exit_code == EXIT_SUCCESS)
-        {
-            save_last_status();
-        }
         return exit_code;
     }
     exit_code = build_self();
@@ -1322,9 +1318,5 @@ int execute(void)
         return exit_code;
     }
     exit_code = build_targets();
-    if (exit_code == EXIT_SUCCESS)
-    {
-        save_last_status();
-    }
     return exit_code;
 }
