@@ -53,8 +53,8 @@ ENTRY(build_test_scan_deps_cmd)
     Node* src = SRC("{dir}/test_scan_deps_cmd.c");
     Node* obj = OBJ(src);
     CC(src, obj);
-    obj_add_link_node(obj, LIB("{out_dir}/core"));
     obj_add_link_node(obj, LIB("{out_dir}/cup"));
+    obj_add_link_node(obj, LIB("{out_dir}/core"));
     obj_add_link_obj_from_src(obj, SRC("src/cup/in_repo.c"));
     obj_add_link_obj_from_src(obj, SRC("src/cup/c_toolchain/scan_deps_cmd.c"));
 }

@@ -1,6 +1,7 @@
 /.cache
 /.vscode
 /build
+/build_*
 /backup
 /src/cup/bin2c/*
 /src/core/hash.h
