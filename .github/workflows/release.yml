@@ -93,10 +93,22 @@ jobs:
         with:
           path: _artifacts
 
-      - name: Create release and upload assets
+      - name: Delete existing release (if any)
+        run: gh release delete "$TAG" --yes 2>/dev/null || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag }}
+
+      - name: Create release
+        run: gh release create "$TAG" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag }}
+
+      - name: Upload release assets
         run: |
-          gh release delete "$TAG" --yes 2>/dev/null || true
-          gh release create "$TAG" --generate-notes \
+          sleep 3
+          gh release upload "$TAG" \
             "_artifacts/cup-linux/cup#cup Linux (x64)" \
             "_artifacts/cup-linux/cup.h#cup.h" \
             "_artifacts/cup-windows/cup.exe#cup Windows (x64)" \
