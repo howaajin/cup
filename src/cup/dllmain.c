@@ -130,7 +130,7 @@ ENTRY(build_cup_dll)
             c_compile_cmd_add_flag(cc, "-fPIC");
         }
     }
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+#if CURRENT_PLATFORM == PLATFORM_WINDOWS
     {
         LinkCmd* lcmd = (LinkCmd*)link;
 
@@ -157,6 +157,7 @@ ENTRY(build_cup_dll)
             link_cmd_add_flag(link, "-Wl,/export:main");
         }
     }
+#endif
     cmd_set_after_execute_fn(link, after_self_built);
     allocator_destroy(allocator);
 }
