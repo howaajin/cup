@@ -14,6 +14,7 @@ void verify_p1689(ScanDepsCmd* scan)
     executor_add_task(executor, task);
     Task* finished = executor_wait(executor);
     ASSERT(task == finished);
+    ASSERT(task->exit_code == EXIT_SUCCESS);
     scan->after_execute((Node*)scan);
     ASSERT(string_equal(scan->export_name, "module1"));
     ASSERT(array_size(scan->imports) == 1);
@@ -80,6 +81,10 @@ TEST(test_scan_deps_cmd_msvc, scan_deps_cmd)
 
 TEST(test_scan_deps_cmd_gcc, scan_deps_cmd)
 {
+    if (system("g++ --version") != 0)
+    {
+        return;
+    }
     char const src_path[] = "tests/cpp_module/module1.cppm";
     Node* src = SRC(src_path);
     Node* obj = OBJ(src);
