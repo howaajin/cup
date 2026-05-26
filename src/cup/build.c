@@ -132,7 +132,6 @@ ENTRY(build_cup_lib)
         SRC("{dir}/graph.c"),
         SRC("{dir}/node.c"),
         SRC("{dir}/var.c"),
-        SRC("{dir}/vs.c"),
         SRC("{dir}/test_finder.c"),
         SRC("{dir}/fmt.c"),
     };
