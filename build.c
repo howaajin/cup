@@ -19,6 +19,10 @@ void setup_default_flags(void)
             c_compile_cmd_set_cpp_std(node, CPP_LANGUAGE_STANDARD_20);
             c_compile_cmd_set_c_std(node, C_LANGUAGE_STANDARD_23);
             CCompileCmd* cmd = (CCompileCmd*)node;
+            if (CURRENT_PLATFORM == PLATFORM_LINUX)
+            {
+                c_compile_cmd_add_flag(node, "-D_GNU_SOURCE");
+            }
             if (cmd->toolchain == TOOLCHAIN_TYPE_LLVM)
             {
                 c_compile_cmd_add_flag(node, "-Wall");
