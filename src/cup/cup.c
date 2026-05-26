@@ -250,8 +250,7 @@ static void parse_cmdline(void)
             }
             else if (arg[0] == '-')
             {
-                print_help(false);
-                exit(EXIT_FAILURE);
+                continue;
             }
             char* target = string_from_c_str(allocator, arg);
             array_push(allocator, target_names, target);
