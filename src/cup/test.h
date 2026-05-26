@@ -40,8 +40,8 @@ static inline void test_push_entry(TestEntry entry)
 #endif
 #endif
 #define TEST_REGISTER(fn, ...)                                     \
-    CONSTRUCTOR(fn##_register)                                     \
     extern void fn(void);                                          \
+    CONSTRUCTOR(fn##_register)                                     \
     static void fn##_register()                                    \
     {                                                              \
         TestEntry e = {#fn, #__VA_ARGS__, fn, __FILE__, __LINE__}; \
