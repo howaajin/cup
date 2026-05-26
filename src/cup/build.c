@@ -333,16 +333,16 @@ ENTRY(build_embedded_cup_h_c)
     cmd_add_input_file_option(cmd, NULL, input);
 }
 
-ENTRY(build_embedded_cup_lib_c)
+ENTRY(build_embedded_cup_def_c)
 {
     if (CURRENT_PLATFORM != PLATFORM_WINDOWS)
     {
         return;
     }
     Node* bin2c = EXE("{out_dir}/bin2c");
-    Node* output = SRC("{out_dir}/embedded/cup.lib.c");
+    Node* output = SRC("{out_dir}/embedded/cup.def.c");
     Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
-    Node* input = FILE("{out_dir}/embedded/cup" LIB_EXT);
+    Node* input = FILE("{dir}/cup.def");
     cmd_add_output_file_option(cmd, NULL, output);
     cmd_add_input_file_option(cmd, NULL, input);
 }
@@ -396,11 +396,11 @@ ENTRY(build_cup_embedded)
     }
     if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
-        // embedded lib
-        Node* src = SRC("{out_dir}/embedded/cup.lib.c");
-        Node* obj = OBJ(src);
-        CC(src, obj);
-        link_cmd_add_input(link, obj);
+        // embedded def
+        Node* src_def = SRC("{out_dir}/embedded/cup.def.c");
+        Node* obj_def = OBJ(src_def);
+        CC(src_def, obj_def);
+        link_cmd_add_input(link, obj_def);
 
         // icon
         Node* res = FILE("{out_dir}/cup.res");
