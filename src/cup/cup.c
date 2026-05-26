@@ -522,7 +522,7 @@ static void clean(void)
         dll_path = fmt("{out_dir}/{self_name}" DLL_EXT);
     }
     Node* self = get_or_add_file_with_type(fmt("{self}"), FILE_TYPE_EXE);
-    StringPtrHash* h = cache->hash_path_to_output_file;
+    StringPtrHash* h = cache->hash_path_to_output_file_record;
     for (uint32_t i = h->begin; i != h->end; i = hash_next(h, i))
     {
         CacheRecordFile* record = hash_value(h, i);
@@ -1262,13 +1262,13 @@ int execute(void)
 {
     determine_toolchain();
     sort_entries();
+    char const* lock_path = fmt("{out_dir}/.cup_lock");
+    process_lock_ctx = os_lock_file(lock_path, allocator_c(), false);
     if (b_clean)
     {
         clean();
         return 0;
     }
-    char const* lock_path = fmt("{out_dir}/.cup_lock");
-    process_lock_ctx = os_lock_file(lock_path, allocator_c(), false);
     init_cache();
     if (b_clean)
     {
