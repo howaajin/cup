@@ -50,7 +50,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           mkdir -p _release
-          cp cup _release/
+          cp build/embedded/cup _release/
           cp build/header_only/cup.h _release/
 
       - name: Stage Windows artifacts
@@ -58,7 +58,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path _release -Force > $null
-          Copy-Item cup.exe _release/
+          Copy-Item build/embedded/cup.exe _release/
 
       - uses: actions/upload-artifact@v4
         with:
