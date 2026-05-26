@@ -33,18 +33,16 @@ jobs:
         if: matrix.platform == 'linux'
         run: ./bootstrap.sh
 
-      - name: Bootstrap (Windows)
-        if: matrix.platform == 'windows'
-        shell: cmd
-        run: bootstrap.bat
-
       - name: Build (Linux)
         if: matrix.platform == 'linux'
         run: ./cup -t llvm -O3
 
-      - name: Build (Windows)
+      - name: Bootstrap and Build (Windows)
         if: matrix.platform == 'windows'
-        run: .\cup.exe -t msvc -O3
+        shell: cmd
+        run: |
+          call bootstrap.bat
+          .\cup.exe -t msvc -O3
 
       - name: Stage Linux artifacts
         if: matrix.platform == 'linux'
