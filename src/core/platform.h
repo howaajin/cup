@@ -65,11 +65,11 @@
 #if CURRENT_COMPILER == COMPILER_CL
 #define CONSTRUCTOR(name)                   \
     _Pragma("section(\".CRT$XCU\", read)"); \
-    static void name(void);                 \
+    void name(void);                        \
     __declspec(allocate(".CRT$XCU")) void (*name##_ptr)(void) = name;
 #define DESTRUCTOR(name)                    \
     _Pragma("section(\".CRT$XTU\", read)"); \
-    static void name(void);                 \
+    void name(void);                        \
     __declspec(allocate(".CRT$XTU")) void (*name##_ptr)(void) = name;
 #else
 #define CONSTRUCTOR(name) __attribute__((constructor(101)))
