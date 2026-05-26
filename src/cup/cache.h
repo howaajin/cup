@@ -64,13 +64,13 @@ struct CacheRecordTestExe
 struct Cache
 {
     Allocator* allocator;
-    StringPtrHash* hash_path_to_input_file;
-    StringPtrHash* hash_path_to_output_file;
+    StringPtrHash* hash_path_to_input_file_record;
+    StringPtrHash* hash_path_to_output_file_record;
     StringPtrHash* hash_name_to_cmd_record;
     StringPtrHash* hash_source_path_to_cpp_module_record;
     StringPtrHash* hash_source_path_to_test_exe_record;
-    char** files;
-    StringHash* hash_path_to_file_id;
+    char** strings;
+    StringHash* hash_string_to_id;
 
     FILE* log_file;
     uint32_t total_records_read;

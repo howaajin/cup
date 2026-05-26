@@ -17,9 +17,9 @@ Cache* cache_create(Allocator* allocator)
 {
     Cache* c = allocator_calloc(allocator, 1, sizeof(Cache));
     c->allocator = allocator;
-    cache_init_hash(c->hash_path_to_file_id);
-    cache_init_hash(c->hash_path_to_input_file);
-    cache_init_hash(c->hash_path_to_output_file);
+    cache_init_hash(c->hash_string_to_id);
+    cache_init_hash(c->hash_path_to_input_file_record);
+    cache_init_hash(c->hash_path_to_output_file_record);
     cache_init_hash(c->hash_name_to_cmd_record);
     cache_init_hash(c->hash_source_path_to_cpp_module_record);
     cache_init_hash(c->hash_source_path_to_test_exe_record);
@@ -110,8 +110,8 @@ Cache* get_cache(void)
 size_t cache_calc_num_records(Cache* c)
 {
     size_t num_records = 0;
-    num_records += c->hash_path_to_input_file->size;
-    num_records += c->hash_path_to_output_file->size;
+    num_records += c->hash_path_to_input_file_record->size;
+    num_records += c->hash_path_to_output_file_record->size;
     num_records += c->hash_name_to_cmd_record->size;
     num_records += c->hash_source_path_to_cpp_module_record->size;
     num_records += c->hash_source_path_to_test_exe_record->size;
@@ -258,27 +258,27 @@ static void cache_destroy_record_cmd(Allocator* allocator, CacheRecordCmd* recor
 void cache_destroy_files(Cache* c)
 {
     StringPtrHash* h;
-    h = c->hash_path_to_output_file;
+    h = c->hash_path_to_output_file_record;
     for (uint32_t i = h->begin; i != h->end; i = hash_next(h, i))
     {
         CacheRecordFile* record = hash_value(h, i);
         allocator_free(c->allocator, record);
     }
-    hash_free(c->hash_path_to_output_file);
-    h = c->hash_path_to_input_file;
+    hash_free(c->hash_path_to_output_file_record);
+    h = c->hash_path_to_input_file_record;
     for (uint32_t i = h->begin; i != h->end; i = hash_next(h, i))
     {
         CacheRecordFile* record = hash_value(h, i);
         allocator_free(c->allocator, record);
     }
-    hash_free(c->hash_path_to_input_file);
-    for (size_t i = 0; i != array_size(c->files); i++)
+    hash_free(c->hash_path_to_input_file_record);
+    for (size_t i = 0; i != array_size(c->strings); i++)
     {
-        char* path = c->files[i];
+        char* path = c->strings[i];
         string_free(c->allocator, path);
     }
-    hash_free(c->hash_path_to_file_id);
-    array_free(c->allocator, c->files);
+    hash_free(c->hash_string_to_id);
+    array_free(c->allocator, c->strings);
 }
 
 void cache_clear(Cache* c)
@@ -329,19 +329,19 @@ static CacheRecordFile* cache_merge_file_record(Cache* c, char const* path, Stri
     }
     CacheRecordFile* record = allocator_calloc(c->allocator, 1, sizeof(CacheRecordFile));
     record->id = cache_get_or_insert_string(c, path);
-    hash_key(h, i) = c->files[record->id];
+    hash_key(h, i) = c->strings[record->id];
     hash_value(h, i) = record;
     return record;
 }
 
 CacheRecordFile* cache_merge_in_file_record(Cache* c, char const* path)
 {
-    return cache_merge_file_record(c, path, c->hash_path_to_input_file);
+    return cache_merge_file_record(c, path, c->hash_path_to_input_file_record);
 }
 
 CacheRecordFile* cache_merge_out_file_record(Cache* c, char const* path)
 {
-    return cache_merge_file_record(c, path, c->hash_path_to_output_file);
+    return cache_merge_file_record(c, path, c->hash_path_to_output_file_record);
 }
 
 static void cache_copy_cmd_record(Allocator* allocator, CacheRecordCmd* dst, CacheRecordCmd const* src)
@@ -496,32 +496,32 @@ CacheRecordFile* cache_find_file_record(Cache* c, char const* path, StringPtrHas
 
 char* cache_get_string(Cache* c, uint32_t id)
 {
-    return c->files[id];
+    return c->strings[id];
 }
 
 uint32_t cache_get_or_insert_string(Cache* c, char const* path)
 {
-    StringHash* h = c->hash_path_to_file_id;
+    StringHash* h = c->hash_string_to_id;
     bool b_existed;
     uint32_t i = hash_insert_check(h, path, &b_existed);
     if (!b_existed)
     {
-        hash_value(h, i) = array_size(c->files);
+        hash_value(h, i) = array_size(c->strings);
         char* new_path = string_from_c_str(c->allocator, path);
         hash_key(h, i) = new_path;
-        array_push(c->allocator, c->files, new_path);
+        array_push(c->allocator, c->strings, new_path);
     }
     return hash_value(h, i);
 }
 
 CacheRecordFile* cache_find_in_file_record(Cache* c, char const* path)
 {
-    return cache_find_file_record(c, path, c->hash_path_to_input_file);
+    return cache_find_file_record(c, path, c->hash_path_to_input_file_record);
 }
 
 CacheRecordFile* cache_find_out_file_record(Cache* c, char const* path)
 {
-    return cache_find_file_record(c, path, c->hash_path_to_output_file);
+    return cache_find_file_record(c, path, c->hash_path_to_output_file_record);
 }
 
 CacheRecordCppModule* cache_find_cpp_module_record(Cache* c, char const* source_path)
@@ -660,7 +660,7 @@ static bool cache_read_file_array(Cache* c, CacheFile** out_files)
 
 static bool cache_validate_file_array(Cache* c, CacheFile* files)
 {
-    size_t num_cached_files = array_size(c->files);
+    size_t num_cached_files = array_size(c->strings);
     for (size_t i = 0; i != array_size(files); i++)
     {
         if (files[i].id >= num_cached_files) return false;
@@ -745,7 +745,7 @@ bool cache_read_cpp_module_record(Cache* c)
 {
     CacheRecordCppModule record = {0};
     if (!cache_read_bytes(c->log_file, &record.source_id, sizeof(record.source_id))) return false;
-    if (record.source_id >= array_size(c->files)) return false;
+    if (record.source_id >= array_size(c->strings)) return false;
     if (!cache_read_str(c->log_file, c->allocator, &record.export)) return false;
     if (!cache_read_string_array(c, &record.imports)) return false;
     cache_merge_cpp_module_record(c, &record);
@@ -772,7 +772,7 @@ bool cache_read_test_exe_record(Cache* c)
 {
     CacheRecordTestExe record = {0};
     if (!cache_read_bytes(c->log_file, &record.source_id, sizeof(record.source_id))) return false;
-    if (record.source_id >= array_size(c->files)) return false;
+    if (record.source_id >= array_size(c->strings)) return false;
     if (!cache_read_string_array(c, &record.entries)) return false;
     cache_merge_test_exe_record(c, &record);
     for (size_t i = 0; i != array_size(record.entries); i++)
