@@ -167,11 +167,7 @@ static inline char* string_append_fmt(Allocator* allocator, char* str, char cons
 [[nodiscard]]
 static inline bool string_equal(char const* str1, char const* str2)
 {
-    size_t len1 = strlen(str1);
-    size_t len2 = strlen(str2);
-    if (len1 != len2) return false;
-    if (len1 == 0) return true;
-    return memcmp(str1, str2, len1) == 0;
+    return strcmp(str1, str2) == 0;
 }
 
 [[nodiscard("string_shrink_to_fit may reallocate memory")]]
