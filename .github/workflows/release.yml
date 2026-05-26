@@ -92,29 +92,42 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag }}
 
-      - name: Upload Linux binary
+      - name: Get release ID
         run: |
-          gh release upload "$TAG" "_artifacts/cup-linux/cup" \
-            --name "cup" \
-            --label "cup linux (x64)"
+          echo "RELEASE_ID=$(gh release view "$TAG" --json id --jq .id)" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag }}
+
+      - name: Upload Linux binary
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/octet-stream" \
+            "/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets?name=cup&label=cup+linux+(x64)" \
+            --input "_artifacts/cup-linux/cup"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Upload Windows binary
         run: |
-          gh release upload "$TAG" "_artifacts/cup-windows/cup.exe" \
-            --name "cup.exe" \
-            --label "cup Windows(x64)"
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/octet-stream" \
+            "/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets?name=cup.exe&label=cup+Windows(x64)" \
+            --input "_artifacts/cup-windows/cup.exe"
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.inputs.tag }}
 
       - name: Upload cup.h
         run: |
-          gh release upload "$TAG" "_artifacts/cup-linux/cup.h" \
-            --name "cup.h" \
-            --label "cup.h"
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/octet-stream" \
+            "/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets?name=cup.h&label=cup.h" \
+            --input "_artifacts/cup-linux/cup.h"
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.inputs.tag }}
