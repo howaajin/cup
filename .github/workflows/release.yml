@@ -84,32 +84,13 @@ jobs:
         with:
           path: _artifacts
 
-      - name: Create release (delete first if re-run)
+      - name: Create release and upload assets
         run: |
           gh release delete "$TAG" --yes 2>/dev/null || true
-          gh release create "$TAG" --generate-notes
+          gh release create "$TAG" --generate-notes \
+            "_artifacts/cup-linux/cup#cup linux (x64)" \
+            "_artifacts/cup-windows/cup.exe#cup Windows(x64)" \
+            "_artifacts/cup-linux/cup.h#cup.h"
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag }}
-
-      - name: Upload assets
-        run: |
-          REPO="${{ github.repository }}"
-          TAG="${{ github.event.inputs.tag }}"
-          RELEASE_ID=$(gh release view "$TAG" --json id --jq .id)
-          upload() {
-            local file="$1" name="$2" label="$3"
-            local label_enc=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$label'))")
-            curl -L -s -o /dev/null -w "%{http_code}" \
-              -X POST \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "Content-Type: application/octet-stream" \
-              "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets?name=$name&label=$label_enc" \
-              --data-binary "@$file"
-          }
-          upload "_artifacts/cup-linux/cup" "cup" "cup linux (x64)"
-          upload "_artifacts/cup-windows/cup.exe" "cup.exe" "cup Windows(x64)"
-          upload "_artifacts/cup-linux/cup.h" "cup.h" "cup.h"
-        env:
-          GH_TOKEN: ${{ github.token }}
