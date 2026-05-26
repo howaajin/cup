@@ -617,7 +617,7 @@ static char* vcxproj_get_build_command(Vcxproj const* project, Allocator* alloca
 static char const* vcxproj_get_clean_command(Vcxproj const* project, Allocator* allocator)
 {
     char* clean_command = vcxproj_get_build_command(project, allocator);
-    string_concat_c_str(allocator, clean_command, " clean");
+    string_concat_c_str(allocator, clean_command, " -clean");
     return clean_command;
 }
 static char const* vcxproj_get_compile_command(Vcxproj const* project, Allocator* allocator)
