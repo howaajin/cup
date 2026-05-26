@@ -265,6 +265,7 @@ typedef struct LockFileContextWindows
 
 LockFileContext* os_lock_file(char const* path, Allocator* allocator, bool b_shared)
 {
+    os_ensure_dir_existed(path);
     HANDLE handle = CreateFileA(
         path,
         GENERIC_READ | GENERIC_WRITE,

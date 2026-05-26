@@ -204,6 +204,7 @@ typedef struct LockFileContextLinux
 
 LockFileContext* os_lock_file(char const* path, Allocator* allocator, bool b_shared)
 {
+    os_ensure_dir_existed(path);
     int fd = open(path, O_RDWR | O_CREAT, 0666);
     if (fd == -1)
     {
