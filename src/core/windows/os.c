@@ -86,7 +86,7 @@ wchar_t* os_get_default_env(void)
 
     if (!default_env)
     {
-        CreateEnvironmentBlock((LPVOID*)&default_env, NULL, TRUE);
+        CreateEnvironmentBlock((LPVOID*)&default_env, NULL, FALSE);
         SetEnvironmentStringsW(default_env);
     }
     return default_env;
