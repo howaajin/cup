@@ -527,7 +527,7 @@ static void clean(void)
     {
         CacheRecordFile* record = hash_value(h, i);
         char const* path = cache_get_string(cache, record->id);
-        if (string_equal(self->path, path))
+        if (string_equal(self->path, path) || string_equal(path, "build.c"))
         {
             continue;
         }
