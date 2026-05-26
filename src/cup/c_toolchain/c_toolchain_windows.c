@@ -416,7 +416,7 @@ bool msvc_set_arch_env(ArchitectureType type)
     }
 
     char const* old_path = os_get_env(allocator, "Path");
-    new_path = string_from_print(allocator, "%s;%s", old_path, new_path);
+    new_path = string_from_print(allocator, "%s;%s", new_path, old_path);
     os_set_env("INCLUDE", new_include);
     os_set_env("LIB", new_lib);
     os_set_env("Path", new_path);
