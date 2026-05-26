@@ -82,14 +82,37 @@ jobs:
         with:
           path: _artifacts
 
-      - name: Create or Update Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
-          files: |
-            _artifacts/cup-linux/cup
-            _artifacts/cup-linux/cup.h
-            _artifacts/cup-windows/cup.exe
-          generate_release_notes: true
-          fail_on_unmatched_files: false
-          overwrite_files: true
+      - name: Create release (delete first if re-run)
+        run: |
+          gh release delete "$TAG" --yes 2>/dev/null || true
+          gh release create "$TAG" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag }}
+
+      - name: Upload Linux binary
+        run: |
+          gh release upload "$TAG" "_artifacts/cup-linux/cup" \
+            --name "cup" \
+            --label "cup linux (x64)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag }}
+
+      - name: Upload Windows binary
+        run: |
+          gh release upload "$TAG" "_artifacts/cup-windows/cup.exe" \
+            --name "cup.exe" \
+            --label "cup Windows(x64)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag }}
+
+      - name: Upload cup.h
+        run: |
+          gh release upload "$TAG" "_artifacts/cup-linux/cup.h" \
+            --name "cup.h" \
+            --label "cup.h"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag }}
