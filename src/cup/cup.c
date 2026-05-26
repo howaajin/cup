@@ -47,6 +47,7 @@ char const* cup_h_dir = ".";
 char const* vscode_debugger_type = NULL;
 Node** targets = NULL;
 Dylib* cup_dll = NULL;
+FnAfterPrepare* fn_after_prepare = NULL;
 
 static LockFileContext* process_lock_ctx;
 size_t max_build_errors = 1;
@@ -866,6 +867,11 @@ void set_vscode_debugger_type(char const* type)
     vscode_debugger_type = type;
 }
 
+void set_after_prepare_callback(FnAfterPrepare* fn)
+{
+    fn_after_prepare = fn;
+}
+
 ENTRY(gen_vscode_launch_json)
 {
     Node* output = get_or_add_file(".vscode/launch.json");
@@ -1289,7 +1295,10 @@ int execute(void)
         }
     }
     prepare();
-    invoke_entries_after_prepare();
+    if (fn_after_prepare)
+    {
+        fn_after_prepare();
+    }
     if (b_print_exe_entries)
     {
         return print_exe_entries();

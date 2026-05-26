@@ -100,6 +100,7 @@ EXPORTS
     cache_read_records    
     set_vs_project_version
     set_vscode_debugger_type
+    set_after_prepare_callback
     set_cup_h_dir
     set_node_default_excluded
     add_copy_cmd
