@@ -26,7 +26,7 @@ ENTRY(build_self_header_only)
     {
         collect_build_scripts(build_script_search_directories[i], allocator);
     }
-    Node* self = EXE("cup");
+    Node* self = EXE("{self_name}");
     Node* cmd_link = LINK(self);
     link_cmd_setup_self_build(cmd_link);
     {
@@ -103,7 +103,7 @@ static void bootstrap_compile_link_make_cmdline_msvc(Node* node, Node* out_exe)
     Node* env = msvc_get_env_node(default_toolchain, CURRENT_ARCHITECTURE);
     cmd_set_env(node, env);
     Node* cup_h = FILE("cup.h");
-    Node* pdb = FILE("{out_dir}/cup.exe.pdb");
+    Node* pdb = FILE("{out_dir}/{}.pdb", out_exe->path);
     node->ctx = pdb;
     cmd_add_option(node, NULL, "cl", OPTION_EXE);
     cmd_add_option(node, "/Fe:", out_exe->path, OPTION_OUTPUT);
@@ -146,7 +146,7 @@ static void bootstrap_compile_link_cmd_before_execute(Node* node)
 
 int bootstrap(void)
 {
-    Node* self = EXE("cup");
+    Node* self = EXE("{self_name}");
     Node* cmd = CMD(NULL);
     ToolchainType toolchain = c_toolchain_select_toolchain_automatically();
     set_default_toolchain(toolchain);

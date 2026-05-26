@@ -92,7 +92,7 @@ ENTRY(build_cup_dll)
     }
     if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
-        link_cmd_add_input(link, LIB("{out_dir}/cup"));
+        link_cmd_add_input(link, LIB("{out_dir}/{self_name}"));
         LinkCmd* cmd = (LinkCmd*)link;
         if (cmd->toolchain == TOOLCHAIN_TYPE_MSVC)
         {
