@@ -14,10 +14,8 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            binary: cup
           - os: windows-latest
             platform: windows
-            binary: cup.exe
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -30,11 +28,6 @@ jobs:
           echo "Using: $LLVM_AR"
           sudo ln -sf "$LLVM_AR" /usr/bin/llvm-ar
           llvm-ar --version
-
-      - name: Setup (Windows)
-        if: matrix.platform == 'windows'
-        shell: pwsh
-        run: echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
 
       - name: Bootstrap (Linux)
         if: matrix.platform == 'linux'
@@ -51,7 +44,7 @@ jobs:
 
       - name: Build (Windows)
         if: matrix.platform == 'windows'
-        run: .\cup.exe -t llvm -O3
+        run: .\cup.exe -t msvc -O3
 
       - name: Stage Linux artifacts
         if: matrix.platform == 'linux'
@@ -88,8 +81,8 @@ jobs:
         run: |
           gh release delete "$TAG" --yes 2>/dev/null || true
           gh release create "$TAG" --generate-notes \
-            "_artifacts/cup-linux/cup#cup linux (x64)" \
-            "_artifacts/cup-windows/cup.exe#cup Windows(x64)" \
+            "_artifacts/cup-linux/cup#cup Linux (x64)" \
+            "_artifacts/cup-windows/cup.exe#cup Windows (x64)" \
             "_artifacts/cup-linux/cup.h#cup.h"
         env:
           GH_TOKEN: ${{ github.token }}
