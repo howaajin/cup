@@ -74,7 +74,7 @@ jobs:
         if: matrix.platform == 'macos'
         run: |
           mkdir -p _release
-          cp build/embedded/cup _release/
+          cp build/embedded/cup _release/cup-macos
 
       - uses: actions/upload-artifact@v4
         with:
@@ -112,7 +112,7 @@ jobs:
             "_artifacts/cup-linux/cup#cup Linux (x64)" \
             "_artifacts/cup-linux/cup.h#cup.h" \
             "_artifacts/cup-windows/cup.exe#cup Windows (x64)" \
-            "_artifacts/cup-macos/cup#cup macOS (x64)"
+            "_artifacts/cup-macos/cup-macos#cup macOS (x64)"
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag }}
