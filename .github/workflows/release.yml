@@ -37,12 +37,25 @@ jobs:
         if: matrix.platform == 'linux'
         run: ./cup -t llvm -O3
 
-      - name: Bootstrap and Build (Windows)
+      - name: Bootstrap (Windows)
+        if: matrix.platform == 'windows'
+        shell: cmd
+        run: bootstrap.bat
+
+      - name: Setup MSVC (Windows)
         if: matrix.platform == 'windows'
         shell: cmd
         run: |
-          call bootstrap.bat
-          .\cup.exe -t msvc -O3
+          for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath`) do set "VS_DIR=%%i"
+          if defined VS_DIR (
+            set "MSVC_VER="
+            for /f "delims=" %%v in ('dir /b /o-n /ad "%VS_DIR%\VC\Tools\MSVC" 2^>nul') do if not defined MSVC_VER set "MSVC_VER=%%v"
+            if defined MSVC_VER echo %VS_DIR%\VC\Tools\MSVC\%MSVC_VER%\bin\Hostx64\x64>> %GITHUB_PATH%
+          )
+
+      - name: Build (Windows)
+        if: matrix.platform == 'windows'
+        run: .\cup.exe -t msvc -O3
 
       - name: Stage Linux artifacts
         if: matrix.platform == 'linux'
