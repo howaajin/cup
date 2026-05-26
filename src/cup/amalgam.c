@@ -16,8 +16,8 @@
 // cl /Fe:cup.exe /Tc cup.h /std:clatest /experimental:c11atomics /DMAIN_ENTRY
 // cl /Fe:cup.exe /Tc cup.h /std:clatest /experimental:c11atomics /DMAIN_ENTRY /Od /nologo /Z7 /link /debug /incremental:no /noexp /noimplib /pdb:build/cup.exe.pdb
 // Linux:
-// gcc -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions -lelf
-// clang -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions -lelf
+// gcc -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions
+// clang -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions
 
 #ifdef MAIN_ENTRY
 int main(int argc, char** argv)
