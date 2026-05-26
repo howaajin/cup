@@ -108,7 +108,7 @@ jobs:
       - name: Upload release assets
         run: |
           sleep 3
-          gh release upload "$TAG" \
+          gh release upload "$TAG" --clobber \
             "_artifacts/cup-linux/cup#cup Linux (x64)" \
             "_artifacts/cup-linux/cup.h#cup.h" \
             "_artifacts/cup-windows/cup.exe#cup Windows (x64)" \
