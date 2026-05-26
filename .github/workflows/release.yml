@@ -99,15 +99,13 @@ jobs:
           RELEASE_ID=$(gh release view "$TAG" --json id --jq .id)
           upload() {
             local file="$1" name="$2" label="$3"
+            local label_enc=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$label'))")
             curl -L -s -o /dev/null -w "%{http_code}" \
               -X POST \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer $GH_TOKEN" \
               -H "Content-Type: application/octet-stream" \
-              "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets" \
-              -G \
-              --data-urlencode "name=$name" \
-              --data-urlencode "label=$label" \
+              "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets?name=$name&label=$label_enc" \
               --data-binary "@$file"
           }
           upload "_artifacts/cup-linux/cup" "cup" "cup linux (x64)"
