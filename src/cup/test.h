@@ -40,7 +40,7 @@ static inline void test_push_entry(TestEntry entry)
 #endif
 #endif
 #define TEST_REGISTER(fn, ...)                                     \
-    extern void fn(void);                                          \
+    static void fn(void);                                          \
     CONSTRUCTOR(fn##_register)                                     \
     static void fn##_register()                                    \
     {                                                              \
@@ -51,7 +51,7 @@ static inline void test_push_entry(TestEntry entry)
 #define TEST_REGISTER(fn, ...)
 #endif // BUILD_TEST
 
-#define TEST(fn, ...) TEST_REGISTER(fn, ##__VA_ARGS__) void fn(void)
+#define TEST(fn, ...) TEST_REGISTER(fn, ##__VA_ARGS__) static void fn(void)
 #define TEST_DISABLED(fn, ...) void fn(void)
 
 static inline void assert_impl(bool cond, char const* msg, char const* file, int line)
