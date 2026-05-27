@@ -356,6 +356,8 @@ bool run_test_cmd_check_dirty(Node* node)
     return true;
 }
 
+void gen_test_src(void);
+
 Node* add_test_exe_for_obj(Node* obj, char const** entries)
 {
     Allocator* temp_allocator = allocator_temp();
@@ -372,22 +374,31 @@ Node* add_test_exe_for_obj(Node* obj, char const** entries)
     c_compile_cmd_add_include_directory(obj->build_cmd, get_var("test_src_dir"));
     Node* obj_test = OBJ(SRC("{test_src_dir}/cup/test.c"));
     obj_add_link_node(obj, obj_test);
-    node_add_dependency(obj->build_cmd, FILE("{test_src_dir}/cup/test.h"));
+    Node* test_h = FILE("{test_src_dir}/cup/test.h");
+    node_add_dependency(obj->build_cmd, test_h);
     TestExe* test_exe = (TestExe*)exe;
     test_exe->entries = entries;
     Node* link = LINK(exe);
     cmd_set_source_location(link, obj->build_cmd->file, obj->build_cmd->line);
     link_cmd_add_input(link, obj);
-    Node* sources[] = {
-        SRC("{test_src_dir}/cup/test_main.c"),
-        SRC("{test_src_dir}/cup/test.c"),
-    };
-    for (size_t i = 0; i != static_array_size(sources); i++)
     {
-        Node* src = sources[i];
+        Node* src = SRC("{test_src_dir}/cup/test_main.c");
         if (src->build_cmd == NULL)
         {
-            void gen_test_src(void);
+            gen_test_src();
+        }
+        Node* obj = OBJ(src);
+        if (obj->build_cmd == NULL)
+        {
+            Node* cc = CC(src, obj);
+            node_add_dependency(cc, test_h);
+        }
+        link_cmd_add_input(link, obj);
+    }
+    {
+        Node* src = SRC("{test_src_dir}/cup/test.c");
+        if (src->build_cmd == NULL)
+        {
             gen_test_src();
         }
         Node* obj = OBJ(src);
