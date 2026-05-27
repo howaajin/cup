@@ -77,6 +77,11 @@ void destroy(void)
         node_allocator = NULL;
     }
     destroy_var();
+    if (cup_dll)
+    {
+        dylib_unload(cup_dll);
+        cup_dll = NULL;
+    }
 }
 
 // To support multi-file selection compilation in Visual Studio

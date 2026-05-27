@@ -31,7 +31,8 @@ Dylib* dylib_load(char const* name)
                 NULL);
             if (messageBuffer)
             {
-                printf("%s", messageBuffer);
+                fprintf(stderr, "%s:%d: %s", __FILE__, __LINE__, messageBuffer);
+                fprintf(stderr, "%s\n", name);
                 LocalFree(messageBuffer);
             }
         }
