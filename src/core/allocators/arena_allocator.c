@@ -39,7 +39,7 @@ static void* arena_malloc(Allocator* allocator, size_t size)
 static void* arena_calloc(Allocator* instance, size_t count, size_t size)
 {
     void* ptr = arena_malloc(instance, count * size);
-    memset(ptr, 0, size);
+    memset(ptr, 0, count * size);
     return ptr;
 }
 
