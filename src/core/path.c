@@ -707,7 +707,7 @@ bool path_is_under_directory(char const* path, char const* directory)
     return true;
 }
 
-char* path_absolute_to_relative(char const* path, Allocator* allocator)
+char* path_windows_style_to_linux_relative(char const* path, Allocator* allocator)
 {
     char* result = string_from_c_str(allocator, "");
     Allocator* temp_allocator = allocator_temp();

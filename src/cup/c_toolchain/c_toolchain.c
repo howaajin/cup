@@ -205,7 +205,7 @@ char* determine_imtermediate_path(char const* src_path, char const* sub_dir, cha
         }
         else
         {
-            src_rel_path = path_absolute_to_relative(src_path, temp_allocator);
+            src_rel_path = path_windows_style_to_linux_relative(src_path, temp_allocator);
         }
     }
     char* obj_path;

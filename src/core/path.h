@@ -31,7 +31,7 @@ bool path_is_absolute(char const* path);
 bool path_is_empty(char const* path);
 bool path_is_under_directory(char const* path, char const* directory);
 bool path_has_relative_path(char const* path);
-char* path_absolute_to_relative(char const* path, Allocator* allocator);
+char* path_windows_style_to_linux_relative(char const* path, Allocator* allocator);
 
 PathParser* path_create_parser(char const* path, Allocator* allocator);
 PathParser* path_create_parser_with_status(char const* path, PathParseStatus status, Allocator* allocator);

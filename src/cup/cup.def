@@ -71,7 +71,7 @@ EXPORTS
     path_is_empty
     path_is_under_directory
     path_has_relative_path
-    path_absolute_to_relative
+    path_windows_style_to_linux_relative
     path_create_parser
     path_create_parser_with_status
     path_next_element
