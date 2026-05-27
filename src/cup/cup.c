@@ -436,7 +436,7 @@ static int build(Graph* graph)
     return exit_code;
 }
 
-static int determine_targets(void)
+static int determine_build_targets(void)
 {
     array_resize(allocator_c(), targets, 0);
     for (size_t i = 0; i != array_size(target_names); i++)
@@ -463,6 +463,49 @@ static int determine_targets(void)
             {
                 array_push(allocator_c(), targets, node);
             }
+        }
+    }
+    return EXIT_SUCCESS;
+}
+
+static int determine_test_targets(void)
+{
+    uint32_t test_type = node_make_file_type(FILE_TYPE_EXE, C_FILE_TEST);
+    array_resize(node_allocator, targets, 0);
+    for (size_t i = 0; i != array_size(target_names); i++)
+    {
+        char const* name = target_names[i];
+        Node* node = find_node(name);
+        if (node)
+        {
+            if (node->type != test_type)
+            {
+                warn("Unknown test target: skip %s", name);
+                continue;
+            }
+            Node* run_test_cmd = CMD_FROM_EXE(node, fmt("run test: {:n}", node));
+            array_push(node_allocator, targets, run_test_cmd);
+            node_ensure_prepared(run_test_cmd);
+        }
+        else
+        {
+            warn("Unknown target: %s", name);
+            return EXIT_FAILURE;
+        }
+    }
+    if (array_size(targets) == 0)
+    {
+        for (size_t i = 0; i != array_size(nodes); i++)
+        {
+            Node* node = nodes[i];
+            if (node->type != test_type)
+            {
+                continue;
+            }
+            Node* run_test_cmd = CMD_FROM_EXE(node, fmt("run test: {:n}", node));
+            run_test_cmd->b_dirty = true;
+            array_push(node_allocator, targets, run_test_cmd);
+            node_ensure_prepared(run_test_cmd);
         }
     }
     return EXIT_SUCCESS;
@@ -1104,7 +1147,7 @@ int build_self(void)
 
 static int build_targets(void)
 {
-    determine_targets();
+    determine_build_targets();
     Allocator* allocator = allocator_create_tiny(4096, 4096 * 64);
     Graph* graph = graph_create(allocator, targets, array_size(targets));
     int exit_code = build(graph);
@@ -1144,22 +1187,8 @@ static int dry_run(void)
 static int run_tests()
 {
     build_self();
+    determine_test_targets();
     Allocator* allocator = allocator_create_chained();
-    Node** targets = NULL;
-    for (size_t i = 0; i != array_size(nodes); i++)
-    {
-        Node* node = nodes[i];
-        if (node->node_type != NODE_TYPE_FILE ||
-            node->file_type != FILE_TYPE_EXE ||
-            node->file_ext_type != C_FILE_TEST)
-        {
-            continue;
-        }
-        Node* run_test_cmd = CMD_FROM_EXE(node, fmt("run test: {:n}", node));
-        run_test_cmd->b_dirty = true;
-        array_push(allocator, targets, run_test_cmd);
-        node_ensure_prepared(run_test_cmd);
-    }
     Graph* graph = graph_create(allocator, targets, array_size(targets));
     max_build_errors = array_size(targets);
     int exit_code = build(graph);

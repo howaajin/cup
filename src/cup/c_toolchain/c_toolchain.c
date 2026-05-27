@@ -3,7 +3,6 @@
 #include "core/array.h"
 #include "core/hash.h"
 #include "core/macros.h"
-#include <stdio.h>
 #include "core/os.h"
 #include "core/path.h"
 #include "core/platform.h"
@@ -17,6 +16,7 @@
 #include "cup/fmt.h"
 #include "cup/node.h"
 #include "cup/var.h"
+#include <stdio.h>
 
 #include <assert.h>
 #include <stdlib.h>
