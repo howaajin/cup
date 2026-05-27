@@ -68,3 +68,11 @@ ENTRY(build_test_binary_mode)
     obj_add_link_node(obj, LIB("{out_dir}/core"));
     obj_add_link_obj_from_src(obj, SRC("src/cup/in_repo.c"));
 }
+
+ENTRY(build_test_path)
+{
+    Node* src = SRC("{dir}/test_path.c");
+    Node* obj = get_default_obj(src);
+    CC(src, obj);
+    obj_add_link_obj_from_src(obj, SRC("src/core/allocator.c"));
+}
