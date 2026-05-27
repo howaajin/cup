@@ -61,8 +61,11 @@ int main(int argc, char** argv)
     {
         set_debug_info_enabled(false);
     }
-    add_build_script_search_directory("tests");
-    add_build_script_search_directory("src");
+    add_build_script("src/core/build.c");
+    add_build_script("src/cup/build.c");
+    add_build_script("src/cup/c_toolchain/build.c");
+    add_build_script("tests/build.c");
+    add_build_script("tests/cpp_module/build.c");
     set_after_prepare_callback(setup_default_flags);
     return execute();
 }
