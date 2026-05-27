@@ -207,8 +207,6 @@ EXPORTS
     is_test_exe
     get_test_entries
     module_from_src
-    enumerate_compile_cmd
-    enumerate_link_cmd
     c_compile_cmd_create
     c_compile_cmd_set_c_std
     c_compile_cmd_add_include_directory

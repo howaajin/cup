@@ -468,6 +468,15 @@ static int determine_build_targets(void)
     return EXIT_SUCCESS;
 }
 
+static Node* create_run_test_target(Node* exe)
+{
+    Node* run_test_cmd = CMD_FROM_EXE(exe, fmt("run test: {:n}", exe));
+    run_test_cmd->b_dirty = true;
+    array_push(node_allocator, targets, run_test_cmd);
+    node_ensure_prepared(run_test_cmd);
+    return run_test_cmd;
+}
+
 static int determine_test_targets(void)
 {
     uint32_t test_type = node_make_file_type(FILE_TYPE_EXE, C_FILE_TEST);
@@ -483,9 +492,7 @@ static int determine_test_targets(void)
                 warn("Unknown test target: skip %s", name);
                 continue;
             }
-            Node* run_test_cmd = CMD_FROM_EXE(node, fmt("run test: {:n}", node));
-            array_push(node_allocator, targets, run_test_cmd);
-            node_ensure_prepared(run_test_cmd);
+            create_run_test_target(node);
         }
         else
         {
@@ -502,10 +509,7 @@ static int determine_test_targets(void)
             {
                 continue;
             }
-            Node* run_test_cmd = CMD_FROM_EXE(node, fmt("run test: {:n}", node));
-            run_test_cmd->b_dirty = true;
-            array_push(node_allocator, targets, run_test_cmd);
-            node_ensure_prepared(run_test_cmd);
+            create_run_test_target(node);
         }
     }
     return EXIT_SUCCESS;

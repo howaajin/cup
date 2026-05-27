@@ -37,7 +37,6 @@ typedef struct CCompileCmd
     bool b_cache_header_dependencies : 1;
     bool b_color_diagnostics : 1;
     bool b_scan_deps_dirty : 1;
-    bool b_self_build : 1;
     bool b_import_std : 1;
 
     // Cpp module

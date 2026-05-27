@@ -71,21 +71,24 @@ struct Node
         struct
         {
             NodeType node_type : 3;
-            uint32_t virtual_ext_type : 29;
+            uint32_t internal_flag : 1;
+            uint32_t virtual_ext_type : 28;
         };
         union
         {
             struct
             {
                 NodeType : 3;
+                uint32_t : 1;
                 FileType file_type : 5;
-                uint32_t file_ext_type : 24;
+                uint32_t file_ext_type : 23;
             };
             struct
             {
                 NodeType : 3;
+                uint32_t : 1;
                 CmdType cmd_type : 3;
-                uint32_t cmd_ext_type : 26;
+                uint32_t cmd_ext_type : 25;
             };
         };
         uint32_t type;

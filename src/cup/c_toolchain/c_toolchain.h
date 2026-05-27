@@ -172,8 +172,6 @@ Node* get_toolchain_env_node(ToolchainType toolchain_type, ArchitectureType arch
 bool is_test_exe(Node* exe);
 char const** get_test_entries(Node* exe);
 Node* module_from_src(Node* src);
-Node* enumerate_compile_cmd(size_t* i);
-Node* enumerate_link_cmd(size_t* i);
 
 Node* c_compile_cmd_create(Node* input, Node* out_obj, char const* file, int line);
 void c_compile_cmd_set_c_std(Node* cmd, CLanguageStandard c_std);

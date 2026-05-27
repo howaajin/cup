@@ -112,6 +112,7 @@ ENTRY(build_cup_dll)
     Node* cup_h = FILE("{out_dir}/cup/cup.h");
     Node* dll = DLL("{out_dir}/{self_name}");
     Node* link = LINK(dll);
+    link->internal_flag = true;
     link_cmd_setup_self_build(link);
     link_cmd_set_arch(link, ARCH_X64);
 

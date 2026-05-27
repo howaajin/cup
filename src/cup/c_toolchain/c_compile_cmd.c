@@ -349,8 +349,8 @@ void c_compile_cmd_add_self_build_options(Node* node)
     extern ToolchainType self_build_toolchain;
 
     CCompileCmd* cmd = (CCompileCmd*)node;
-    cmd->b_self_build = true;
     cmd->toolchain = self_build_toolchain;
+    cmd->internal_flag = true;
     c_compile_cmd_set_arch(node, ARCH_X64);
     if (cmd->toolchain == TOOLCHAIN_TYPE_MSVC)
     {
