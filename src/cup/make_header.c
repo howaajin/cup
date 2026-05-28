@@ -265,9 +265,9 @@ int main(int argc, char** argv)
 
     if (!b_no_impl)
     {
-        string_printf(allocator, merged, "\n\n#ifndef NO_BUILD_IMPLEMENTATION\n");
+        string_printf(allocator, merged, "\n\n#if defined(BUILD_IMPLEMENTATION) || defined(MAIN_ENTRY)\n");
         merge_source(allocator, include, &merged);
-        string_printf(allocator, merged, "#endif // NO_BUILD_IMPLEMENTATION\n");
+        string_printf(allocator, merged, "#endif // defined(BUILD_IMPLEMENTATION) || defined(MAIN_ENTRY)\n");
     }
     string_printf(allocator, merged, "#endif // CUP_H\n");
 

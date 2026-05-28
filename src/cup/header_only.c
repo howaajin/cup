@@ -46,9 +46,9 @@ ENTRY(build_self_header_only)
             Node* src = SRC(hash_key(build_scripts, i));
             Node* obj = OBJ(src);
             Node* cc = CC(src, obj);
-            if (!string_equal(src->path, "build.c"))
+            if (string_equal(src->path, "build.c"))
             {
-                c_compile_cmd_add_define(cc, "NO_BUILD_IMPLEMENTATION");
+                c_compile_cmd_add_define(cc, "BUILD_IMPLEMENTATION");
             }
             c_compile_cmd_add_self_build_options(cc);
             if (cup_h_dir)
