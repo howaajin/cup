@@ -1,15 +1,16 @@
-# Cup - Yet another Build System
+# Cup - A Build System in C
 
 Cup is a build system implemented in C that uses C as its scripting language. Write your build logic in **C** — loops, functions, complex logic — with full support from your favorite tools (LSP, debugger).
 
 Cup was originally inspired by the build system of Unreal Engine.
 
-[Example build script](#example-buildc).
+[Example build script](#example-buildc). For more real-world examples, search for the self-built entry function in this project: `ENTRY(`
 
 ## Features
 
 * **Native C Build Scripts**: `build.c` is the build system. No DSL.
 * **Self-Hosting**: Only depends on a C compiler. The initial build directly invokes the compiler, after which Cup supports automatic self-updating, even in debug mode.
+* **Clear command-line output**: No build commands are hidden, input and output are highlighted for better readability, without losing the compiler’s colored output.
 * **Platform Support**: **Windows**, **Linux**, and **macOS**.
 * **IDE Support**:
     * Generates `compile_commands.json` for Clangd.
@@ -22,10 +23,10 @@ Cup was originally inspired by the build system of Unreal Engine.
 * **C++20 Modules**: Supports automatic scanning and dependency resolution for named modules. Automatically builds `std` and `std.compat`. Modules can also be declared manually via `c_compile_cmd_set_export_name(name)` and imported with `c_compile_cmd_add_import(cc, name)`.
 * **Lightweight**: Optimized `cup` / `cup.exe` builds are ~780 KB, while the standalone `cup.h` is ~540 KB.
 
-## What Cup is NOT
+## Non-goals
 
-* **Not a package manager.** Cup does not download or resolve third-party dependencies from the internet.
-* **No built-in support for non-C/C++ languages.** Use `add_process_cmd` to invoke external tools for other languages.
+* **A package manager.**
+* **Support for non-C/C++ languages.** To keep the project small and focused, native support for other languages is not considered. Although it can invoke external commands, its abstractions are intended only to simplify C or C++ projects.
 
 ## Modes
 
