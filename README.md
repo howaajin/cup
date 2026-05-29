@@ -12,6 +12,7 @@ Cup was originally inspired by the build system of Unreal Engine.
 * **Self-Hosting**: Only depends on a C compiler. The initial build directly invokes the compiler, after which Cup supports automatic self-updating, even in debug mode.
 * **Clear command-line output**: No build commands are hidden, input and output are highlighted for better readability, without losing the compiler’s colored output.
 * **Platform Support**: **Windows**, **Linux**, and **macOS**.
+* **Support for multiple toolchains**: `llvm`, `msvc`, `gcc`, `zig`
 * **IDE Support**:
     * Generates `compile_commands.json` for Clangd.
     * Generates **VS Code** `launch.json` and `tasks.json`.
