@@ -37,7 +37,7 @@ StringSet* build_scripts = NULL;
 char* msvc_show_include_prefix;
 char* g_zig_target = NULL;
 LinkerType linker_type = LINKER_UNSPECIFIED;
-LinkerType self_build_linker_type = LINKER_UNSPECIFIED;
+static bool b_linker_type_explicit = false;
 
 static LinkerType c_toolchain_select_linker_automatically(ToolchainType toolchain)
 {
@@ -56,15 +56,82 @@ static LinkerType c_toolchain_select_linker_automatically(ToolchainType toolchai
     return LINKER_UNSPECIFIED;
 }
 
+static bool is_llvm_linker_type(LinkerType type)
+{
+    return type == LINKER_LLVM_LD || type == LINKER_LLVM_LLD;
+}
+
 void set_default_toolchain(ToolchainType type)
 {
     default_toolchain = type;
+    if (b_linker_type_explicit)
+    {
+        if (type != TOOLCHAIN_TYPE_LLVM)
+        {
+            error("LLVM linker selection requires the LLVM toolchain");
+            exit(EXIT_FAILURE);
+        }
+        return;
+    }
     linker_type = c_toolchain_select_linker_automatically(type);
 }
 
 ToolchainType get_default_toolchain(void)
 {
     return default_toolchain;
+}
+
+void set_llvm_linker_type(LinkerType type)
+{
+    if (!is_llvm_linker_type(type))
+    {
+        error("set_llvm_linker_type only accepts LLVM -fuse-ld linker types");
+        exit(EXIT_FAILURE);
+    }
+    if (default_toolchain != TOOLCHAIN_TYPE_UNSPECIFIED && default_toolchain != TOOLCHAIN_TYPE_LLVM)
+    {
+        return;
+    }
+    linker_type = type;
+}
+
+void c_toolchain_set_llvm_linker_type_explicit(LinkerType type)
+{
+    if (!is_llvm_linker_type(type))
+    {
+        error("c_toolchain_set_llvm_linker_type_explicit only accepts LLVM -fuse-ld linker types");
+        exit(EXIT_FAILURE);
+    }
+    if (default_toolchain != TOOLCHAIN_TYPE_UNSPECIFIED && default_toolchain != TOOLCHAIN_TYPE_LLVM)
+    {
+        error("LLVM linker selection requires the LLVM toolchain");
+        exit(EXIT_FAILURE);
+    }
+    linker_type = type;
+    b_linker_type_explicit = true;
+}
+
+void c_toolchain_restore_llvm_linker_type(LinkerType type)
+{
+    if (!is_llvm_linker_type(type))
+    {
+        return;
+    }
+    linker_type = type;
+}
+
+LinkerType get_llvm_linker_type(void)
+{
+    if (!is_llvm_linker_type(linker_type))
+    {
+        return c_toolchain_select_linker_automatically(TOOLCHAIN_TYPE_LLVM);
+    }
+    return linker_type;
+}
+
+bool c_toolchain_is_linker_type_explicit(void)
+{
+    return b_linker_type_explicit;
 }
 
 void set_default_architecture(ArchitectureType type)
@@ -90,7 +157,6 @@ OptimizationType get_default_optimization(void)
 void set_self_build_toolchain(ToolchainType toolchain)
 {
     self_build_toolchain = toolchain;
-    self_build_linker_type = c_toolchain_select_linker_automatically(toolchain);
 }
 
 ToolchainType get_toolchain_by_current_compiler()

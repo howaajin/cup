@@ -186,6 +186,8 @@ EXPORTS
     set_default_toolchain
     get_toolchain_by_current_compiler
     get_default_toolchain
+    set_llvm_linker_type
+    get_llvm_linker_type
     set_default_architecture
     get_default_architecture
     set_default_optimization

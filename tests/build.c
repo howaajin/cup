@@ -23,6 +23,18 @@ ENTRY(build_test_c_compile_cmd)
     obj_add_link_obj_from_src(obj, SRC("src/cup/in_repo.c"));
 }
 
+ENTRY(build_test_link_cmd)
+{
+    Node* src = SRC("{dir}/test_link_cmd.c");
+    Node* obj = get_default_obj(src);
+    CC(src, obj);
+    obj_add_link_obj_from_src(obj, SRC("src/cup/c_toolchain/link_cmd.c"));
+    obj_add_link_obj_from_src(obj, SRC("src/cup/c_toolchain/c_toolchain.c"));
+    obj_add_link_obj_from_src(obj, SRC("src/cup/c_toolchain/c_compile_cmd.c"));
+    obj_add_link_obj_from_src(obj, SRC("src/cup/fmt.c"));
+    obj_add_link_obj_from_src(obj, SRC("src/cup/in_repo.c"));
+}
+
 ENTRY(build_test_string)
 {
     Node* src = SRC("{dir}/test_string.c");

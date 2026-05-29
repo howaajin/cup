@@ -118,6 +118,7 @@ typedef enum LinkerType
     LINKER_LD,
     LINKER_LLVM_LINK,
     LINKER_LLVM_LD,
+    LINKER_LLVM_LLD,
     LINKER_ZIG_CC,
 } LinkerType;
 
@@ -151,6 +152,8 @@ typedef struct BmiToObjCmd
 void set_default_toolchain(ToolchainType type);
 ToolchainType get_toolchain_by_current_compiler();
 ToolchainType get_default_toolchain(void);
+void set_llvm_linker_type(LinkerType type);
+LinkerType get_llvm_linker_type(void);
 void set_default_architecture(ArchitectureType type);
 ArchitectureType get_default_architecture(void);
 void set_default_optimization(OptimizationType type);

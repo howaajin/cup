@@ -20,7 +20,6 @@ extern bool b_generate_debug_info;
 extern ToolchainType default_toolchain;
 extern ArchitectureType default_architecture_type;
 extern OptimizationType default_optimization_type;
-extern LinkerType linker_type;
 extern char* g_zig_target;
 typedef struct LibOrderPair
 {
@@ -288,7 +287,7 @@ static bool link_cmd_can_output_pdb(LinkerType linker)
     {
         return true;
     }
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && linker == LINKER_LLVM_LD)
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && (linker == LINKER_LLVM_LD || linker == LINKER_LLVM_LLD))
     {
         return true;
     }
@@ -399,7 +398,7 @@ static char const* link_cmd_get_linker(LinkCmd* cmd)
         {
             return "link";
         }
-        if (cmd->linker_type == LINKER_LLVM_LD)
+        if (cmd->linker_type == LINKER_LLVM_LD || cmd->linker_type == LINKER_LLVM_LLD)
         {
             return link_cmd_get_linker_gcc_llvm_zig(cmd, cmd->toolchain);
         }
@@ -432,7 +431,7 @@ static char const* link_cmd_get_option_pdb(LinkerType linker_type)
     {
         return "/pdb:";
     }
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && linker_type == LINKER_LLVM_LD)
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && (linker_type == LINKER_LLVM_LD || linker_type == LINKER_LLVM_LLD))
     {
         return "-Wl,/pdb:";
     }
@@ -445,7 +444,7 @@ static char const* link_cmd_get_option_def(LinkerType linker_type)
     {
         return "/def:";
     }
-    if (linker_type == LINKER_LLVM_LD)
+    if (linker_type == LINKER_LLVM_LD || linker_type == LINKER_LLVM_LLD)
     {
         return "-Wl,/def:";
     }
@@ -460,7 +459,7 @@ static char const* link_cmd_get_option_out_import_lib(LinkerType linker_type)
     }
     if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
-        if (linker_type == LINKER_LLVM_LD)
+        if (linker_type == LINKER_LLVM_LD || linker_type == LINKER_LLVM_LLD)
         {
             return "-Wl,/implib:";
         }
@@ -509,7 +508,12 @@ static char const* link_cmd_get_default_options_llvm(LinkCmd* link, Allocator* a
     {
         options = link_cmd_get_default_options_msvc_llvm_common(link, allocator, options);
     }
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && link->linker_type == LINKER_LLVM_LD)
+    if (link->linker_type == LINKER_LLVM_LLD)
+    {
+        string_concat_c_str(allocator, options, " -fuse-ld=lld");
+    }
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS &&
+        (link->linker_type == LINKER_LLVM_LD || link->linker_type == LINKER_LLVM_LLD))
     {
         if (link->out_import_lib == NULL)
         {
@@ -585,6 +589,27 @@ static char const* link_cmd_get_option_lib(LinkerType linker_type)
     {
         return "-l";
     }
+}
+
+static LinkerType link_cmd_get_default_linker_type(ToolchainType toolchain)
+{
+    if (toolchain == TOOLCHAIN_TYPE_LLVM)
+    {
+        return get_llvm_linker_type();
+    }
+    if (toolchain == TOOLCHAIN_TYPE_MSVC)
+    {
+        return LINKER_LINK;
+    }
+    if (toolchain == TOOLCHAIN_TYPE_GCC)
+    {
+        return LINKER_LD;
+    }
+    if (toolchain == TOOLCHAIN_TYPE_ZIG)
+    {
+        return LINKER_ZIG_CC;
+    }
+    return LINKER_UNSPECIFIED;
 }
 
 void link_cmd_make_cmdline(Node* cmd)
@@ -728,7 +753,7 @@ Node* link_cmd_create(Node* output, char const* file, int line)
     link->prepare = link_cmd_prepare;
     link->before_execute = link_cmd_before_execute;
     link->check_dirty = link_cmd_check_dirty;
-    link->linker_type = linker_type;
+    link->linker_type = link_cmd_get_default_linker_type(link->toolchain);
     link->optimization = default_optimization_type;
     cmd_set_source_location(cmd, file, line);
     cmd_add_output(cmd, output);
@@ -825,7 +850,6 @@ void link_cmd_set_linker_type(Node* cmd, LinkerType linker_type)
 void link_cmd_setup_self_build(Node* cmd)
 {
     extern ToolchainType self_build_toolchain;
-    extern LinkerType self_build_linker_type;
     link_cmd_set_toolchain_type(cmd, self_build_toolchain);
-    link_cmd_set_linker_type(cmd, self_build_linker_type);
+    link_cmd_set_linker_type(cmd, link_cmd_get_default_linker_type(self_build_toolchain));
 }

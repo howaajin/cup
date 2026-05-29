@@ -107,6 +107,7 @@ static void print_help(bool detailed)
     printf("  -hh                           Print detailed help\n");
     printf("  -out_dir <dir>                Set output directory\n");
     printf("  -t <toolchain>                Set toolchain (llvm, msvc, gcc, zig)\n");
+    printf("  -linker <linker>              Set LLVM -fuse-ld linker (default, lld)\n");
     printf("  -O<level>                     Set optimization level (0, 3, s)\n");
     printf("  -clean                        Clean build\n");
     printf("  -dry                          Dry run (commands skipped but treated as success)\n");
@@ -125,6 +126,9 @@ static void print_help(bool detailed)
         printf("  -t <toolchain>\n");
         printf("        Select the toolchain to use for compilation.\n");
         printf("        Supported: llvm, msvc, gcc, zig\n");
+        printf("  -linker <linker>\n");
+        printf("        Select the linker to use with the LLVM toolchain via -fuse-ld=<linker>.\n");
+        printf("        Supported: default, lld\n");
         printf("  -O<level>\n");
         printf("        0  : Debug (no optimization)\n");
         printf("        3  : Release (optimize for speed)\n");
@@ -142,6 +146,8 @@ static void print_help(bool detailed)
 
 static void parse_cmdline(void)
 {
+    void c_toolchain_set_llvm_linker_type_explicit(LinkerType type);
+
     char const* cli = os_get_cmdline();
     char const* p = cli;
     char* arg = NULL;
@@ -198,6 +204,23 @@ static void parse_cmdline(void)
                 else if (string_equal(arg, "msvc")) set_default_toolchain(TOOLCHAIN_TYPE_MSVC);
                 else if (string_equal(arg, "gcc")) set_default_toolchain(TOOLCHAIN_TYPE_GCC);
                 else if (string_equal(arg, "zig")) set_default_toolchain(TOOLCHAIN_TYPE_ZIG);
+                else
+                {
+                    print_help(false);
+                    exit(EXIT_FAILURE);
+                }
+                continue;
+            }
+            else if (string_equal(arg, "-linker"))
+            {
+                p = utilities_split_cmd(temp_allocator, p, &arg);
+                if (array_size(arg) == 0)
+                {
+                    print_help(false);
+                    exit(EXIT_FAILURE);
+                }
+                if (string_equal(arg, "default")) c_toolchain_set_llvm_linker_type_explicit(LINKER_LLVM_LD);
+                else if (string_equal(arg, "lld")) c_toolchain_set_llvm_linker_type_explicit(LINKER_LLVM_LLD);
                 else
                 {
                     print_help(false);
@@ -1222,11 +1245,14 @@ static int run_tests()
 
 void init_mode(void);
 void init_toolchain(void);
+bool c_toolchain_is_linker_type_explicit(void);
+void c_toolchain_restore_llvm_linker_type(LinkerType type);
 
 static void read_last_status(void)
 {
     if (default_toolchain == TOOLCHAIN_TYPE_UNSPECIFIED ||
-        default_optimization_type == OPTIMIZATION_TYPE_UNSPECIFIED)
+        default_optimization_type == OPTIMIZATION_TYPE_UNSPECIFIED ||
+        !c_toolchain_is_linker_type_explicit())
     {
         char const* status_path = fmt("{out_dir}/.last_status");
         char* content = os_read_all(allocator_temp(), status_path);
@@ -1247,6 +1273,12 @@ static void read_last_status(void)
                 if (string_equal(line, "debug")) set_default_optimization(OPTIMIZATION_TYPE_DEBUG);
                 else if (string_equal(line, "release_fast")) set_default_optimization(OPTIMIZATION_TYPE_RELEASE_FAST);
                 else if (string_equal(line, "release_small")) set_default_optimization(OPTIMIZATION_TYPE_RELEASE_SMALL);
+            }
+            line = strtok(NULL, "\r\n");
+            if (line && !c_toolchain_is_linker_type_explicit() && default_toolchain == TOOLCHAIN_TYPE_LLVM)
+            {
+                if (string_equal(line, "default")) c_toolchain_restore_llvm_linker_type(LINKER_LLVM_LD);
+                else if (string_equal(line, "lld")) c_toolchain_restore_llvm_linker_type(LINKER_LLVM_LLD);
             }
         }
     }
@@ -1275,7 +1307,16 @@ void save_last_status(void)
     case OPTIMIZATION_TYPE_RELEASE_SMALL: opt_str = "release_small"; break;
     default: opt_str = "release"; break;
     }
-    char* content = string_from_print(allocator_temp(), "%s\n%s\n", tc_str, opt_str);
+    char const* linker_str = "default";
+    if (default_toolchain == TOOLCHAIN_TYPE_LLVM)
+    {
+        switch (get_llvm_linker_type())
+        {
+        case LINKER_LLVM_LLD: linker_str = "lld"; break;
+        default: linker_str = "default"; break;
+        }
+    }
+    char* content = string_from_print(allocator_temp(), "%s\n%s\n%s\n", tc_str, opt_str, linker_str);
     os_write_all(status_path, content, array_size(content));
 }
 
