@@ -382,32 +382,11 @@ void sort_entries(void)
     }
 }
 
-void invoke_entries_before_prepare()
+void invoke_entries()
 {
     Entry* entries = entry_get_all();
     for (size_t i = 0; i != array_size(entries); i++)
     {
-        if (entries[i].priority >= PRIORITY_AFTER_PREPARE)
-        {
-            break;
-        }
-        allocator_reset_temp();
-        char const* dir = get_src_file_dir(entries[i].file, allocator_temp());
-        set_var("dir", dir);
-        entries[i].fn();
-        set_var("dir", NULL);
-    }
-}
-
-void invoke_entries_after_prepare()
-{
-    Entry* entries = entry_get_all();
-    for (size_t i = 0; i != array_size(entries); i++)
-    {
-        if (entries[i].priority < PRIORITY_AFTER_PREPARE)
-        {
-            continue;
-        }
         allocator_reset_temp();
         char const* dir = get_src_file_dir(entries[i].file, allocator_temp());
         set_var("dir", dir);
@@ -1397,7 +1376,7 @@ int execute(void)
         clean();
         return 0;
     }
-    invoke_entries_before_prepare();
+    invoke_entries();
     int exit_code;
     if (b_test_enabled)
     {

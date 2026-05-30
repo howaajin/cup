@@ -27,7 +27,6 @@ void entry_clean();
 #define PRIORITY_BEFORE_DEFAULT 50
 #define PRIORITY_DEFAULT 100
 #define PRIORITY_AFTER_DEFAULT 200
-#define PRIORITY_AFTER_PREPARE 300
 
 #define ENTRY(fn, ...)                                  \
     CONSTRUCTOR(Entry_register_##fn)                    \

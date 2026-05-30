@@ -191,7 +191,7 @@ extern void Entry_register_gen_build_c(void);
 extern ToolchainType c_toolchain_select_toolchain_automatically();
 extern int build_self(void);
 extern char const* get_src_file_dir(char const* path, Allocator* allocator);
-extern void invoke_entries_before_prepare(void);
+extern void invoke_entries(void);
 int bootstrap(void)
 {
     entry_clean();
@@ -203,7 +203,7 @@ int bootstrap(void)
     Entry_register_build_cup_dll();
     set_self_build_toolchain(get_default_toolchain());
     set_default_toolchain(self_build_toolchain);
-    invoke_entries_before_prepare();
+    invoke_entries();
     for (size_t i = 0; i != array_size(nodes); i++)
     {
         node_ensure_prepared(nodes[i]);
