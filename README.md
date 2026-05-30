@@ -23,7 +23,7 @@ Cup was originally inspired by the build system of Unreal Engine.
 * **Parallel Builds**: Executes independent commands simultaneously.
 * **Callback-Based Build Commands**: Supports custom callback functions integrated into the build graph.
 * **Header Dependencies**: Parses MSVC `/showIncludes` and GCC `-M` output.
-* **C++20 Modules**: Supports automatic scanning and dependency resolution for named modules. Automatically builds `std` and `std.compat`. Modules can also be declared manually via `c_compile_cmd_set_export_name(name)` and imported with `c_compile_cmd_add_import(cc, name)`.
+* **C++20 Modules**: Supports automatic scanning and dependency resolution for named modules. Automatically builds `std` and `std.compat`. Modules can also be declared manually via `c_compile_cmd_set_export_name(cc, name)` and imported with `c_compile_cmd_add_import(cc, name)`.
 * **Lightweight**: Optimized `cup` / `cup.exe` builds are ~780 KB, while the standalone `cup.h` is ~540 KB.
 
 ## Non-goals

@@ -26,6 +26,7 @@ extern char const* desc_color_reset;
 extern char const* desc_color_error;
 extern char const* desc_color_flag;
 extern char const* desc_color_bright_flag;
+extern bool b_content_hash;
 
 SourceType get_source_type(char const* path)
 {
@@ -342,6 +343,10 @@ bool cmd_check_cache_dirty(Node* cmd, Cache* cache, CacheRecordCmd* r, bool* b_r
         }
         if (input->mtime != cf->build_time)
         {
+            if (!b_content_hash)
+            {
+                return true;
+            }
             uint64_t current_hash = file_get_content_hash(input);
             if (current_hash == 0 || current_hash != cf->content_hash)
             {
@@ -366,6 +371,10 @@ bool cmd_check_cache_dirty(Node* cmd, Cache* cache, CacheRecordCmd* r, bool* b_r
         }
         if (output->mtime != cf->build_time)
         {
+            if (!b_content_hash)
+            {
+                return true;
+            }
             uint64_t current_hash = file_get_content_hash(output);
             if (current_hash == 0 || current_hash != cf->content_hash)
             {
@@ -402,6 +411,10 @@ bool cmd_check_cache_dirty(Node* cmd, Cache* cache, CacheRecordCmd* r, bool* b_r
         }
         if (input->mtime == 0 || cf->build_time != input->mtime)
         {
+            if (!b_content_hash)
+            {
+                return true;
+            }
             uint64_t current_hash = file_get_content_hash(input);
             if (current_hash == 0 || current_hash != cf->content_hash)
             {
@@ -602,7 +615,7 @@ void cmd_after_execute(Node* node)
             CacheRecordFile* record = cache_get_or_add_in_file_record(cache, path);
             cmd_record.inputs[i].id = record->id;
             cmd_record.inputs[i].build_time = file_node->mtime;
-            cmd_record.inputs[i].content_hash = file_get_content_hash(file_node);
+            cmd_record.inputs[i].content_hash = b_content_hash ? file_get_content_hash(file_node) : 0;
         }
         size_t num_outputs = array_size(node->outputs);
         array_resize(temp_allocator, cmd_record.outputs, num_outputs);
@@ -613,7 +626,7 @@ void cmd_after_execute(Node* node)
             CacheRecordFile* record = cache_get_or_add_out_file_record(cache, path);
             cmd_record.outputs[i].id = record->id;
             cmd_record.outputs[i].build_time = file_node->mtime;
-            cmd_record.outputs[i].content_hash = file_get_content_hash(file_node);
+            cmd_record.outputs[i].content_hash = b_content_hash ? file_get_content_hash(file_node) : 0;
         }
         size_t num_implicit_inputs = array_size(node->implicit_inputs);
         array_resize(temp_allocator, cmd_record.implicit_inputs, num_implicit_inputs);
@@ -624,7 +637,7 @@ void cmd_after_execute(Node* node)
             CacheRecordFile* record = cache_get_or_add_in_file_record(cache, path);
             cmd_record.implicit_inputs[i].id = record->id;
             cmd_record.implicit_inputs[i].build_time = file_node->mtime;
-            cmd_record.implicit_inputs[i].content_hash = file_get_content_hash(file_node);
+            cmd_record.implicit_inputs[i].content_hash = b_content_hash ? file_get_content_hash(file_node) : 0;
         }
         cache_write_cmd_record(cache, &cmd_record);
     }

@@ -23,6 +23,7 @@ void set_vscode_debugger_type(char const* type);
 void set_after_prepare_callback(FnAfterPrepare* fn);
 void set_cup_h_dir(char const* dir);
 void set_node_default_excluded(bool b_default_excluded);
+void set_content_hash_enabled(bool b_enabled);
 Node* add_copy_cmd(Node* input, Node* output, char const* file, int line);
 
 int execute(void);

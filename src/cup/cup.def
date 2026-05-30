@@ -103,6 +103,7 @@ EXPORTS
     set_after_prepare_callback
     set_cup_h_dir
     set_node_default_excluded
+    set_content_hash_enabled
     add_copy_cmd
     execute
     depfile_parser_init

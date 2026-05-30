@@ -39,6 +39,7 @@ bool b_print_exe_entries = false;
 bool b_generate_vscode_files = false;
 bool b_bootstrap = false;
 bool b_scan_deps_enabled = true;
+bool b_content_hash = true;
 
 char const* cl_show_include_prefix = "";
 size_t max_jobs;
@@ -1114,6 +1115,11 @@ void set_cup_h_dir(char const* dir)
 void set_node_default_excluded(bool b_default_excluded)
 {
     b_node_default_excluded = b_default_excluded;
+}
+
+void set_content_hash_enabled(bool b_enabled)
+{
+    b_content_hash = b_enabled;
 }
 
 static Node* add_copy_cmd_windows(Node* input, Node* output, char const* file, int line)
