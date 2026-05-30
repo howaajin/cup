@@ -1,5 +1,7 @@
 # Cup - A Build System in C
 
+![Cup logo](assets/icon.png)
+
 Cup is a build system implemented in C that uses C as its scripting language. Write your build logic in **C** — loops, functions, complex logic — with full support from your favorite tools (LSP, debugger).
 
 Cup was originally inspired by the build system of Unreal Engine.

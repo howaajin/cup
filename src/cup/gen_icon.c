@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define PI 3.14159265359f
 
@@ -257,13 +258,50 @@ typedef struct
 
 typedef vec3 (*shader_func_t)(vec2 uv, Uniforms u);
 
-static int generate_icon(int width, int height, shader_func_t shader, const char* filename)
+static void render_pixel_rgba(int width, int height, int x, int render_y, shader_func_t shader, uint8_t rgba[4])
 {
     Uniforms u;
     u.width = (float)width;
     u.height = (float)height;
     u.iTime = 0.0f;
 
+    float u_coord = (float)x / u.width;
+    float v_coord = 1.0f - ((float)render_y / u.height);
+    float aspect = u.width / u.height;
+    u_coord = (u_coord - 0.5f) * aspect + 0.5f;
+    vec2 uv = vec2_new(u_coord, v_coord);
+
+    current_bg_color = vec3_new(0.0f, 0.0f, 0.0f);
+    vec3 c_black = shader(uv, u);
+    c_black = vec3_clamp(c_black, 0.0f, 1.0f);
+
+    current_bg_color = vec3_new(1.0f, 1.0f, 1.0f);
+    vec3 c_white = shader(uv, u);
+    c_white = vec3_clamp(c_white, 0.0f, 1.0f);
+
+    vec3 diff = vec3_sub(c_white, c_black);
+    float alpha_f = 1.0f - (diff.x + diff.y + diff.z) / 3.0f;
+    alpha_f = f_clamp(alpha_f, 0.0f, 1.0f);
+
+    vec3 final_rgb;
+    if (alpha_f > 0.001f)
+    {
+        final_rgb = vec3_mul_scalar(c_black, 1.0f / alpha_f);
+        final_rgb = vec3_clamp(final_rgb, 0.0f, 1.0f);
+    }
+    else
+    {
+        final_rgb = vec3_new(0, 0, 0);
+    }
+
+    rgba[0] = (uint8_t)(final_rgb.x * 255.0f);
+    rgba[1] = (uint8_t)(final_rgb.y * 255.0f);
+    rgba[2] = (uint8_t)(final_rgb.z * 255.0f);
+    rgba[3] = (uint8_t)(alpha_f * 255.0f);
+}
+
+static int generate_icon(int width, int height, shader_func_t shader, const char* filename)
+{
     FILE* f = fopen(filename, "wb");
     if (!f)
     {
@@ -310,45 +348,14 @@ static int generate_icon(int width, int height, shader_func_t shader, const char
 
         for (int x = 0; x < width; ++x)
         {
-            float u_coord = (float)x / u.width;
-            float v_coord = 1.0f - ((float)render_y / u.height);
-            float aspect = u.width / u.height;
-            u_coord = (u_coord - 0.5f) * aspect + 0.5f;
-            vec2 uv = vec2_new(u_coord, v_coord);
-
-            current_bg_color = vec3_new(0.0f, 0.0f, 0.0f);
-            vec3 c_black = shader(uv, u);
-            c_black = vec3_clamp(c_black, 0.0f, 1.0f);
-
-            current_bg_color = vec3_new(1.0f, 1.0f, 1.0f);
-            vec3 c_white = shader(uv, u);
-            c_white = vec3_clamp(c_white, 0.0f, 1.0f);
-
-            vec3 diff = vec3_sub(c_white, c_black);
-            float alpha_f = 1.0f - (diff.x + diff.y + diff.z) / 3.0f;
-            alpha_f = f_clamp(alpha_f, 0.0f, 1.0f);
-
-            vec3 final_rgb;
-            if (alpha_f > 0.001f)
-            {
-                final_rgb = vec3_mul_scalar(c_black, 1.0f / alpha_f);
-                final_rgb = vec3_clamp(final_rgb, 0.0f, 1.0f);
-            }
-            else
-            {
-                final_rgb = vec3_new(0, 0, 0);
-            }
-
-            uint8_t b = (uint8_t)(final_rgb.z * 255.0f);
-            uint8_t g = (uint8_t)(final_rgb.y * 255.0f);
-            uint8_t r = (uint8_t)(final_rgb.x * 255.0f);
-            uint8_t a = (uint8_t)(alpha_f * 255.0f);
+            uint8_t rgba[4];
+            render_pixel_rgba(width, height, x, render_y, shader, rgba);
 
             int idx = x * 4;
-            row_buffer[idx + 0] = b;
-            row_buffer[idx + 1] = g;
-            row_buffer[idx + 2] = r;
-            row_buffer[idx + 3] = a;
+            row_buffer[idx + 0] = rgba[2];
+            row_buffer[idx + 1] = rgba[1];
+            row_buffer[idx + 2] = rgba[0];
+            row_buffer[idx + 3] = rgba[3];
         }
         fwrite(row_buffer, 1, pixel_stride, f);
     }
@@ -362,13 +369,180 @@ static int generate_icon(int width, int height, shader_func_t shader, const char
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char** argv)
+static void write_u32_be(FILE* f, uint32_t value)
 {
-    if (argc != 2)
+    uint8_t bytes[4] = {
+        (uint8_t)((value >> 24) & 0xff),
+        (uint8_t)((value >> 16) & 0xff),
+        (uint8_t)((value >> 8) & 0xff),
+        (uint8_t)(value & 0xff),
+    };
+    fwrite(bytes, 1, sizeof(bytes), f);
+}
+
+static uint32_t crc32_update(uint32_t crc, uint8_t const* data, size_t size)
+{
+    static uint32_t table[256];
+    static int table_ready = 0;
+    if (!table_ready)
+    {
+        for (uint32_t i = 0; i < 256; ++i)
+        {
+            uint32_t c = i;
+            for (int k = 0; k < 8; ++k)
+            {
+                c = (c & 1) ? (0xedb88320u ^ (c >> 1)) : (c >> 1);
+            }
+            table[i] = c;
+        }
+        table_ready = 1;
+    }
+
+    crc = ~crc;
+    for (size_t i = 0; i < size; ++i)
+    {
+        crc = table[(crc ^ data[i]) & 0xff] ^ (crc >> 8);
+    }
+    return ~crc;
+}
+
+static uint32_t adler32(uint8_t const* data, size_t size)
+{
+    uint32_t a = 1;
+    uint32_t b = 0;
+    for (size_t i = 0; i < size; ++i)
+    {
+        a = (a + data[i]) % 65521u;
+        b = (b + a) % 65521u;
+    }
+    return (b << 16) | a;
+}
+
+static void png_write_chunk(FILE* f, char const type[4], uint8_t const* data, uint32_t size)
+{
+    write_u32_be(f, size);
+    fwrite(type, 1, 4, f);
+    if (size)
+    {
+        fwrite(data, 1, size, f);
+    }
+
+    uint32_t crc = 0;
+    crc = crc32_update(crc, (uint8_t const*)type, 4);
+    if (size)
+    {
+        crc = crc32_update(crc, data, size);
+    }
+    write_u32_be(f, crc);
+}
+
+static int generate_png(int width, int height, shader_func_t shader, char const* filename)
+{
+    size_t row_size = (size_t)width * 4 + 1;
+    size_t raw_size = row_size * (size_t)height;
+    uint8_t* raw = (uint8_t*)malloc(raw_size);
+    if (!raw)
     {
         return EXIT_FAILURE;
     }
-    char const* out_path = argv[1];
-    generate_icon(256, 256, shader_func_cup_icon, out_path);
-    return 0;
+
+    uint8_t* p = raw;
+    for (int y = 0; y < height; ++y)
+    {
+        *p++ = 0;
+        for (int x = 0; x < width; ++x)
+        {
+            uint8_t rgba[4];
+            render_pixel_rgba(width, height, x, y, shader, rgba);
+            memcpy(p, rgba, sizeof(rgba));
+            p += sizeof(rgba);
+        }
+    }
+
+    size_t num_blocks = (raw_size + 65534) / 65535;
+    size_t zlib_size = 2 + raw_size + num_blocks * 5 + 4;
+    uint8_t* zlib = (uint8_t*)malloc(zlib_size);
+    if (!zlib)
+    {
+        free(raw);
+        return EXIT_FAILURE;
+    }
+
+    p = zlib;
+    *p++ = 0x78;
+    *p++ = 0x01;
+    size_t remaining = raw_size;
+    uint8_t* src = raw;
+    while (remaining)
+    {
+        uint16_t block_size = (remaining > 65535) ? 65535 : (uint16_t)remaining;
+        int final_block = remaining == block_size;
+        *p++ = final_block ? 1 : 0;
+        *p++ = (uint8_t)(block_size & 0xff);
+        *p++ = (uint8_t)(block_size >> 8);
+        uint16_t nlen = (uint16_t)~block_size;
+        *p++ = (uint8_t)(nlen & 0xff);
+        *p++ = (uint8_t)(nlen >> 8);
+        memcpy(p, src, block_size);
+        p += block_size;
+        src += block_size;
+        remaining -= block_size;
+    }
+    uint32_t adler = adler32(raw, raw_size);
+    *p++ = (uint8_t)((adler >> 24) & 0xff);
+    *p++ = (uint8_t)((adler >> 16) & 0xff);
+    *p++ = (uint8_t)((adler >> 8) & 0xff);
+    *p++ = (uint8_t)(adler & 0xff);
+
+    FILE* f = fopen(filename, "wb");
+    if (!f)
+    {
+        fprintf(stderr, "fopen failed: %s\n", filename);
+        free(zlib);
+        free(raw);
+        return EXIT_FAILURE;
+    }
+
+    uint8_t signature[8] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n'};
+    fwrite(signature, 1, sizeof(signature), f);
+
+    uint8_t ihdr[13] = {0};
+    ihdr[0] = (uint8_t)((width >> 24) & 0xff);
+    ihdr[1] = (uint8_t)((width >> 16) & 0xff);
+    ihdr[2] = (uint8_t)((width >> 8) & 0xff);
+    ihdr[3] = (uint8_t)(width & 0xff);
+    ihdr[4] = (uint8_t)((height >> 24) & 0xff);
+    ihdr[5] = (uint8_t)((height >> 16) & 0xff);
+    ihdr[6] = (uint8_t)((height >> 8) & 0xff);
+    ihdr[7] = (uint8_t)(height & 0xff);
+    ihdr[8] = 8;
+    ihdr[9] = 6;
+    png_write_chunk(f, "IHDR", ihdr, sizeof(ihdr));
+    png_write_chunk(f, "IDAT", zlib, (uint32_t)(p - zlib));
+    png_write_chunk(f, "IEND", NULL, 0);
+
+    fclose(f);
+    free(zlib);
+    free(raw);
+    return EXIT_SUCCESS;
+}
+
+int main(int argc, char** argv)
+{
+    if (argc < 2)
+    {
+        return EXIT_FAILURE;
+    }
+    if (generate_icon(256, 256, shader_func_cup_icon, argv[1]) != EXIT_SUCCESS)
+    {
+        return EXIT_FAILURE;
+    }
+    for (int i = 2; i < argc; ++i)
+    {
+        if (generate_png(256, 256, shader_func_cup_icon, argv[i]) != EXIT_SUCCESS)
+        {
+            return EXIT_FAILURE;
+        }
+    }
+    return EXIT_SUCCESS;
 }

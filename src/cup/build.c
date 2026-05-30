@@ -434,9 +434,11 @@ ENTRY(build_gen_icon_exe)
 ENTRY(build_cup_icon)
 {
     Node* icon = FILE("{out_dir}/icon.ico");
+    Node* readme_png = FILE("assets/icon.png");
     Node* gen_icon = EXE("{out_dir}/gen_icon");
     Node* cmd = CMD_FROM_EXE(gen_icon, fmt("gen: {:n}", icon));
     cmd_add_output_file_option(cmd, NULL, icon);
+    cmd_add_output_file_option(cmd, NULL, readme_png);
 }
 
 ENTRY(build_cup_res)
