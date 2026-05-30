@@ -2,6 +2,7 @@
 
 #if defined(__APPLE__) || defined(__STDC_NO_THREADS__)
 
+#include <errno.h>
 #include <pthread.h>
 
 typedef pthread_mutex_t mtx_t;
