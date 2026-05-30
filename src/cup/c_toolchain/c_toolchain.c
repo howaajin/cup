@@ -345,12 +345,12 @@ CCompileCmd* obj_get_compile_cmd(Node* obj)
     {
         return NULL;
     }
-    CCompileCmd* cc;
+    CCompileCmd* cc = NULL;
     if (cmd->cmd_ext_type == C_CMD_COMPILE)
     {
         cc = (CCompileCmd*)cmd;
     }
-    else
+    else if (cmd->cmd_ext_type == C_CMD_BMI_TO_OBJ)
     {
         BmiToObjCmd* cmd_bmi_to_obj = (BmiToObjCmd*)cmd;
         cc = cmd_bmi_to_obj->c_compile_cmd;
@@ -362,6 +362,10 @@ char** obj_get_compile_includes(Node* obj, Allocator* allocator)
 {
     char** includes = NULL;
     CCompileCmd* cc = obj_get_compile_cmd(obj);
+    if (cc == NULL)
+    {
+        return NULL;
+    }
     StringSet* s = cc->includes;
     for (uint32_t i = s->begin; i != s->end; i = hash_next(s, i))
     {
