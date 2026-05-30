@@ -5,6 +5,8 @@
 
 #include <limits.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <wchar.h>
 
 static inline int utf8_decode(uint8_t const* p, uint32_t* out)
@@ -193,4 +195,115 @@ static inline int utf16_to_utf32(const uint16_t* code, uint32_t* out)
     }
     *out = (uint32_t)*code;
     return 1;
+}
+
+static inline size_t base64_encode_size(size_t data_len)
+{
+    return ((data_len + 2) / 3) * 4 + 1;
+}
+
+static inline void base64_encode(char* out, uint8_t const* data, size_t data_len)
+{
+    // clang-format off
+    static char const table[64] = {
+        'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
+        'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
+        'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
+        'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/',
+    };
+    // clang-format on
+
+    size_t fast_len = data_len - (data_len % 3);
+    for (size_t i = 0; i < fast_len; i += 3)
+    {
+        uint32_t v = ((uint32_t)data[i] << 16) | ((uint32_t)data[i + 1] << 8) | data[i + 2];
+        *out++ = table[(v >> 18) & 0x3F];
+        *out++ = table[(v >> 12) & 0x3F];
+        *out++ = table[(v >> 6) & 0x3F];
+        *out++ = table[v & 0x3F];
+    }
+
+    size_t rem = data_len - fast_len;
+    if (rem == 1)
+    {
+        uint32_t v = (uint32_t)data[fast_len] << 16;
+        *out++ = table[(v >> 18) & 0x3F];
+        *out++ = table[(v >> 12) & 0x3F];
+        *out++ = '=';
+        *out++ = '=';
+    }
+    else if (rem == 2)
+    {
+        uint32_t v = ((uint32_t)data[fast_len] << 16) | ((uint32_t)data[fast_len + 1] << 8);
+        *out++ = table[(v >> 18) & 0x3F];
+        *out++ = table[(v >> 12) & 0x3F];
+        *out++ = table[(v >> 6) & 0x3F];
+        *out++ = '=';
+    }
+    *out = '\0';
+}
+
+static inline int base64_decode(char const* in, size_t in_len, uint8_t* out, size_t out_cap)
+{
+    // clang-format off
+    static uint8_t const decode_table[256] = {
+        255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        255,255,255,255,255,255,255,255,255,255,255,62, 255,255,255,63,
+        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 255,255,255,255,255,255,
+        255,0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14,
+        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 255,255,255,255,255,
+        255,26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+        41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 255,255,255,255,255,
+    };
+    // clang-format on
+
+    while (in_len > 0 && in[in_len - 1] == '=')
+    {
+        in_len--;
+    }
+    if (in_len == 0) return 0;
+
+    size_t rem = in_len % 4;
+    if (rem == 1) return -1;
+
+    size_t out_len = (in_len / 4) * 3 + (rem == 2 ? 1 : (rem == 3 ? 2 : 0));
+    if (out_len > out_cap) return -1;
+
+    size_t fast_iters = in_len / 4;
+    size_t in_pos = 0;
+    size_t pos = 0;
+
+    for (size_t i = 0; i < fast_iters; i++)
+    {
+        uint8_t c0 = decode_table[(uint8_t)in[in_pos++]];
+        uint8_t c1 = decode_table[(uint8_t)in[in_pos++]];
+        uint8_t c2 = decode_table[(uint8_t)in[in_pos++]];
+        uint8_t c3 = decode_table[(uint8_t)in[in_pos++]];
+
+        if ((c0 | c1 | c2 | c3) & 0xC0) return -1;
+
+        out[pos++] = (uint8_t)((c0 << 2) | (c1 >> 4));
+        out[pos++] = (uint8_t)((c1 << 4) | (c2 >> 2));
+        out[pos++] = (uint8_t)((c2 << 6) | c3);
+    }
+
+    if (rem == 2)
+    {
+        uint8_t c0 = decode_table[(uint8_t)in[in_pos++]];
+        uint8_t c1 = decode_table[(uint8_t)in[in_pos]];
+        if ((c0 | c1) & 0xC0) return -1;
+        out[pos++] = (uint8_t)((c0 << 2) | (c1 >> 4));
+    }
+    else if (rem == 3)
+    {
+        uint8_t c0 = decode_table[(uint8_t)in[in_pos++]];
+        uint8_t c1 = decode_table[(uint8_t)in[in_pos++]];
+        uint8_t c2 = decode_table[(uint8_t)in[in_pos]];
+        if ((c0 | c1 | c2) & 0xC0) return -1;
+        out[pos++] = (uint8_t)((c0 << 2) | (c1 >> 4));
+        out[pos++] = (uint8_t)((c1 << 4) | (c2 >> 2));
+    }
+
+    return (int)out_len;
 }

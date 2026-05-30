@@ -34,6 +34,7 @@ ENTRY(gen_embedded_files)
         Node* output = get_or_add_src(embedded_sources[i].out_path);
         Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
         Node* input = get_or_add_src(embedded_sources[i].path);
+        cmd_add_option(cmd, "-base64", NULL, OPTION_FLAG);
         cmd_add_output_file_option(cmd, NULL, output);
         cmd_add_input_file_option(cmd, NULL, input);
     }
@@ -329,6 +330,7 @@ ENTRY(build_embedded_cup_h_c)
     Node* output = SRC("{out_dir}/embedded/cup.h.c");
     Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
     Node* input = FILE("{out_dir}/embedded/cup.h");
+    cmd_add_option(cmd, "-base64", NULL, OPTION_FLAG);
     cmd_add_output_file_option(cmd, NULL, output);
     cmd_add_input_file_option(cmd, NULL, input);
 }
@@ -343,6 +345,7 @@ ENTRY(build_embedded_cup_def_c)
     Node* output = SRC("{out_dir}/embedded/cup.def.c");
     Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
     Node* input = FILE("{dir}/cup.def");
+    cmd_add_option(cmd, "-base64", NULL, OPTION_FLAG);
     cmd_add_output_file_option(cmd, NULL, output);
     cmd_add_input_file_option(cmd, NULL, input);
 }

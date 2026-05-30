@@ -8,7 +8,7 @@ typedef struct EmbeddedFile EmbeddedFile;
 
 struct EmbeddedFile
 {
-    uint8_t const* src;
+    char const* base64;
     size_t* size;
     char const* path;
     FileType type;

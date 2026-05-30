@@ -6,7 +6,7 @@
 ENTRY(gen_build_c)
 {
     extern size_t bin2c_build_script_tpl_c_size;
-    extern uint8_t bin2c_build_script_tpl_c[];
+    extern char const bin2c_build_script_tpl_c[];
 
     if (os_file_exists("build.c"))
     {
@@ -14,7 +14,7 @@ ENTRY(gen_build_c)
     }
 
     static struct EmbeddedFile file = {
-        .src = bin2c_build_script_tpl_c,
+        .base64 = bin2c_build_script_tpl_c,
         .size = &bin2c_build_script_tpl_c_size,
         .path = "build.c",
         .type = FILE_TYPE_SRC,

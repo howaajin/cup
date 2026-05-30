@@ -17,9 +17,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern uint8_t bin2c_cup_h[];
+extern char const bin2c_cup_h[];
 extern size_t bin2c_cup_h_size;
-extern uint8_t bin2c_cup_def[];
+extern char const bin2c_cup_def[];
 extern size_t bin2c_cup_def_size;
 extern Dylib* cup_dll;
 extern void restart(void);
@@ -31,7 +31,7 @@ void add_build_script(char const* path);
 ENTRY(gen_embedded_cup_h_interface)
 {
     static struct EmbeddedFile file = {
-        .src = bin2c_cup_h,
+        .base64 = bin2c_cup_h,
         .size = &bin2c_cup_h_size,
         .path = "{out_dir}/cup/cup.h",
         .type = FILE_TYPE_NORMAL,
@@ -44,7 +44,7 @@ ENTRY(gen_embedded_cup_h_interface)
 ENTRY(gen_embedded_cup_def)
 {
     static struct EmbeddedFile file = {
-        .src = bin2c_cup_def,
+        .base64 = bin2c_cup_def,
         .size = &bin2c_cup_def_size,
         .path = "{out_dir}/cup.def",
         .type = FILE_TYPE_NORMAL,
