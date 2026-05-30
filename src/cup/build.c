@@ -418,6 +418,9 @@ ENTRY(build_cup_embedded)
     {
         link_cmd_add_flag(link, "-rdynamic");
     }
+
+    Node* copied = EXE("examples/{self_name}");
+    COPY(exe, copied);
 }
 
 ENTRY(build_gen_icon_exe)
