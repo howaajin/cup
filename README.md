@@ -1,6 +1,6 @@
 # Cup - A Build System in C
 
-![Cup logo](assets/icon.png)
+<img src="assets/icon.png" alt="Cup logo" width="128">
 
 Cup is a build system implemented in C that uses C as its scripting language. Write your build logic in **C** — loops, functions, complex logic — with full support from your favorite tools (LSP, debugger).
 
