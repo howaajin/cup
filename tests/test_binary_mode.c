@@ -2,18 +2,26 @@
 #include "core/os.h"
 #include "core/path.h"
 #include "core/platform.h"
+#include "core/string.h"
 #include "cup/fmt.h"
 #include "cup/test.h"
 
-static void test_binary_mode_impl(char const* path, char const* run_cmd, char const* file, int line)
+static void test_binary_mode_impl(char const* file, int line)
 {
-    char const src[] = "build/embedded/cup" EXE_EXT;
-    if (!os_file_exists(src))
+    char const* exe = fmt("{out_dir}/embedded/cup" EXE_EXT);
+    if (!os_file_exists(exe))
     {
         return;
     }
-    char const* dir = path_parent_path(path, allocator_temp());
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+    char const* copied_exe = fmt("{out_dir}/tests/binary_mode_test/cup" EXE_EXT);
+    char const* tests_dir = fmt("{out_dir}/tests");
+    char const* dir = path_parent_path(copied_exe, allocator_temp());
+    if (!string_starts_with(dir, tests_dir))
+    {
+        fprintf(stderr, "WARNING: refusing to delete path not under build/tests/: %s\n", dir);
+        return;
+    }
+    else if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
         system(fmt("rmdir /s /q \"{}\" 2>NUL", dir));
     }
@@ -21,18 +29,22 @@ static void test_binary_mode_impl(char const* path, char const* run_cmd, char co
     {
         system(fmt("rm -rf \"{}\" 2>/dev/null", dir));
     }
-    os_ensure_dir_existed(path);
-    os_copy_file(src, path);
+    os_ensure_dir_existed(copied_exe);
+    os_copy_file(exe, copied_exe);
     char const* cwd = os_get_cwd(allocator_temp());
     os_set_cwd(dir);
-    int result = system(run_cmd);
+    int result = system("cup" EXE_EXT);
     bool build_c_exists = os_file_exists("build.c");
     bool dll_exists = os_file_exists("build/cup" DLL_EXT);
     os_set_cwd(cwd);
     assert_impl(result == 0, "run cup failed", file, line);
     assert_impl(build_c_exists, "build.c not generated", file, line);
     assert_impl(dll_exists, "build/cup" DLL_EXT " not generated", file, line);
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+    if (!string_starts_with(dir, tests_dir))
+    {
+        fprintf(stderr, "WARNING: refusing to delete path not under build/tests/: %s\n", dir);
+    }
+    else if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
         system(fmt("rmdir /s /q \"{}\" 2>NUL", dir));
     }
@@ -42,7 +54,7 @@ static void test_binary_mode_impl(char const* path, char const* run_cmd, char co
     }
 }
 
-#define test_binary_mode(path, run_cmd) test_binary_mode_impl(path, run_cmd, __FILE__, __LINE__)
+#define test_binary_mode() test_binary_mode_impl(__FILE__, __LINE__)
 
 TEST(test_binary_mode_clang_windows, binary_mode)
 {
@@ -54,9 +66,7 @@ TEST(test_binary_mode_clang_windows, binary_mode)
     {
         return;
     }
-    test_binary_mode(
-        "build/tests/binary_mode_test/cup.exe",
-        "cup.exe");
+    test_binary_mode();
 }
 
 TEST(test_binary_mode_clang_linux, binary_mode)
@@ -70,9 +80,7 @@ TEST(test_binary_mode_clang_linux, binary_mode)
         fprintf(stderr, "clang not found, skip test clang");
         return;
     }
-    test_binary_mode(
-        "build/tests/binary_mode_test/cup",
-        "./cup");
+    test_binary_mode();
 }
 
 TEST(test_binary_mode_clang_mac, binary_mode)
@@ -85,7 +93,5 @@ TEST(test_binary_mode_clang_mac, binary_mode)
     {
         return;
     }
-    test_binary_mode(
-        "build/tests/binary_mode_test/cup",
-        "./cup");
+    test_binary_mode();
 }
