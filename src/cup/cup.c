@@ -46,6 +46,7 @@ size_t max_jobs;
 char** target_names;
 char const* cup_h_dir = ".";
 char const* vscode_debugger_type = NULL;
+char const* init_cwd = NULL;
 Node** targets = NULL;
 Dylib* cup_dll = NULL;
 FnAfterPrepare* fn_after_prepare = NULL;
@@ -76,6 +77,12 @@ void destroy(void)
     {
         allocator_destroy(node_allocator);
         node_allocator = NULL;
+    }
+    if (init_cwd)
+    {
+        os_set_cwd(init_cwd);
+        array_free(allocator_c(), init_cwd);
+        init_cwd = NULL;
     }
     destroy_var();
     if (cup_dll)
@@ -114,6 +121,7 @@ static void print_help(bool detailed)
     printf("  -dry                          Dry run (commands skipped but treated as success)\n");
     printf("  -test                         Run tests\n");
     printf("  -r, --bootstrap               Bootstrap (ignore build.c, build cup only)\n");
+    printf("  -root <dir>                   Set root directory\n");
     if (detailed)
     {
         printf("\nDetailed Options:\n");
@@ -142,6 +150,10 @@ static void print_help(bool detailed)
         printf("        Build and run all test executables.\n");
         printf("  -r, --bootstrap\n");
         printf("        Ignore all custom build.c files and build cup itself only.\n");
+        printf("  -root <dir>\n");
+        printf("        Set the project root directory. All relative paths are resolved\n");
+        printf("        relative to this directory.\n");
+        printf("        Default: current working directory\n");
     }
 }
 
@@ -176,6 +188,17 @@ static void parse_cmdline(void)
                 }
                 char const* cwd = get_var("workspace");
                 target_names = objects_from_sources_string(arg, cwd, target_names, allocator);
+                continue;
+            }
+            else if (string_equal(arg, "-root"))
+            {
+                p = utilities_split_cmd(temp_allocator, p, &arg);
+                if (array_size(arg) == 0)
+                {
+                    print_help(true);
+                    exit(EXIT_FAILURE);
+                }
+                set_root_dir(arg);
                 continue;
             }
             else if (string_equal(arg, "-print_exe_entries"))
@@ -1326,10 +1349,24 @@ void save_last_status(void)
     os_write_all(status_path, content, array_size(content));
 }
 
+void set_root_dir(char const* dir)
+{
+    extern void var_on_cwd_changed(void);
+
+    if (!os_file_exists(dir))
+    {
+        error("root directory not found");
+        exit(EXIT_FAILURE);
+    }
+    os_set_cwd(dir);
+    var_on_cwd_changed();
+}
+
 CONSTRUCTOR(init)
 static void init(void)
 {
     os_set_console_utf8();
+    init_cwd = os_get_cwd(allocator_c());
     init_var();
     parse_cmdline();
     read_last_status();

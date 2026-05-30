@@ -18,6 +18,28 @@ char const* desc_color_bright_flag = ANSI_BRIGHT_YELLOW;
 
 StringPtrHash* variables = NULL;
 
+void var_on_cwd_changed(void)
+{
+    if (variables == NULL)
+    {
+        init_var();
+    }
+    else
+    {
+        Allocator* temp_allocator = allocator_temp();
+        char const* cwd = os_get_cwd(temp_allocator);
+        char const* self_exe_fullpath = os_get_current_exe_path(temp_allocator);
+        if (path_is_under_directory(self_exe_fullpath, cwd))
+        {
+            self_exe_fullpath = path_lexically_relative(self_exe_fullpath, cwd, temp_allocator);
+        }
+        char const* self_name = path_stem(self_exe_fullpath, temp_allocator);
+        set_var("self", self_exe_fullpath);
+        set_var("self_name", self_name);
+        set_var("workspace", cwd);
+    }
+}
+
 void init_var(void)
 {
     if (!os_is_terminal_supports_color())
@@ -33,24 +55,13 @@ void init_var(void)
 
     variables = allocator_calloc(allocator_c(), 1, sizeof(StringPtrHash));
     variables->allocator = allocator_c();
-    Allocator* temp_allocator = allocator_temp();
-    char const* cwd = os_get_cwd(temp_allocator);
-    char const* self_exe_fullpath = os_get_current_exe_path(temp_allocator);
-    if (path_is_under_directory(self_exe_fullpath, cwd))
-    {
-        self_exe_fullpath = path_lexically_relative(self_exe_fullpath, cwd, temp_allocator);
-    }
-    char const* self_name = path_stem(self_exe_fullpath, temp_allocator);
     struct
     {
         char const* key;
         char const* value;
     } map[] = {
         {"mode", "header_only"},
-        {"workspace", cwd},
         {"out_dir", "build"},
-        {"self", self_exe_fullpath},
-        {"self_name", self_name},
         {"obj_dir", "obj"},
         {"exe_ext", EXE_EXT},
         {"dll_ext", DLL_EXT},
@@ -70,6 +81,7 @@ void init_var(void)
     {
         set_var(map[i].key, map[i].value);
     }
+    var_on_cwd_changed();
 }
 
 void set_var(char const* name, char const* value)

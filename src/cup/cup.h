@@ -18,6 +18,7 @@
 typedef struct Node Node;
 typedef void FnAfterPrepare(void);
 
+void set_root_dir(char const* dir);
 void set_vs_project_version(char const* version);
 void set_vscode_debugger_type(char const* type);
 void set_after_prepare_callback(FnAfterPrepare* fn);
