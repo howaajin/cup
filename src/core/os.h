@@ -51,32 +51,4 @@ bool os_file_writable(const char* path);
 bool os_is_terminal_supports_color(void);
 void os_set_console_utf8(void);
 
-typedef void* Mutex;
-int os_mtx_init(Mutex* mtx);
-void os_mtx_destroy(Mutex* mtx);
-int os_mtx_lock(Mutex* mtx);
-int os_mtx_unlock(Mutex* mtx);
-
-#if CURRENT_PLATFORM == PLATFORM_WINDOWS
-#define OS_API_CALLCONV __stdcall
-typedef unsigned long os_tss_t;
-typedef struct
-{
-    void* Ptr;
-} os_once_flag;
-#define OS_ONCE_FLAG_INIT {0}
-#else
-#include <pthread.h>
-#define OS_API_CALLCONV
-typedef pthread_key_t os_tss_t;
-typedef pthread_once_t os_once_flag;
-#define OS_ONCE_FLAG_INIT PTHREAD_ONCE_INIT
-#endif
-
-typedef void(OS_API_CALLCONV* os_tss_dtor_t)(void*);
-
-int os_tss_create(os_tss_t* key, os_tss_dtor_t dtor);
-void* os_tss_get(os_tss_t key);
-int os_tss_set(os_tss_t key, void* val);
-void os_tss_delete(os_tss_t key);
-void os_call_once(os_once_flag* flag, void (*func)(void));
+#include "core/compat_threads.h"

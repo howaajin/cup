@@ -21,7 +21,7 @@ struct ChainedAllocator
     void (*destroy)(Allocator* allocator);
     Allocator* backend;
     ChainedBlock* head;
-    Mutex mutex;
+    mtx_t mutex;
 };
 
 static void* chained_allocator_malloc(Allocator* allocator, size_t size)
@@ -31,14 +31,14 @@ static void* chained_allocator_malloc(Allocator* allocator, size_t size)
     assert(block);
     block->next = NULL;
     block->prev = NULL;
-    os_mtx_lock(&chained_allocator->mutex);
+    mtx_lock(&chained_allocator->mutex);
     block->next = chained_allocator->head;
     if (chained_allocator->head)
     {
         chained_allocator->head->prev = block;
     }
     chained_allocator->head = block;
-    os_mtx_unlock(&chained_allocator->mutex);
+    mtx_unlock(&chained_allocator->mutex);
     return block + 1;
 }
 
@@ -50,21 +50,21 @@ static void* chained_allocator_calloc(Allocator* allocator, size_t count, size_t
     assert(block);
     block->next = NULL;
     block->prev = NULL;
-    os_mtx_lock(&chained_allocator->mutex);
+    mtx_lock(&chained_allocator->mutex);
     block->next = chained_allocator->head;
     if (chained_allocator->head)
     {
         chained_allocator->head->prev = block;
     }
     chained_allocator->head = block;
-    os_mtx_unlock(&chained_allocator->mutex);
+    mtx_unlock(&chained_allocator->mutex);
     return block + 1;
 }
 
 static void* chained_allocator_realloc(Allocator* allocator, void* ptr, size_t size)
 {
     ChainedAllocator* chained_allocator = (ChainedAllocator*)allocator;
-    os_mtx_lock(&chained_allocator->mutex);
+    mtx_lock(&chained_allocator->mutex);
     ChainedBlock* old_block = ptr == NULL ? NULL : (ChainedBlock*)ptr - 1;
     ChainedBlock* new_block = allocator_realloc(chained_allocator->backend, old_block, sizeof(ChainedBlock) + size);
     assert(new_block);
@@ -93,7 +93,7 @@ static void* chained_allocator_realloc(Allocator* allocator, void* ptr, size_t s
         }
         chained_allocator->head = new_block;
     }
-    os_mtx_unlock(&chained_allocator->mutex);
+    mtx_unlock(&chained_allocator->mutex);
     return new_block + 1;
 }
 
@@ -105,7 +105,7 @@ static void chained_allocator_free(Allocator* allocator, void* ptr)
     }
     ChainedAllocator* chained_allocator = (ChainedAllocator*)allocator;
     ChainedBlock* block = (ChainedBlock*)ptr - 1;
-    os_mtx_lock(&chained_allocator->mutex);
+    mtx_lock(&chained_allocator->mutex);
     if (block->prev)
     {
         block->prev->next = block->next;
@@ -118,14 +118,14 @@ static void chained_allocator_free(Allocator* allocator, void* ptr)
     {
         block->next->prev = block->prev;
     }
-    os_mtx_unlock(&chained_allocator->mutex);
+    mtx_unlock(&chained_allocator->mutex);
     allocator_free(chained_allocator->backend, block);
 }
 
 static void chained_allocator_destroy(Allocator* allocator)
 {
     ChainedAllocator* chained_allocator = (ChainedAllocator*)allocator;
-    os_mtx_lock(&chained_allocator->mutex);
+    mtx_lock(&chained_allocator->mutex);
     ChainedBlock* current = chained_allocator->head;
     while (current != NULL)
     {
@@ -133,8 +133,8 @@ static void chained_allocator_destroy(Allocator* allocator)
         allocator_free(chained_allocator->backend, current);
         current = next;
     }
-    os_mtx_unlock(&chained_allocator->mutex);
-    os_mtx_destroy(&chained_allocator->mutex);
+    mtx_unlock(&chained_allocator->mutex);
+    mtx_destroy(&chained_allocator->mutex);
     allocator_free(chained_allocator->backend, chained_allocator);
 }
 
@@ -150,7 +150,7 @@ Allocator* allocator_create_chained(void)
         .destroy = chained_allocator_destroy,
         .backend = c_allocator,
     };
-    if (os_mtx_init(&allocator->mutex) != 0)
+    if (mtx_init(&allocator->mutex, mtx_plain) != 0)
     {
         allocator_free(c_allocator, allocator);
         return NULL;
