@@ -95,12 +95,12 @@ if not exist build\obj\src\cup mkdir build\obj\src\cup
 if not exist build\obj\src\cup\c_toolchain mkdir build\obj\src\cup\c_toolchain
 
 set "CC_MSVC_HASH=cl /nologo src/core/hash_gen.c /I src /c /Fobuild/hash_gen.obj"
-set "CC_MSVC_ROOT=cl /Fo:build/obj/build.c.obj /c /MDd /nologo build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/build.c.obj.pdb"
-set "CC_MSVC_CORE=cl /Fo:build/obj/src/core/build.c.obj /c /MDd /nologo src/core/build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/core/build.c.obj.pdb"
-set "CC_MSVC_CUP=cl /Fo:build/obj/src/cup/build.c.obj /c /MDd /nologo src/cup/build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/build.c.obj.pdb"
-set "CC_MSVC_REPO=cl /Fo:build/obj/src/cup/in_repo.c.obj /c /MDd /nologo src/cup/in_repo.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/in_repo.c.obj.pdb"
-set "CC_MSVC_CT=cl /Fo:build/obj/src/cup/c_toolchain/build.c.obj /c /MDd /nologo src/cup/c_toolchain/build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/c_toolchain/build.c.obj.pdb"
-set "CC_MSVC_BOOT=cl /Fo:build/obj/src/cup/bootstrap.c.obj /c /MDd /nologo src/cup/bootstrap.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/bootstrap.c.obj.pdb"
+set "CC_MSVC_ROOT=cl /Fo:build/obj/build.c.obj /c /nologo build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/build.c.obj.pdb"
+set "CC_MSVC_CORE=cl /Fo:build/obj/src/core/build.c.obj /c /nologo src/core/build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/core/build.c.obj.pdb"
+set "CC_MSVC_CUP=cl /Fo:build/obj/src/cup/build.c.obj /c /nologo src/cup/build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/build.c.obj.pdb"
+set "CC_MSVC_REPO=cl /Fo:build/obj/src/cup/in_repo.c.obj /c /nologo src/cup/in_repo.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/in_repo.c.obj.pdb"
+set "CC_MSVC_CT=cl /Fo:build/obj/src/cup/c_toolchain/build.c.obj /c /nologo src/cup/c_toolchain/build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/c_toolchain/build.c.obj.pdb"
+set "CC_MSVC_BOOT=cl /Fo:build/obj/src/cup/bootstrap.c.obj /c /nologo src/cup/bootstrap.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/bootstrap.c.obj.pdb"
 
 %CC_MSVC_HASH% || exit /B 1
 link /nologo build\hash_gen.obj /out:build\hash_gen.exe /incremental:no /pdb:build\hash_gen.exe.pdb || exit /B 1
