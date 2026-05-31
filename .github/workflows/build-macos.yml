@@ -5,7 +5,15 @@ on:
 
 jobs:
   build-project-macos:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+        include:
+          - arch: x86_64
+            runner: macos-13
+          - arch: arm64
+            runner: macos-14
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - name: Checkout repository
