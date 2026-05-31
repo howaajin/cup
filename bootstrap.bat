@@ -1,7 +1,27 @@
 @echo off
 setlocal
 
+set ARCH=x64
+:parse_cmdline
+if "%~1"=="" goto set_param
 
+if /i "%~1"=="-arch" (
+    set ARCH=%~2
+    shift
+)
+shift
+goto parse_cmdline
+
+:set_param
+
+if /i "%ARCH%"=="x86" (
+    set ARCH=x86
+) else if /i "%ARCH%"=="x64" (
+    set ARCH=x64
+) else (
+    echo error: only supported x86/x64
+    exit /b 1
+)
 
 if not exist build mkdir build
 
@@ -24,7 +44,6 @@ echo Error: no C compiler found. Install clang or Visual Studio.
 exit /B 1
 
 :init_msvc_env
-set "ARCH=x64"
 set "MSVC_VER="
 for /f "delims=" %%v in ('dir /b /o-n /ad "%VS_INSTALL_DIR%\VC\Tools\MSVC" 2^>nul') do if not defined MSVC_VER set "MSVC_VER=%%v"
 if not defined MSVC_VER (
@@ -50,8 +69,13 @@ set "PATH=%MSVC_BIN%\bin\Host%ARCH%\%ARCH%;%SDK_ROOT%\bin\%SDK_VER%\%ARCH%;%PATH
 goto build_msvc
 
 :build_clang
-set "CC_CLANG_HASH=clang src/core/hash_gen.c -g -O0 -Isrc -o build/hash_gen.exe -Wno-deprecated-declarations -Wno-microsoft-anon-tag -Xlinker /incremental:no -Xlinker /pdb:build/hash_gen.exe.pdb"
-set "CC_CLANG_CUP=clang build.c src/core/build.c src/cup/build.c src/cup/in_repo.c src/cup/c_toolchain/build.c src/cup/bootstrap.c -g -O0 -Isrc -o cup.exe -Wno-deprecated-declarations -Wno-microsoft-anon-tag -Xlinker /noimplib -Xlinker /incremental:no -Xlinker /pdb:build/cup.exe.pdb"
+if /i "%ARCH%"=="x86" (
+    set ARCH= -m32
+) else (
+    set ARCH= -m64
+)
+set "CC_CLANG_HASH=clang src/core/hash_gen.c%ARCH% -g -O0 -Isrc -o build/hash_gen.exe -Wno-deprecated-declarations -Wno-microsoft-anon-tag -Xlinker /incremental:no -Xlinker /pdb:build/hash_gen.exe.pdb"
+set "CC_CLANG_CUP=clang build.c src/core/build.c src/cup/build.c src/cup/in_repo.c src/cup/c_toolchain/build.c src/cup/bootstrap.c%ARCH% -g -O0 -Isrc -o cup.exe -Wno-deprecated-declarations -Wno-microsoft-anon-tag -Xlinker /noimplib -Xlinker /incremental:no -Xlinker /pdb:build/cup.exe.pdb"
 
 %CC_CLANG_HASH% || exit /B 1
 build\hash_gen.exe -o src/core/hash.h src/core/hash_gen.c || exit /B 1
