@@ -545,7 +545,7 @@ static char const* link_cmd_get_option_arch(ToolchainType toolchain, Architectur
         {
             return "-m64";
         }
-        else if (arch == ARCH_X86 || arch == ARCH_ARM)
+        if (arch == ARCH_X86)
         {
             return "-m32";
         }

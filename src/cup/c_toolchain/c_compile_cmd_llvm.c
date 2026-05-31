@@ -23,9 +23,9 @@ void compile_cmdline_node_append_string_array_options(Node* node, char const* op
 static char const* get_arch_option_clang_or_gcc(ArchitectureType arch)
 {
     if (arch == ARCH_UNSPECIFIED) return NULL;
-    if (arch == ARCH_X64 || arch == ARCH_ARM64) return "-m64";
-    if (arch == ARCH_X86 || arch == ARCH_ARM) return "-m32";
-    return "unknown architecture";
+    if (arch == ARCH_X64) return "-m64";
+    if (arch == ARCH_X86) return "-m32";
+    return NULL;
 }
 
 static char const* get_optimization_option_clang_or_gcc(OptimizationType optimization)
