@@ -1199,10 +1199,12 @@ static int build_targets(void)
 static void cmd_visit_dry_run(Node* node, Graph* graph, Executor* executor)
 {
     node_visit(node, graph, executor);
-    if (executor)
+    char const* desc = cmd_get_description(node);
+    if (array_size(desc))
     {
-        node->processed(node, graph);
+        puts(desc);
     }
+    node->processed(node, graph);
 }
 
 static int dry_run(void)
