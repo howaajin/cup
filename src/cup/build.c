@@ -46,7 +46,7 @@ ENTRY(build_make_header)
     Node* link = LINK(make_header);
     link_cmd_setup_self_build(link);
     {
-        link_cmd_set_arch(link, ARCH_X64);
+        link_cmd_set_arch(link, get_self_build_arch());
         Node* src = get_or_add_src("src/cup/make_header.c");
         Node* obj = OBJ(src);
         CC(src, obj);
@@ -266,7 +266,7 @@ ENTRY(build_self_with_source)
     Node* self = EXE("{self_name}");
     Node* link = LINK(self);
     link_cmd_setup_self_build(link);
-    link_cmd_set_arch(link, ARCH_X64);
+    link_cmd_set_arch(link, get_self_build_arch());
 
     Node* cup_lib = LIB("{out_dir}/cup");
     link_cmd_add_input(link, cup_lib);
@@ -369,7 +369,7 @@ ENTRY(build_cup_embedded)
     Node* exe = EXE("{out_dir}/embedded/{self_name}");
     Node* link = LINK(exe);
     link_cmd_setup_self_build(link);
-    link_cmd_set_arch(link, ARCH_X64);
+    link_cmd_set_arch(link, get_self_build_arch());
     Node* def = FILE("{dir}/cup.def");
     link_cmd_set_def_file(link, def);
     for (size_t i = 0; i != static_array_size(cup_common_sources); i++)
@@ -483,7 +483,7 @@ ENTRY(build_cup_res)
         assert(rc_name);
         extern ToolchainType self_build_toolchain;
         Node* cmd = CMD(rc_name);
-        Node* env = get_toolchain_env_node(self_build_toolchain, ARCH_X64);
+        Node* env = get_toolchain_env_node(self_build_toolchain, get_self_build_arch());
         cmd_set_env(cmd, env);
         Node* icon = FILE("{out_dir}/icon.ico");
         Node* rc = FILE("{dir}/cup.rc");

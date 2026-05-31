@@ -1175,6 +1175,11 @@ Node* add_copy_cmd(Node* input, Node* output, char const* file, int line)
     assert(false);
 }
 
+ArchitectureType get_self_build_arch(void)
+{
+    return CURRENT_ARCHITECTURE;
+}
+
 int build_self(void)
 {
     Allocator* allocator = allocator_create_tiny(4096, 4096 * 64);

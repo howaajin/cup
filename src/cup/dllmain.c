@@ -23,6 +23,7 @@ extern char const bin2c_cup_def[];
 extern size_t bin2c_cup_def_size;
 extern Dylib* cup_dll;
 extern void restart(void);
+extern ArchitectureType get_self_build_arch(void);
 
 typedef int FnMain(int argc, char** argv);
 void collect_build_scripts(char const* directory, Allocator* allocator);
@@ -114,7 +115,7 @@ ENTRY(build_cup_dll)
     Node* link = LINK(dll);
     link->internal_flag = true;
     link_cmd_setup_self_build(link);
-    link_cmd_set_arch(link, ARCH_X64);
+    link_cmd_set_arch(link, get_self_build_arch());
 
     extern StringSet* build_scripts;
     for (uint32_t i = build_scripts->begin; i != build_scripts->end; i = hash_next(build_scripts, i))

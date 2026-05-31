@@ -250,3 +250,4 @@ EXPORTS
     ar_cmd_set_toolchain_type
     make_implib_cmd_create
     get_or_add_src
+    get_self_build_arch

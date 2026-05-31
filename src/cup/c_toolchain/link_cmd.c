@@ -486,14 +486,6 @@ static char* link_cmd_get_default_options_msvc_llvm_common(LinkCmd* link, Alloca
     {
         string_concat_c_str(allocator, options, " /noimplib");
     }
-    if (b_generate_debug_info)
-    {
-        string_concat_c_str(allocator, options, " /defaultlib:msvcrtd.lib");
-    }
-    else
-    {
-        string_concat_c_str(allocator, options, " /defaultlib:msvcrt.lib");
-    }
     return options;
 }
 
@@ -547,7 +539,7 @@ static char const* link_cmd_get_default_options(LinkCmd* link, Allocator* alloca
 
 static char const* link_cmd_get_option_arch(ToolchainType toolchain, ArchitectureType arch)
 {
-    if (toolchain == TOOLCHAIN_TYPE_GCC)
+    if (toolchain != TOOLCHAIN_TYPE_MSVC)
     {
         if (arch == ARCH_X64)
         {

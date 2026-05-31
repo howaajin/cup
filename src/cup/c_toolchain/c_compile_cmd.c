@@ -347,11 +347,12 @@ void c_compile_cmd_set_import_map(CCompileCmd* cmd, StringPtrHash* map)
 void c_compile_cmd_add_self_build_options(Node* node)
 {
     extern ToolchainType self_build_toolchain;
+    extern ArchitectureType get_self_build_arch(void);
 
     CCompileCmd* cmd = (CCompileCmd*)node;
     cmd->toolchain = self_build_toolchain;
     cmd->internal_flag = true;
-    c_compile_cmd_set_arch(node, ARCH_X64);
+    c_compile_cmd_set_arch(node, get_self_build_arch());
     if (cmd->toolchain == TOOLCHAIN_TYPE_MSVC)
     {
         c_compile_cmd_set_c_std(node, C_LANGUAGE_STANDARD_23);
