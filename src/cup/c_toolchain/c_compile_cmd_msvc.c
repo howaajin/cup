@@ -189,14 +189,6 @@ void compile_cmdline_node_make_cmdline_msvc_common(Node* node, CCompileCmd* cmd)
     cmd_add_option(node, NULL, "cl", OPTION_EXE);
     cmd_add_output_file_option(node, "/Fo:", cmd->out_obj);
     cmd_add_option(node, "/c", NULL, OPTION_FLAG);
-    if (cmd->optimization_type == OPTIMIZATION_TYPE_DEBUG)
-    {
-        cmd_add_option(node, "/MDd", NULL, OPTION_FLAG);
-    }
-    else
-    {
-        cmd_add_option(node, "/MD", NULL, OPTION_FLAG);
-    }
     compile_cmdline_node_make_cmdline_msvc_scan_deps_common(node, cmd);
     if (cmd->b_generate_debug_info)
     {
