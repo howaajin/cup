@@ -33,7 +33,7 @@ static void test_binary_mode_impl(char const* file, int line)
     os_copy_file(exe, copied_exe);
     char const* cwd = os_get_cwd(allocator_temp());
     os_set_cwd(dir);
-    int result = system("cup" EXE_EXT);
+    int result = system(CURRENT_PLATFORM == PLATFORM_WINDOWS ? "cup" EXE_EXT : "./cup");
     bool build_c_exists = os_file_exists("build.c");
     bool dll_exists = os_file_exists("build/cup" DLL_EXT);
     os_set_cwd(cwd);
