@@ -111,7 +111,7 @@ build\hash_gen.exe -o src\core\hash.h src\core\hash_gen.c || exit /B 1
 %CC_MSVC_REPO% || exit /B 1
 %CC_MSVC_CT% || exit /B 1
 %CC_MSVC_BOOT% || exit /B 1
-link /nologo build/obj/build.c.obj build/obj/src/core/build.c.obj build/obj/src/cup/build.c.obj build/obj/src/cup/in_repo.c.obj build/obj/src/cup/c_toolchain/build.c.obj build/obj/src/cup/bootstrap.c.obj /out:cup.exe /incremental:no /pdb:build\cup.exe.pdb || exit /B 1
+link /nologo build/obj/build.c.obj build/obj/src/core/build.c.obj build/obj/src/cup/build.c.obj build/obj/src/cup/in_repo.c.obj build/obj/src/cup/c_toolchain/build.c.obj build/obj/src/cup/bootstrap.c.obj /debug /out:cup.exe /incremental:no /pdb:build\cup.exe.pdb || exit /B 1
 
 call :gen_compile_commands ^
     "src/core/hash_gen.c|CC_MSVC_HASH" ^
