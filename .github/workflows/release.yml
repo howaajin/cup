@@ -14,8 +14,16 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
+            arch: x64
+          - os: ubuntu-latest
+            platform: linux
+            arch: x86
           - os: windows-latest
             platform: windows
+            arch: x64
+          - os: windows-latest
+            platform: windows
+            arch: x86
           - os: macos-14
             platform: macos
 
@@ -33,7 +41,7 @@ jobs:
 
       - name: Bootstrap (Linux)
         if: matrix.platform == 'linux'
-        run: ./bootstrap.sh
+        run: ./bootstrap.sh ${{ matrix.arch == 'x86' && '-arch x86' || '' }}
 
       - name: Build (Linux)
         if: matrix.platform == 'linux'
@@ -42,7 +50,7 @@ jobs:
       - name: Bootstrap (Windows)
         if: matrix.platform == 'windows'
         shell: cmd
-        run: bootstrap.bat
+        run: bootstrap.bat${{ matrix.arch == 'x86' && ' -arch x86' || '' }}
 
       - name: Build (Windows)
         if: matrix.platform == 'windows'
@@ -60,7 +68,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           mkdir -p _release
-          cp build/embedded/cup _release/
+          cp build/embedded/cup _release/cup-linux-${{ matrix.arch }}
           cp build/header_only/cup.h _release/
 
       - name: Stage Windows artifacts
@@ -68,7 +76,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path _release -Force > $null
-          Copy-Item build/embedded/cup.exe _release/
+          Copy-Item build/embedded/cup.exe _release/cup-windows-${{ matrix.arch }}.exe
 
       - name: Stage macOS artifacts
         if: matrix.platform == 'macos'
@@ -78,7 +86,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: cup-${{ matrix.platform }}
+          name: cup-${{ matrix.platform }}-${{ matrix.arch || 'arm64' }}
           path: _release/
 
   release:
@@ -109,10 +117,12 @@ jobs:
         run: |
           sleep 3
           gh release upload "$TAG" --clobber \
-            "_artifacts/cup-linux/cup#cup Linux (x64)" \
-            "_artifacts/cup-linux/cup.h#cup.h" \
-            "_artifacts/cup-windows/cup.exe#cup Windows (x64)" \
-            "_artifacts/cup-macos/cup-macos#cup macOS (arm64)"
+            "_artifacts/cup-linux-x64/cup-linux-x64#cup Linux (x64)" \
+            "_artifacts/cup-linux-x86/cup-linux-x86#cup Linux (x86)" \
+            "_artifacts/cup-linux-x64/cup.h#cup.h" \
+            "_artifacts/cup-windows-x64/cup-windows-x64.exe#cup Windows (x64).exe" \
+            "_artifacts/cup-windows-x86/cup-windows-x86.exe#cup Windows (x86).exe" \
+            "_artifacts/cup-macos-arm64/cup-macos#cup macOS (arm64)"
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag }}
