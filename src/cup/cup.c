@@ -1168,11 +1168,7 @@ Node* add_copy_cmd(Node* input, Node* output, char const* file, int line)
     {
         return add_copy_cmd_windows(input, output, file, line);
     }
-    if (CURRENT_PLATFORM == PLATFORM_LINUX)
-    {
-        return add_copy_cmd_linux(input, output, file, line);
-    }
-    assert(false);
+    return add_copy_cmd_linux(input, output, file, line);
 }
 
 ArchitectureType get_self_build_arch(void)
