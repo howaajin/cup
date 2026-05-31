@@ -19,9 +19,11 @@ jobs:
           - os: macos-13
             platform: macos
             arch: x64
+            artifact_name: macos-x64
           - os: macos-14
             platform: macos
             arch: arm64
+            artifact_name: macos-arm64
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -82,9 +84,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: cup-${{ matrix.platform }}${{
-            matrix.arch && format('-{0}', matrix.arch) || ''
-          }}
+          name: cup-${{ matrix.artifact_name || matrix.platform }}
           path: _release/
 
   release:
