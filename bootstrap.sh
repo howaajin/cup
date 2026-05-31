@@ -2,14 +2,38 @@
 
 set -e
 
+ARCH=""
 CLANG_FLAGS=""
-
-OS=$(uname -s)
 LINK_FLAGS=""
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -arch)
+            shift
+            ARCH="$1"
+            ;;
+        *)
+            echo "error: unknown option $1"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+if [ "$ARCH" = "x86" ]; then
+    CLANG_FLAGS="-m32"
+    LINK_FLAGS="-m32"
+elif [ "$ARCH" = "x64" ]; then
+    CLANG_FLAGS="-m64"
+    LINK_FLAGS="-m64"
+elif [ -n "$ARCH" ]; then
+    echo "error: only supported x86/x64"
+    exit 1
+fi
 
 mkdir -p build
 
-gcc src/core/hash_gen.c -g -O0 -Isrc -fms-extensions -Wno-microsoft-anon-tag -o build/hash_gen \
+gcc $CLANG_FLAGS src/core/hash_gen.c -g -O0 -Isrc -fms-extensions -Wno-microsoft-anon-tag -o build/hash_gen \
     -Wno-deprecated-declarations
 
 build/hash_gen -o src/core/hash.h src/core/hash_gen.c
