@@ -16,8 +16,12 @@ jobs:
             platform: linux
           - os: windows-latest
             platform: windows
-          - os: macos-latest
+          - os: macos-13
             platform: macos
+            arch: x64
+          - os: macos-14
+            platform: macos
+            arch: arm64
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -74,11 +78,13 @@ jobs:
         if: matrix.platform == 'macos'
         run: |
           mkdir -p _release
-          cp build/embedded/cup _release/cup-macos
+          cp build/embedded/cup _release/cup-macos-${{ matrix.arch }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: cup-${{ matrix.platform }}
+          name: cup-${{ matrix.platform }}${{
+            matrix.arch && format('-{0}', matrix.arch) || ''
+          }}
           path: _release/
 
   release:
@@ -112,7 +118,8 @@ jobs:
             "_artifacts/cup-linux/cup#cup Linux (x64)" \
             "_artifacts/cup-linux/cup.h#cup.h" \
             "_artifacts/cup-windows/cup.exe#cup Windows (x64)" \
-            "_artifacts/cup-macos/cup-macos#cup macOS (x64)"
+            "_artifacts/cup-macos-x64/cup-macos-x64#cup macOS (x64)" \
+            "_artifacts/cup-macos-arm64/cup-macos-arm64#cup macOS (arm64)"
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag }}
