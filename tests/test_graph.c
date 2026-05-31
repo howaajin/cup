@@ -155,18 +155,18 @@ TEST(graph_multiple_sources, graph)
     graph_add_target(graph, b);
     graph_add_target(graph, c);
     Set set = {.allocator = allocator_temp()};
-    hash_insert(&set, (uint64_t)a);
-    hash_insert(&set, (uint64_t)b);
-    hash_insert(&set, (uint64_t)c);
+    hash_insert(&set, (uintptr_t)a);
+    hash_insert(&set, (uintptr_t)b);
+    hash_insert(&set, (uintptr_t)c);
 
     uint32_t i;
-    i = hash_index(&set, (uint64_t)graph_pop(graph));
+    i = hash_index(&set, (uintptr_t)graph_pop(graph));
     ASSERT(i != HASH_INVALID_INDEX);
     hash_remove(&set, i);
-    i = hash_index(&set, (uint64_t)graph_pop(graph));
+    i = hash_index(&set, (uintptr_t)graph_pop(graph));
     ASSERT(i != HASH_INVALID_INDEX);
     hash_remove(&set, i);
-    i = hash_index(&set, (uint64_t)graph_pop(graph));
+    i = hash_index(&set, (uintptr_t)graph_pop(graph));
     ASSERT(i != HASH_INVALID_INDEX);
     hash_remove(&set, i);
     ASSERT(graph_pop(graph) == NULL);

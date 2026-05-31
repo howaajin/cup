@@ -158,7 +158,7 @@ static void link_cmd_get_lib_obj_set(Node** files, Set* set)
         {
             if (ar_cmd->inputs[j]->file_type == FILE_TYPE_OBJ)
             {
-                hash_insert(set, (uint64_t)ar_cmd->inputs[j]);
+                hash_insert(set, (uintptr_t)ar_cmd->inputs[j]);
             }
         }
     }
@@ -186,7 +186,7 @@ static Node** link_cmd_collect_all_linked(LinkCmd* cmd, Allocator* temp_allocato
     for (size_t i = 0; i != array_size(temp_files); i++)
     {
         Node* file = temp_files[i];
-        if (!hash_has_key(&lib_objs, (uint64_t)file))
+        if (!hash_has_key(&lib_objs, (uintptr_t)file))
         {
             array_push(temp_allocator, files, file);
         }

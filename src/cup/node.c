@@ -166,7 +166,7 @@ void node_set_name(Node* node, char const* name)
     }
     node->name = string_append_c_str(node_allocator, node->name, name);
     hash_key(hash_name_to_node, i) = node->name;
-    hash_value(hash_name_to_node, i) = (uint64_t)node;
+    hash_value(hash_name_to_node, i) = (uintptr_t)node;
 }
 
 void node_set_alias(Node* node, char const* alias)
@@ -179,7 +179,7 @@ void node_set_alias(Node* node, char const* alias)
     }
     alias = string_from_c_str(node_allocator, alias);
     hash_key(hash_name_to_node, i) = alias;
-    hash_value(hash_name_to_node, i) = (uint64_t)node;
+    hash_value(hash_name_to_node, i) = (uintptr_t)node;
 }
 
 void node_add_debugger_argument(Node* node, char const* arg)
@@ -963,7 +963,7 @@ Node* add_process_cmd_from_exe_node(Node* exe, char const* name, char const* fil
 Node* find_node(char const* name)
 {
     assert(hash_name_to_node);
-    return (Node*)hash_get(hash_name_to_node, name);
+    return (Node*)(uintptr_t)hash_get(hash_name_to_node, name);
 }
 
 bool has_dependency(Node* node, Node* dependency)

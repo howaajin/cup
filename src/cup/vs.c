@@ -537,12 +537,12 @@ static void vcxproj_set_deps(Vcxproj* p, Node* cmd, Hash* hash_node_to_vcxproj)
     {
         Node* node = array_pop(stack);
         bool b_existed;
-        hash_insert_check(&set, (uint64_t)node, &b_existed);
+        hash_insert_check(&set, (uintptr_t)node, &b_existed);
         if (b_existed)
         {
             continue;
         }
-        Vcxproj* dependency = (Vcxproj*)hash_get(hash_node_to_vcxproj, (uint64_t)node);
+        Vcxproj* dependency = (Vcxproj*)(uintptr_t)hash_get(hash_node_to_vcxproj, (uintptr_t)node);
         if (dependency && (dependency != p))
         {
             vcxproj_add_dependency(p, dependency);
@@ -1001,8 +1001,8 @@ static SlnFile* sln_from_graph(Allocator* allocator)
         if (p)
         {
             sln_add_project(sln, p);
-            uint64_t key = (uint64_t)nodes[i];
-            hash_put(&hash_node_to_vcxproj, key, (uint64_t)p);
+            uint64_t key = (uintptr_t)nodes[i];
+            hash_put(&hash_node_to_vcxproj, key, (uintptr_t)p);
         }
     }
     Vcxproj* src_proj = src_project(allocator);
@@ -1010,8 +1010,8 @@ static SlnFile* sln_from_graph(Allocator* allocator)
     Hash* h = &hash_node_to_vcxproj;
     for (uint32_t i = h->begin; i != h->end; i = hash_next(h, i))
     {
-        Node* node = (Node*)hash_key(h, i);
-        Vcxproj* p = (Vcxproj*)hash_value(h, i);
+        Node* node = (Node*)(uintptr_t)hash_key(h, i);
+        Vcxproj* p = (Vcxproj*)(uintptr_t)hash_value(h, i);
         vcxproj_set_deps(p, node, h);
     }
     return sln;

@@ -549,7 +549,7 @@ static int determine_test_targets(void)
 static void remove_generated_files(Node* target, Set* set, Node* self)
 {
     bool b_existed;
-    hash_insert_check(set, (uint64_t)target, &b_existed);
+    hash_insert_check(set, (uintptr_t)target, &b_existed);
     if (b_existed)
     {
         return;
