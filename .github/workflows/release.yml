@@ -72,7 +72,11 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           mkdir -p _release
-          cp build/embedded/cup _release/cup-linux-${{ matrix.arch }}
+          if [ "${{ matrix.arch }}" = "x64" ]; then
+            cp build/embedded/cup _release/cup
+          else
+            cp build/embedded/cup _release/cup-linux-x86
+          fi
           cp build/header_only/cup.h _release/
 
       - name: Stage Windows artifacts
@@ -80,7 +84,11 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path _release -Force > $null
-          Copy-Item build/embedded/cup.exe _release/cup-windows-${{ matrix.arch }}.exe
+          if ("${{ matrix.arch }}" -eq "x64") {
+            Copy-Item build/embedded/cup.exe _release/cup.exe
+          } else {
+            Copy-Item build/embedded/cup.exe _release/cup-windows-x86.exe
+          }
 
       - name: Stage macOS artifacts
         if: matrix.platform == 'macos'
@@ -121,10 +129,10 @@ jobs:
         run: |
           sleep 3
           gh release upload "$TAG" --clobber \
-            "_artifacts/cup-linux-x64/cup-linux-x64#cup Linux (x64)" \
+            "_artifacts/cup-linux-x64/cup#cup Linux (x64)" \
             "_artifacts/cup-linux-x86/cup-linux-x86#cup Linux (x86)" \
             "_artifacts/cup-linux-x64/cup.h#cup.h" \
-            "_artifacts/cup-windows-x64/cup-windows-x64.exe#cup Windows (x64).exe" \
+            "_artifacts/cup-windows-x64/cup.exe#cup Windows (x64).exe" \
             "_artifacts/cup-windows-x86/cup-windows-x86.exe#cup Windows (x86).exe" \
             "_artifacts/cup-macos-arm64/cup-macos#cup macOS (arm64)"
         env:
