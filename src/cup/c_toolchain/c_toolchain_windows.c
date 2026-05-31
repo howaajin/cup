@@ -62,7 +62,7 @@ static char const* msvc_find_sdk(char** latest_version, Allocator* allocator)
         HKEY_LOCAL_MACHINE,
         root_sub_key,
         0,
-        KEY_READ,
+        KEY_READ | KEY_WOW64_64KEY,
         &h_key);
     if (result != ERROR_SUCCESS)
     {
@@ -112,7 +112,7 @@ static char const* msvc_find_sdk(char** latest_version, Allocator* allocator)
         HKEY_LOCAL_MACHINE,
         root_sub_key,
         0,
-        KEY_READ,
+        KEY_READ | KEY_WOW64_64KEY,
         &h_key);
     if (result != ERROR_SUCCESS)
     {
