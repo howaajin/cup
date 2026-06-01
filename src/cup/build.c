@@ -428,7 +428,8 @@ ENTRY(build_gen_icon_exe)
 {
     Node* src = SRC("{dir}/gen_icon.c");
     Node* obj = OBJ(src);
-    CC(src, obj);
+    Node* cc = CC(src, obj);
+    c_compile_cmd_add_self_build_options(cc);
     Node* link = LINK(EXE("{out_dir}/gen_icon"));
     link_cmd_setup_self_build(link);
     link_cmd_add_input(link, obj);
