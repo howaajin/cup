@@ -46,6 +46,15 @@ Cup can be used in two ways:
 3. If no `build.c` exists, Cup generates a default one. Edit it as needed.
 4. You can run `cup -h` to see more command-line options.
 
+### AI Agent Skills
+
+Pre-built skills for AI coding agents (OpenCode, Claude Code, etc.) are available in the `skills/` directory. Install by copying a skill folder into `.opencode/skills/` (or the equivalent directory for your agent). Once installed, if your project contains `cup.h` or `cup.exe`, you can ask the agent to write `build.c` build scripts, write tests, and use Cup's built-in testing framework to build and verify the program — the skill provides it with the correct macros, recipes, and command-line flags.
+
+For example, you can ask the agent:
+
+> "Write some examples proving you already know how to use Cup."
+>
+
 ## Build from Source
 
 Run `bootstrap.bat` (Windows) or `bootstrap.sh` (Linux/macOS). Generates the embedded binary in `build/embedded/`, the single-header distribution in `build/header_only/`, and a local `cup` / `cup.exe` executable in the project root for building this repository itself.
