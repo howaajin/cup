@@ -55,10 +55,6 @@ ENTRY(build_self_header_only)
             {
                 c_compile_cmd_add_include_directory(cc, cup_h_dir);
             }
-            if (default_toolchain == TOOLCHAIN_TYPE_MSVC)
-            {
-                c_compile_cmd_add_flag(cc, "/experimental:c11atomics");
-            }
             if (CURRENT_PLATFORM == PLATFORM_LINUX)
             {
                 c_compile_cmd_add_define(cc, "_GNU_SOURCE");
@@ -96,6 +92,15 @@ static void bootstrap_compile_link_make_cmdline_llvm_gcc_zig(Node* node, Node* o
     cmd_add_output(node, out_exe);
 }
 
+static void bootstrap_compile_link_msvc_write_stdout_line_fn(Node* node, char const* line)
+{
+    if (string_equal(line, "cup.h"))
+    {
+        return;
+    }
+    cmd_write_stderr_line(node, line);
+}
+
 static void bootstrap_compile_link_make_cmdline_msvc(Node* node, Node* out_exe)
 {
     extern Node* msvc_get_env_node(ToolchainType toolchain_type, ArchitectureType arch);
@@ -109,7 +114,6 @@ static void bootstrap_compile_link_make_cmdline_msvc(Node* node, Node* out_exe)
     cmd_add_option(node, "/Fe:", out_exe->path, OPTION_OUTPUT);
     cmd_add_option(node, "/Tc ", cup_h->path, OPTION_INPUT);
     cmd_add_option(node, "/std:", "clatest", OPTION_FLAG);
-    cmd_add_option(node, "/experimental:", "c11atomics", OPTION_FLAG);
     cmd_add_option(node, "/D", "MAIN_ENTRY", OPTION_BRIGHT_FLAG);
     cmd_add_option(node, "/Od", NULL, OPTION_FLAG);
     cmd_add_option(node, "/nologo", NULL, OPTION_FLAG);
@@ -123,6 +127,8 @@ static void bootstrap_compile_link_make_cmdline_msvc(Node* node, Node* out_exe)
     cmd_add_input(node, cup_h);
     cmd_add_output(node, out_exe);
     cmd_add_output(node, pdb);
+    node->write_stdout_line_fn = bootstrap_compile_link_msvc_write_stdout_line_fn;
+    node->write_stderr_line_fn = bootstrap_compile_link_msvc_write_stdout_line_fn;
 }
 
 int build_self(void);
