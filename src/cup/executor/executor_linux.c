@@ -86,7 +86,11 @@ void executor_update_thread(ExecutorSlot* slot, struct epoll_event* e)
     if (e->events & EPOLLIN)
     {
         uint64_t signal_value;
-        read(slot->event_fd, &signal_value, sizeof(signal_value));
+        ssize_t n = read(slot->event_fd, &signal_value, sizeof(signal_value));
+        if (n == -1)
+        {
+            perror("read event_fd");
+        }
         void* return_value;
         pthread_join(slot->thread_id, &return_value);
         if (epoll_ctl(slot->epoll_fd, EPOLL_CTL_DEL, slot->event_fd, NULL) == -1)
@@ -163,7 +167,11 @@ static void* executor_callback_thread_warpper(void* ctx)
     task->exit_code = EXIT_FAILURE;
     task->exit_code = task->thread_fn(task, task->ctx);
     uint64_t signal_value = 1;
-    ssize_t s = write(slot->event_fd, &signal_value, sizeof(signal_value));
+    ssize_t written = write(slot->event_fd, &signal_value, sizeof(signal_value));
+    if (written == -1)
+    {
+        perror("write event_fd");
+    }
     return NULL;
 }
 
@@ -177,7 +185,7 @@ void executor_execute_slot_thread(ExecutorSlot* slot)
     {
         assert(false);
     }
-    int result = pthread_create(&s->thread_id, NULL, executor_callback_thread_warpper, s);
+    pthread_create(&s->thread_id, NULL, executor_callback_thread_warpper, s);
 }
 
 void executor_execute_slot_process(ExecutorSlot* slot)

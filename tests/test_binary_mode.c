@@ -23,11 +23,17 @@ static void test_binary_mode_impl(char const* file, int line)
     }
     else if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
-        system(fmt("rmdir /s /q \"{}\" 2>NUL", dir));
+        if (system(fmt("rmdir /s /q \"{}\" 2>NUL", dir)) != 0)
+        {
+            fprintf(stderr, "WARNING: rmdir failed for '%s'\n", dir);
+        }
     }
     else
     {
-        system(fmt("rm -rf \"{}\" 2>/dev/null", dir));
+        if (system(fmt("rm -rf \"{}\" 2>/dev/null", dir)) != 0)
+        {
+            fprintf(stderr, "WARNING: rm failed for '%s'\n", dir);
+        }
     }
     os_ensure_dir_existed(copied_exe);
     os_copy_file(exe, copied_exe);
@@ -46,11 +52,17 @@ static void test_binary_mode_impl(char const* file, int line)
     }
     else if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
-        system(fmt("rmdir /s /q \"{}\" 2>NUL", dir));
+        if (system(fmt("rmdir /s /q \"{}\" 2>NUL", dir)) != 0)
+        {
+            fprintf(stderr, "WARNING: rmdir failed for '%s'\n", dir);
+        }
     }
     else
     {
-        system(fmt("rm -rf \"{}\" 2>/dev/null", dir));
+        if (system(fmt("rm -rf \"{}\" 2>/dev/null", dir)) != 0)
+        {
+            fprintf(stderr, "WARNING: rm failed for '%s'\n", dir);
+        }
     }
 }
 

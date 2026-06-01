@@ -44,7 +44,12 @@ int main(int argc, char** argv)
         printf("Unable to allocate memory");
         return EXIT_FAILURE;
     }
-    fread(data, 1, num_bytes, in);
+    size_t bytes_read = fread(data, 1, num_bytes, in);
+    if (bytes_read != (size_t)num_bytes)
+    {
+        fprintf(stderr, "Failed to read file '%s'\n", infile_name);
+        return EXIT_FAILURE;
+    }
     fclose(in);
 
     // Open outfile
