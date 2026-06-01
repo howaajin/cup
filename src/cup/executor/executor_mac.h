@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <sys/event.h> // kqueue 头文件
+#include <sys/event.h>
 #include <sys/types.h>
 
 #define OUTPUT_BUFFER_SIZE 1024
@@ -51,7 +51,7 @@ struct ExecutorSlot
         struct
         {
             pthread_t thread_id;
-            int thread_done_pipe[2]; // [0] read, [1] write (替代 eventfd)
+            int thread_done_pipe[2];
         };
     };
     Task* task;
