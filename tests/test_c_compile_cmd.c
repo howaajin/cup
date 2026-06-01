@@ -433,3 +433,182 @@ TEST(test_c_compile_cmd_msvc_cppm, c_compile_cmd)
     ASSERT(string_contains(cmd->cmdline, "/TP"));
     ASSERT(string_contains(cmd->cmdline, "/reference std="));
 }
+
+TEST(test_c_compile_cmd_gcc_asm, c_compile_cmd)
+{
+    set_default_toolchain(TOOLCHAIN_TYPE_GCC);
+
+    Node* src = SRC("fake.s");
+    Node* obj = get_default_obj(src);
+    Node* node = c_compile_cmd_create(src, obj, __FILE__, __LINE__);
+
+    CCompileCmd* cmd = (CCompileCmd*)node;
+
+    ASSERT(cmd->source_type == SOURCE_TYPE_ASM);
+
+    cmd->b_generate_debug_info = true;
+    cmd->b_cache_header_dependencies = true;
+    cmd->b_color_diagnostics = true;
+    cmd->optimization_type = OPTIMIZATION_TYPE_DEBUG;
+    cmd->arch = ARCH_X64;
+    c_compile_cmd_add_include_directory(node, "src");
+    c_compile_cmd_add_define(node, "DEBUG");
+    c_compile_cmd_add_flag(node, "-xxx");
+
+    cmd->prepare(node);
+
+    // Edges
+    ASSERT(has_dependency(node, cmd->src));
+    ASSERT(has_dependency(node, cmd->make_cmdline));
+    ASSERT(has_dependency(cmd->out_obj, node));
+
+    // Cmdline
+    CompileCmdline* compile_cmdline_node = (CompileCmdline*)cmd->make_cmdline;
+    compile_cmdline_node_make_cmdline(compile_cmdline_node);
+    ASSERT(string_starts_with(cmd->cmdline, "gcc "));
+    ASSERT(string_contains(cmd->cmdline, "-g"));
+    ASSERT(string_contains(cmd->cmdline, "-Isrc"));
+    ASSERT(string_contains(cmd->cmdline, "-DDEBUG"));
+    ASSERT(string_contains(cmd->cmdline, "-xxx"));
+    ASSERT(string_contains(cmd->cmdline, "-m64"));
+    // Pure .s asm: no optimization, no color diagnostics, no dep tracking
+    ASSERT(!string_contains(cmd->cmdline, "-O"));
+    ASSERT(!string_contains(cmd->extra_options, "-fdiagnostics-color"));
+    ASSERT(!string_contains(cmd->cmdline, "-MMD"));
+    ASSERT(!string_contains(cmd->cmdline, "-MF"));
+    // No C/C++ std flags for asm
+    ASSERT(!string_contains(cmd->cmdline, "-std=c"));
+    ASSERT(!string_contains(cmd->cmdline, "-std=c++"));
+}
+
+TEST(test_c_compile_cmd_llvm_asm, c_compile_cmd)
+{
+    set_default_toolchain(TOOLCHAIN_TYPE_LLVM);
+
+    Node* src = SRC("fake.s");
+    Node* obj = get_default_obj(src);
+    Node* node = c_compile_cmd_create(src, obj, __FILE__, __LINE__);
+
+    CCompileCmd* cmd = (CCompileCmd*)node;
+
+    ASSERT(cmd->source_type == SOURCE_TYPE_ASM);
+
+    cmd->b_generate_debug_info = true;
+    cmd->b_cache_header_dependencies = true;
+    cmd->b_color_diagnostics = true;
+    cmd->optimization_type = OPTIMIZATION_TYPE_DEBUG;
+    cmd->arch = ARCH_X64;
+    c_compile_cmd_add_include_directory(node, "src");
+    c_compile_cmd_add_define(node, "ASM_DEFINE");
+    c_compile_cmd_add_flag(node, "-Wa,-alh");
+
+    cmd->prepare(node);
+
+    // Edges
+    ASSERT(has_dependency(node, cmd->src));
+    ASSERT(has_dependency(node, cmd->make_cmdline));
+    ASSERT(has_dependency(cmd->out_obj, node));
+
+    // Cmdline
+    CompileCmdline* compile_cmdline_node = (CompileCmdline*)cmd->make_cmdline;
+    compile_cmdline_node_make_cmdline(compile_cmdline_node);
+    ASSERT(string_starts_with(cmd->cmdline, "clang "));
+    ASSERT(string_contains(cmd->cmdline, "-g"));
+    ASSERT(string_contains(cmd->cmdline, "-Isrc"));
+    ASSERT(string_contains(cmd->cmdline, "-DASM_DEFINE"));
+    ASSERT(string_contains(cmd->cmdline, "-Wa,-alh"));
+    ASSERT(string_contains(cmd->cmdline, "-m64"));
+    // Pure .s asm: no optimization, no color diagnostics, no dep tracking
+    ASSERT(!string_contains(cmd->cmdline, "-O"));
+    ASSERT(!string_contains(cmd->extra_options, "-fcolor-diagnostics"));
+    ASSERT(!string_contains(cmd->extra_options, "-fansi-escape-codes"));
+    ASSERT(!string_contains(cmd->cmdline, "-MMD"));
+    ASSERT(!string_contains(cmd->cmdline, "-MF"));
+    // No C/C++ std flags for asm
+    ASSERT(!string_contains(cmd->cmdline, "-std=c"));
+    ASSERT(!string_contains(cmd->cmdline, "-std=c++"));
+}
+
+TEST(test_c_compile_cmd_zigcc_asm, c_compile_cmd)
+{
+    set_default_toolchain(TOOLCHAIN_TYPE_ZIG);
+
+    Node* src = SRC("fake.s");
+    Node* obj = get_default_obj(src);
+    Node* node = c_compile_cmd_create(src, obj, __FILE__, __LINE__);
+
+    CCompileCmd* cmd = (CCompileCmd*)node;
+
+    ASSERT(cmd->source_type == SOURCE_TYPE_ASM);
+
+    cmd->b_generate_debug_info = true;
+    cmd->b_cache_header_dependencies = true;
+    cmd->b_color_diagnostics = true;
+    cmd->optimization_type = OPTIMIZATION_TYPE_RELEASE_FAST;
+    cmd->arch = ARCH_X64;
+    c_compile_cmd_add_include_directory(node, "include");
+    c_compile_cmd_add_define(node, "FEATURE=1");
+
+    cmd->prepare(node);
+
+    // Edges
+    ASSERT(has_dependency(node, cmd->src));
+    ASSERT(has_dependency(node, cmd->make_cmdline));
+    ASSERT(has_dependency(cmd->out_obj, node));
+
+    // Cmdline
+    CompileCmdline* compile_cmdline_node = (CompileCmdline*)cmd->make_cmdline;
+    compile_cmdline_node_make_cmdline(compile_cmdline_node);
+    ASSERT(string_starts_with(cmd->cmdline, "zig cc "));
+    ASSERT(string_contains(cmd->cmdline, "-g"));
+    ASSERT(string_contains(cmd->cmdline, "-Iinclude"));
+    ASSERT(string_contains(cmd->cmdline, "-DFEATURE=1"));
+    ASSERT(string_contains(cmd->cmdline, "-m64"));
+    // Pure .s asm: no optimization, no color diagnostics, no dep tracking
+    ASSERT(!string_contains(cmd->cmdline, "-O"));
+    ASSERT(!string_contains(cmd->extra_options, "-fcolor-diagnostics"));
+    ASSERT(!string_contains(cmd->extra_options, "-fansi-escape-codes"));
+    ASSERT(!string_contains(cmd->extra_options, "-fdiagnostics-color=always"));
+    ASSERT(!string_contains(cmd->cmdline, "-MMD"));
+    ASSERT(!string_contains(cmd->cmdline, "-MF"));
+    // No C/C++ std flags for asm
+    ASSERT(!string_contains(cmd->cmdline, "-std=c"));
+    ASSERT(!string_contains(cmd->cmdline, "-std=c++"));
+}
+
+TEST(test_c_compile_cmd_msvc_asm, c_compile_cmd)
+{
+    set_default_toolchain(TOOLCHAIN_TYPE_MSVC);
+
+    Node* src = SRC("fake.asm");
+    Node* obj = get_default_obj(src);
+    Node* node = c_compile_cmd_create(src, obj, __FILE__, __LINE__);
+
+    CCompileCmd* cmd = (CCompileCmd*)node;
+
+    ASSERT(cmd->source_type == SOURCE_TYPE_ASM);
+
+    cmd->b_generate_debug_info = true;
+    cmd->b_cache_header_dependencies = true;
+    cmd->b_color_diagnostics = true;
+    cmd->optimization_type = OPTIMIZATION_TYPE_DEBUG;
+    cmd->arch = ARCH_X64;
+    c_compile_cmd_add_include_directory(node, "include");
+    c_compile_cmd_add_define(node, "WIN64");
+
+    cmd->prepare(node);
+
+    // Edges
+    ASSERT(has_dependency(node, cmd->src));
+    ASSERT(has_dependency(node, cmd->make_cmdline));
+    ASSERT(has_dependency(cmd->out_obj, node));
+
+    // Cmdline
+    CompileCmdline* compile_cmdline_node = (CompileCmdline*)cmd->make_cmdline;
+    compile_cmdline_node_make_cmdline(compile_cmdline_node);
+    ASSERT(string_starts_with(cmd->cmdline, "ml64 "));
+    ASSERT(string_contains(cmd->cmdline, "/nologo"));
+    ASSERT(string_contains(cmd->cmdline, "/Zi"));
+    ASSERT(string_contains(cmd->cmdline, "/Iinclude"));
+    ASSERT(string_contains(cmd->cmdline, "/DWIN64"));
+}

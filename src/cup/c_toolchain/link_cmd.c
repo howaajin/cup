@@ -211,7 +211,7 @@ static void link_cmd_add_link_lib_option(Node* node, char const* lib_name)
     extern char const* desc_color_reset;
     extern char const* desc_color_flag;
 
-    if (link->linker_type == LINKER_LINK || link->linker_type == LINKER_LLVM_LINK)
+    if (link->linker_type == LINKER_LINK)
     {
         string_printf(node_allocator, node->cmdline, " %s.lib", lib_name);
         string_printf(node_allocator, node->description, " %s%s.lib%s", desc_color_flag, lib_name, desc_color_reset);
@@ -316,9 +316,13 @@ Node* link_cmd_set_pdb_base_on_output(Node* node)
 
 static char const* link_cmd_get_out_option(LinkerType linker_type)
 {
-    if (linker_type == LINKER_LLVM_LINK || linker_type == LINKER_LINK)
+    if (linker_type == LINKER_LINK)
     {
         return "/out:";
+    }
+    if (linker_type == LINKER_LLVM_LINK || (CURRENT_PLATFORM == PLATFORM_WINDOWS && linker_type == LINKER_LLVM_LLD))
+    {
+        return "-Wl,/out:";
     }
     return "-o ";
 }
@@ -390,15 +394,11 @@ static char const* link_cmd_get_linker(LinkCmd* cmd)
 {
     if (cmd->toolchain == TOOLCHAIN_TYPE_LLVM)
     {
-        if (cmd->linker_type == LINKER_LLVM_LINK)
-        {
-            return "lld-link";
-        }
         if (cmd->linker_type == LINKER_LINK)
         {
             return "link";
         }
-        if (cmd->linker_type == LINKER_LLVM_LD || cmd->linker_type == LINKER_LLVM_LLD)
+        if (cmd->linker_type == LINKER_LLVM_LD || cmd->linker_type == LINKER_LLVM_LLD || cmd->linker_type == LINKER_LLVM_LINK)
         {
             return link_cmd_get_linker_gcc_llvm_zig(cmd, cmd->toolchain);
         }
@@ -418,7 +418,7 @@ static char const* link_cmd_get_linker(LinkCmd* cmd)
 
 static char const* link_cmd_get_option_shared(LinkerType linker_type)
 {
-    if (linker_type == LINKER_LLVM_LINK || linker_type == LINKER_LINK)
+    if (linker_type == LINKER_LINK)
     {
         return "/dll";
     }
@@ -427,11 +427,11 @@ static char const* link_cmd_get_option_shared(LinkerType linker_type)
 
 static char const* link_cmd_get_option_pdb(LinkerType linker_type)
 {
-    if (linker_type == LINKER_LINK || linker_type == LINKER_LLVM_LINK)
+    if (linker_type == LINKER_LINK)
     {
         return "/pdb:";
     }
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && (linker_type == LINKER_LLVM_LD || linker_type == LINKER_LLVM_LLD))
+    if (linker_type == LINKER_LLVM_LINK || (CURRENT_PLATFORM == PLATFORM_WINDOWS && linker_type == LINKER_LLVM_LLD))
     {
         return "-Wl,/pdb:";
     }
@@ -440,11 +440,11 @@ static char const* link_cmd_get_option_pdb(LinkerType linker_type)
 
 static char const* link_cmd_get_option_def(LinkerType linker_type)
 {
-    if (linker_type == LINKER_LLVM_LINK || linker_type == LINKER_LINK)
+    if (linker_type == LINKER_LINK)
     {
         return "/def:";
     }
-    if (linker_type == LINKER_LLVM_LD || linker_type == LINKER_LLVM_LLD)
+    if ((linker_type == LINKER_LLVM_LINK) || (CURRENT_PLATFORM == PLATFORM_WINDOWS && linker_type == LINKER_LLVM_LLD))
     {
         return "-Wl,/def:";
     }
@@ -453,13 +453,13 @@ static char const* link_cmd_get_option_def(LinkerType linker_type)
 
 static char const* link_cmd_get_option_out_import_lib(LinkerType linker_type)
 {
-    if (linker_type == LINKER_LLVM_LINK || linker_type == LINKER_LINK)
+    if (linker_type == LINKER_LINK)
     {
         return "/implib:";
     }
     if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
-        if (linker_type == LINKER_LLVM_LD || linker_type == LINKER_LLVM_LLD)
+        if (linker_type == LINKER_LLVM_LLD || linker_type == LINKER_LLVM_LINK)
         {
             return "-Wl,/implib:";
         }
@@ -473,11 +473,19 @@ static char const* link_cmd_get_option_out_import_lib(LinkerType linker_type)
 
 static char const* link_cmd_get_option_entry(LinkerType linker_type)
 {
-    if (linker_type == LINKER_LLVM_LINK || linker_type == LINKER_LINK)
+    if (linker_type == LINKER_LINK)
     {
-        return "/entry";
+        return "/entry:";
     }
-    return "-e";
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && (linker_type == LINKER_LLVM_LLD || linker_type == LINKER_LLVM_LINK))
+    {
+        return "-Wl,/entry:";
+    }
+    if (linker_type == LINKER_LLVM_LD)
+    {
+        return "-Wl,-e ";
+    }
+    return "-e ";
 }
 
 static char* link_cmd_get_default_options_msvc_llvm_common(LinkCmd* link, Allocator* allocator, char* options)
@@ -496,16 +504,15 @@ static char const* link_cmd_get_default_options_llvm(LinkCmd* link, Allocator* a
     {
         string_concat_c_str(allocator, options, " -stdlib=libc++");
     }
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && link->linker_type == LINKER_LLVM_LINK)
+    if (link->linker_type == LINKER_LLVM_LD)
     {
-        options = link_cmd_get_default_options_msvc_llvm_common(link, allocator, options);
+        string_concat_c_str(allocator, options, " -fuse-ld=ld");
     }
-    if (link->linker_type == LINKER_LLVM_LLD)
+    if (link->linker_type == LINKER_LLVM_LINK)
     {
-        string_concat_c_str(allocator, options, " -fuse-ld=lld");
+        string_concat_c_str(allocator, options, " -fuse-ld=link");
     }
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS &&
-        (link->linker_type == LINKER_LLVM_LD || link->linker_type == LINKER_LLVM_LLD))
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && (link->linker_type == LINKER_LLVM_LLD || link->linker_type == LINKER_LLVM_LINK))
     {
         if (link->out_import_lib == NULL)
         {
@@ -555,7 +562,7 @@ static char const* link_cmd_get_option_arch(ToolchainType toolchain, Architectur
 
 static char const* link_cmd_get_option_debug(LinkerType linker_type)
 {
-    if (linker_type == LINKER_LLVM_LINK || linker_type == LINKER_LINK)
+    if (linker_type == LINKER_LINK)
     {
         return "/debug";
     }
@@ -564,7 +571,7 @@ static char const* link_cmd_get_option_debug(LinkerType linker_type)
 
 static char const* link_cmd_get_option_lib_dir(LinkerType linker_type)
 {
-    if (linker_type == LINKER_LINK || linker_type == LINKER_LLVM_LINK)
+    if (linker_type == LINKER_LINK)
     {
         return "/libpath:";
     }
@@ -573,7 +580,7 @@ static char const* link_cmd_get_option_lib_dir(LinkerType linker_type)
 
 static char const* link_cmd_get_option_lib(LinkerType linker_type)
 {
-    if (linker_type == LINKER_LINK || linker_type == LINKER_LLVM_LINK)
+    if (linker_type == LINKER_LINK)
     {
         return NULL;
     }

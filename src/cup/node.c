@@ -46,6 +46,10 @@ SourceType get_source_type(char const* path)
     {
         return SOURCE_TYPE_CPPM;
     }
+    if (string_equal(ext, ".s") || string_equal(ext, ".asm"))
+    {
+        return SOURCE_TYPE_ASM;
+    }
     return SOURCE_TYPE_UNKNOWN;
 }
 

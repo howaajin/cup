@@ -47,7 +47,14 @@ static LinkerType c_toolchain_select_linker_automatically(ToolchainType toolchai
     }
     else if (toolchain == TOOLCHAIN_TYPE_LLVM)
     {
-        return LINKER_LLVM_LD;
+        if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+        {
+            return LINKER_LLVM_LLD;
+        }
+        else
+        {
+            return LINKER_LLVM_LD;
+        }
     }
     else if (toolchain == TOOLCHAIN_TYPE_GCC)
     {
@@ -58,7 +65,7 @@ static LinkerType c_toolchain_select_linker_automatically(ToolchainType toolchai
 
 static bool is_llvm_linker_type(LinkerType type)
 {
-    return type == LINKER_LLVM_LD || type == LINKER_LLVM_LLD;
+    return type == LINKER_LLVM_LD || type == LINKER_LLVM_LLD || type == LINKER_LLVM_LINK;
 }
 
 void set_default_toolchain(ToolchainType type)

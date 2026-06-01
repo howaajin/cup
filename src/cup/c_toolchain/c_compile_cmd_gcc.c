@@ -1,4 +1,5 @@
 #include "core/os.h"
+#include "core/path.h"
 #include "core/string.h"
 #include "cup/c_toolchain/c_compile_cmd.h"
 #include "cup/c_toolchain/cpp_module.h"
@@ -20,6 +21,9 @@ struct ModuleMapper
 
 void compile_cmdline_node_make_cmdline_llvm_gcc_common(Node* node, CCompileCmd* cmd);
 void compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(Node* node, CCompileCmd* cmd);
+void cmd_add_option_mmd_mf(Node* node, CCompileCmd* cmd);
+void compile_cmdline_node_append_string_set_options(Node* node, char const* option, StringSet* set, OptionType option_type);
+void compile_cmdline_node_append_string_array_options(Node* node, char const* option, char** set, OptionType option_type);
 
 static void compile_cmdline_node_make_cmdline_gcc_c_cpp_common(Node* node, CCompileCmd* cmd)
 {
@@ -58,6 +62,33 @@ static void compile_cmdline_node_make_cmdline_gcc_cpp_module(CompileCmdline* com
     compile_cmdline_node_make_cmdline_gcc_cpp(compile_cmdline);
 }
 
+static void compile_cmdline_node_make_cmdline_gcc_asm(CompileCmdline* compile_cmdline)
+{
+    Node* node = (Node*)compile_cmdline->cmd;
+    CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
+    char const* ext = path_extension(cmd->src->path);
+    bool b_pure_asm = string_equal(ext, ".s");
+    cmd_add_option(node, NULL, "gcc", OPTION_EXE);
+    cmd_add_output_file_option(node, "-o ", cmd->out_obj);
+    cmd_add_option(node, "-c", NULL, OPTION_FLAG);
+    cmd_add_input_file_option(node, NULL, cmd->src);
+    if (cmd->arch)
+    {
+        cmd_add_option(node, cmd->arch == ARCH_X64 ? "-m64" : cmd->arch == ARCH_X86 ? "-m32" : NULL, NULL, OPTION_FLAG);
+    }
+    if (cmd->b_generate_debug_info)
+    {
+        cmd_add_option(node, "-g", NULL, OPTION_FLAG);
+    }
+    compile_cmdline_node_append_string_set_options(node, "-I", cmd->includes, OPTION_BRIGHT_FLAG);
+    compile_cmdline_node_append_string_set_options(node, "-D", cmd->defines, OPTION_FLAG);
+    compile_cmdline_node_append_string_array_options(node, NULL, cmd->flags, OPTION_FLAG);
+    if (!b_pure_asm && cmd->b_cache_header_dependencies && cmd->scan_deps_cmd == NULL)
+    {
+        cmd_add_option_mmd_mf(node, cmd);
+    }
+}
+
 void compile_cmdline_node_make_cmdline_gcc(CompileCmdline* compile_cmdline)
 {
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
@@ -72,6 +103,10 @@ void compile_cmdline_node_make_cmdline_gcc(CompileCmdline* compile_cmdline)
     else if (cmd->source_type == SOURCE_TYPE_CPP)
     {
         compile_cmdline_node_make_cmdline_gcc_cpp(compile_cmdline);
+    }
+    else if (cmd->source_type == SOURCE_TYPE_ASM)
+    {
+        compile_cmdline_node_make_cmdline_gcc_asm(compile_cmdline);
     }
     else
     {

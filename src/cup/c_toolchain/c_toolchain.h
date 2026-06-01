@@ -128,6 +128,7 @@ typedef enum SourceType
     SOURCE_TYPE_C,
     SOURCE_TYPE_CPP,
     SOURCE_TYPE_CPPM,
+    SOURCE_TYPE_ASM,
 } SourceType;
 
 typedef struct Src

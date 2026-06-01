@@ -86,44 +86,38 @@ ENTRY(build_msgbox)
     {
         return;
     }
+    Node* src;
     if (get_default_toolchain() == TOOLCHAIN_TYPE_MSVC)
     {
-        return;
-    }
-    char const* compiler = NULL;
-    if (get_default_toolchain() == TOOLCHAIN_TYPE_GCC)
-    {
-        compiler = "gcc";
-    }
-    if (get_default_toolchain() == TOOLCHAIN_TYPE_LLVM)
-    {
-        compiler = "clang";
-    }
-    if (get_default_toolchain() == TOOLCHAIN_TYPE_ZIG)
-    {
-        compiler = "zig cc";
+        src = SRC("asm_msgbox/msgbox.asm");
     }
     else
     {
-        return;
+        src = SRC("asm_msgbox/msgbox.s");
     }
-    Node* src = FILE("asm_msgbox/msgbox.s");
     Node* obj = OBJ(src);
-    Node* cc = CMD(fmt("{} -o {:n} -c {:n}", compiler, obj, src));
-    cmd_add_input(cc, src);
-    cmd_add_output(cc, obj);
+    CC(src, obj);
     Node* exe = EXE("{out_dir}/msgbox");
     Node* link = LINK(exe);
     link_cmd_add_input(link, obj);
-    link_cmd_add_flag(link, "-nostartfiles");
-    link_cmd_add_flag(link, "-luser32");
-    link_cmd_add_flag(link, "-lkernel32");
-    if (get_default_toolchain() == TOOLCHAIN_TYPE_LLVM)
+    link_cmd_add_lib(link, "user32");
+    link_cmd_add_lib(link, "kernel32");
+    link_cmd_set_entry(link, "WinMainCRTStartup");
+    if (get_default_toolchain() == TOOLCHAIN_TYPE_MSVC)
     {
-        link_cmd_add_flag(link, "-Wl,/subsystem:windows");
+        link_cmd_add_flag(link, "/subsystem:windows");
+        link_cmd_add_flag(link, "/nodefaultlib");
     }
     else
     {
-        link_cmd_add_flag(link, "-mwindows");
+        link_cmd_add_flag(link, "-nostartfiles");
+        if (get_default_toolchain() == TOOLCHAIN_TYPE_LLVM)
+        {
+            link_cmd_add_flag(link, "-Wl,/subsystem:windows");
+        }
+        else
+        {
+            link_cmd_add_flag(link, "-mwindows");
+        }
     }
 }

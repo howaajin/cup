@@ -115,7 +115,7 @@ static void print_help(bool detailed)
     printf("  -hh                           Print detailed help\n");
     printf("  -out_dir <dir>                Set output directory\n");
     printf("  -t <toolchain>                Set toolchain (llvm, msvc, gcc, zig)\n");
-    printf("  -linker <linker>              Set LLVM -fuse-ld linker (default, lld)\n");
+    printf("  -linker <linker>              Set LLVM -fuse-ld linker (lld(==default), link, ld, default)\n");
     printf("  -O<level>                     Set optimization level (0, 3, s)\n");
     printf("  -clean                        Clean build\n");
     printf("  -dry                          Dry run (commands skipped but treated as success)\n");
@@ -243,8 +243,10 @@ static void parse_cmdline(void)
                     print_help(false);
                     exit(EXIT_FAILURE);
                 }
-                if (string_equal(arg, "default")) c_toolchain_set_llvm_linker_type_explicit(LINKER_LLVM_LD);
+                if (string_equal(arg, "link")) c_toolchain_set_llvm_linker_type_explicit(LINKER_LLVM_LINK);
+                else if (string_equal(arg, "ld")) c_toolchain_set_llvm_linker_type_explicit(LINKER_LLVM_LD);
                 else if (string_equal(arg, "lld")) c_toolchain_set_llvm_linker_type_explicit(LINKER_LLVM_LLD);
+                else if (string_equal(arg, "default")) c_toolchain_set_llvm_linker_type_explicit(LINKER_LLVM_LLD);
                 else
                 {
                     print_help(false);
@@ -322,20 +324,15 @@ static void report(Node* cmd)
         {
             fprintf(stderr, "%s\n", desc);
         }
-        char const* cmdline = cmd_get_cmdline(cmd);
-        if (cmdline)
-        {
-            fprintf(stderr, "%s\n", cmdline);
-        }
     }
     else if (array_size(cmd->std_error) || array_size(cmd->std_output))
     {
-        fprintf(stderr, "command output: %s:%d:\n", cmd->file, cmd->line);
         char const* cmdline = cmd_get_cmdline(cmd);
         if (cmdline)
         {
             fprintf(stderr, "%s\n", cmdline);
         }
+        fprintf(stderr, "command output: %s:%d:\n", cmd->file, cmd->line);
     }
     if (array_size(cmd->std_error))
     {
@@ -1297,8 +1294,10 @@ static void read_last_status(void)
             line = strtok(NULL, "\r\n");
             if (line && !c_toolchain_is_linker_type_explicit() && default_toolchain == TOOLCHAIN_TYPE_LLVM)
             {
-                if (string_equal(line, "default")) c_toolchain_restore_llvm_linker_type(LINKER_LLVM_LD);
+                if (string_equal(line, "link")) c_toolchain_restore_llvm_linker_type(LINKER_LLVM_LINK);
+                else if (string_equal(line, "ld")) c_toolchain_restore_llvm_linker_type(LINKER_LLVM_LD);
                 else if (string_equal(line, "lld")) c_toolchain_restore_llvm_linker_type(LINKER_LLVM_LLD);
+                else if (string_equal(line, "default")) c_toolchain_restore_llvm_linker_type(LINKER_LLVM_LLD);
             }
         }
     }
@@ -1327,12 +1326,14 @@ void save_last_status(void)
     case OPTIMIZATION_TYPE_RELEASE_SMALL: opt_str = "release_small"; break;
     default: opt_str = "release"; break;
     }
-    char const* linker_str = "default";
+    char const* linker_str = "";
     if (default_toolchain == TOOLCHAIN_TYPE_LLVM)
     {
         switch (get_llvm_linker_type())
         {
+        case LINKER_LLVM_LD: linker_str = "ld"; break;
         case LINKER_LLVM_LLD: linker_str = "lld"; break;
+        case LINKER_LLVM_LINK: linker_str = "link"; break;
         default: linker_str = "default"; break;
         }
     }

@@ -241,6 +241,37 @@ static void compile_cmdline_node_make_cmdline_msvc_c_cpp(Node* node, CCompileCmd
     compile_cmdline_node_make_cmdline_msvc_add_module_ref_options(node, cmd);
 }
 
+static void compile_cmdline_node_make_cmdline_msvc_asm(CompileCmdline* compile_cmdline)
+{
+    Node* node = (Node*)compile_cmdline->cmd;
+    CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
+    Allocator* temp = allocator_temp();
+    char const* ext_old = path_extension(cmd->src->path);
+    char* ext = string_from_c_str(temp, ext_old);
+    string_tolower(ext);
+    if (string_equal(ext, ".asm"))
+    {
+        cmd_add_option(node, NULL, cmd->arch == ARCH_X64 ? "ml64" : "ml", OPTION_EXE);
+        cmd_add_option(node, "/nologo", NULL, OPTION_FLAG);
+        cmd_add_option(node, "/quiet", NULL, OPTION_FLAG);
+        cmd_add_option(node, "/c", NULL, OPTION_FLAG);
+        cmd_add_option(node, "/Fo", cmd->out_obj->path, OPTION_OUTPUT);
+        cmd_add_output(node, cmd->out_obj);
+        cmd_add_input_file_option(node, NULL, cmd->src);
+        if (cmd->b_generate_debug_info)
+        {
+            cmd_add_option(node, "/Zi", NULL, OPTION_FLAG);
+        }
+        compile_cmdline_node_append_string_set_options(node, "/I", cmd->includes, OPTION_BRIGHT_FLAG);
+        compile_cmdline_node_append_string_set_options(node, "/D", cmd->defines, OPTION_FLAG);
+        compile_cmdline_node_append_string_array_options(node, NULL, cmd->flags, OPTION_FLAG);
+    }
+    else
+    {
+        assert(false && "MSVC does not support .s/.S files; use .asm with MASM syntax");
+    }
+}
+
 void compile_cmdline_node_make_cmdline_msvc(CompileCmdline* compile_cmdline)
 {
     Node* node = (Node*)compile_cmdline->cmd;
@@ -248,6 +279,10 @@ void compile_cmdline_node_make_cmdline_msvc(CompileCmdline* compile_cmdline)
     if (cmd->source_type == SOURCE_TYPE_CPPM)
     {
         compile_cmdline_node_make_cmdline_msvc_cppm(node, cmd);
+    }
+    else if (cmd->source_type == SOURCE_TYPE_ASM)
+    {
+        compile_cmdline_node_make_cmdline_msvc_asm(compile_cmdline);
     }
     else
     {

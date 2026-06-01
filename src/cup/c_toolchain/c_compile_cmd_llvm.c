@@ -324,6 +324,33 @@ static void compile_cmdline_node_make_cmdline_llvm_cpp(CompileCmdline* compile_c
     compile_cmdline_node_make_cmdline_llvm_add_module_ref_options(node, cmd);
 }
 
+static void compile_cmdline_node_make_cmdline_llvm_asm(CompileCmdline* compile_cmdline)
+{
+    Node* node = (Node*)compile_cmdline->cmd;
+    CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
+    char const* ext = path_extension(cmd->src->path);
+    bool b_pure_asm = string_equal(ext, ".s");
+    cmd_add_option(node, NULL, "clang", OPTION_EXE);
+    cmd_add_output_file_option(node, "-o ", cmd->out_obj);
+    cmd_add_option(node, "-c", NULL, OPTION_FLAG);
+    cmd_add_input_file_option(node, NULL, cmd->src);
+    if (cmd->arch)
+    {
+        cmd_add_option(node, get_arch_option_clang_or_gcc(cmd->arch), NULL, OPTION_FLAG);
+    }
+    if (cmd->b_generate_debug_info)
+    {
+        cmd_add_option(node, "-g", NULL, OPTION_FLAG);
+    }
+    compile_cmdline_node_append_string_set_options(node, "-I", cmd->includes, OPTION_BRIGHT_FLAG);
+    compile_cmdline_node_append_string_set_options(node, "-D", cmd->defines, OPTION_FLAG);
+    compile_cmdline_node_append_string_array_options(node, NULL, cmd->flags, OPTION_FLAG);
+    if (!b_pure_asm && cmd->b_cache_header_dependencies && cmd->scan_deps_cmd == NULL)
+    {
+        cmd_add_option_mmd_mf(node, cmd);
+    }
+}
+
 void compile_cmdline_node_make_cmdline_llvm(CompileCmdline* compile_cmdline)
 {
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
@@ -338,6 +365,10 @@ void compile_cmdline_node_make_cmdline_llvm(CompileCmdline* compile_cmdline)
     else if (cmd->source_type == SOURCE_TYPE_CPP)
     {
         compile_cmdline_node_make_cmdline_llvm_cpp(compile_cmdline);
+    }
+    else if (cmd->source_type == SOURCE_TYPE_ASM)
+    {
+        compile_cmdline_node_make_cmdline_llvm_asm(compile_cmdline);
     }
     else
     {
