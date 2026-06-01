@@ -50,7 +50,10 @@ ENTRY(build_make_header)
         Node* src = get_or_add_src("src/cup/make_header.c");
         Node* obj = OBJ(src);
         Node* cc = CC(src, obj);
-        c_compile_cmd_add_define(cc, "_CRT_SECURE_NO_WARNINGS");
+        if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+        {
+            c_compile_cmd_add_define(cc, "_CRT_SECURE_NO_WARNINGS");
+        }
         link_cmd_add_input(link, obj);
         link_cmd_add_input(link, OBJ(SRC("src/core/allocator.c")));
     }

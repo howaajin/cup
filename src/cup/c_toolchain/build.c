@@ -65,7 +65,10 @@ ENTRY(build_platform_c_toolchain)
     Node* src = SRC("{platform_c_toolchain_c}");
     Node* obj = OBJ(src);
     Node* cc = CC(src, obj);
-    c_compile_cmd_add_define(cc, "_CRT_SECURE_NO_WARNINGS");
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+    {
+        c_compile_cmd_add_define(cc, "_CRT_SECURE_NO_WARNINGS");
+    }
     obj_add_link_obj_from_src(obj, SRC("{platform_directory_c}"));
     obj_add_link_obj_from_src(obj, SRC("src/core/{platform}/dylib.c"));
 }
