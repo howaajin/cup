@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core/platform.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -50,5 +48,3 @@ int os_ftruncate(FILE* f, long size);
 bool os_file_writable(const char* path);
 bool os_is_terminal_supports_color(void);
 void os_set_console_utf8(void);
-
-#include "core/compat_threads.h"

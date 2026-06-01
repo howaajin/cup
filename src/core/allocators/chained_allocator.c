@@ -1,5 +1,5 @@
 #include "core/allocator.h"
-#include "core/os.h"
+#include "core/compat_threads.h" // IWYU pragma: keep
 
 #include <assert.h>
 
