@@ -44,6 +44,7 @@ ENTRY(build_hash_h)
     Node* src = get_or_add_src("src/core/hash_gen.c");
     Node* obj = OBJ(src);
     Node* cc = CC(src, obj);
+    c_compile_cmd_add_define(cc, "_CRT_SECURE_NO_WARNINGS");
     link_cmd_add_input(link, obj);
 
     Node* output = get_or_add_file("src/core/hash.h");
@@ -82,7 +83,8 @@ ENTRY(build_directory)
 {
     Node* src = SRC("{platform_directory_c}");
     Node* obj = OBJ(src);
-    CC(src, obj);
+    Node* cc = CC(src, obj);
+    c_compile_cmd_add_define(cc, "_CRT_SECURE_NO_WARNINGS");
 }
 
 ENTRY(build_dylib)
@@ -97,6 +99,7 @@ ENTRY(build_platform_os)
     Node* src = SRC("{dir}/{platform}/os.c");
     Node* obj = OBJ(src);
     Node* cc = CC(src, obj);
+    c_compile_cmd_add_define(cc, "_CRT_SECURE_NO_WARNINGS");
     ToolchainType toolchain = default_toolchain;
     if (toolchain == TOOLCHAIN_TYPE_GCC &&
         CURRENT_PLATFORM == PLATFORM_WINDOWS)
