@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cup Release for OpenCode"
+  short_description: "Use Cup release builds correctly"
+  default_prompt: "Use $opencode-cup-release to build or test this project with the released Cup artifacts."

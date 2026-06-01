@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cup Release for Claude Code"
+  short_description: "Use Cup release builds correctly"
+  default_prompt: "Use $claude-code-cup-release to build or test this project with the released Cup artifacts."
