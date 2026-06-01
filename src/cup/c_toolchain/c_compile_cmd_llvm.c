@@ -258,7 +258,7 @@ void compile_cmdline_node_make_cmdline_llvm_gcc_common(Node* node, CCompileCmd* 
         }
     }
     compile_cmdline_node_append_string_set_options(node, "-I", cmd->includes, OPTION_BRIGHT_FLAG);
-    compile_cmdline_node_append_string_set_options(node, "-D", cmd->defines, OPTION_BRIGHT_FLAG);
+    compile_cmdline_node_append_string_set_options(node, "-D", cmd->defines, OPTION_FLAG);
     compile_cmdline_node_append_string_array_options(node, NULL, cmd->flags, OPTION_FLAG);
 }
 
