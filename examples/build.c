@@ -102,7 +102,7 @@ ENTRY(build_msgbox)
     link_cmd_add_input(link, obj);
     link_cmd_add_lib(link, "user32");
     link_cmd_add_lib(link, "kernel32");
-    link_cmd_set_entry(link, "WinMainCRTStartup");
+    link_cmd_set_entry(link, "hello");
     if (get_default_toolchain() == TOOLCHAIN_TYPE_MSVC)
     {
         link_cmd_add_flag(link, "/subsystem:windows");

@@ -11,9 +11,9 @@ text:
     .asciz "Hello, Windows!"
 
 .section .text
-.global WinMainCRTStartup
+.global hello
 
-WinMainCRTStartup:
+hello:
     sub rsp, 40
 
     xor rcx, rcx
