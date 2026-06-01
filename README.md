@@ -57,7 +57,7 @@ For example, you can ask the agent:
 
 ## Build from Source
 
-Run `bootstrap.bat` (Windows) or `bootstrap.sh` (Linux/macOS). Generates the embedded binary in `build/embedded/`, the single-header distribution in `build/header_only/`, and a local `cup` / `cup.exe` executable in the project root for building this repository itself.
+Run `bootstrap.bat` (Windows) or `bootstrap.sh` (Linux/macOS) to generate a `cup` / `cup.exe` executable in the project root. Then run it (e.g. `.\cup.exe` on Windows, `./cup` on Linux/macOS) to build the project — this produces the embedded binary in `build/embedded/`, the single-header distribution in `build/header_only/`.
 
 ## Built-in Testing Framework
 
