@@ -255,13 +255,13 @@ static void compile_cmdline_node_make_cmdline_msvc_asm(CompileCmdline* compile_c
         cmd_add_option(node, "/nologo", NULL, OPTION_FLAG);
         cmd_add_option(node, "/quiet", NULL, OPTION_FLAG);
         cmd_add_option(node, "/c", NULL, OPTION_FLAG);
-        cmd_add_option(node, "/Fo", cmd->out_obj->path, OPTION_OUTPUT);
-        cmd_add_output(node, cmd->out_obj);
-        cmd_add_input_file_option(node, NULL, cmd->src);
         if (cmd->b_generate_debug_info)
         {
             cmd_add_option(node, "/Zi", NULL, OPTION_FLAG);
         }
+        cmd_add_option(node, "/Fo", cmd->out_obj->path, OPTION_OUTPUT);
+        cmd_add_output(node, cmd->out_obj);
+        cmd_add_input_file_option(node, NULL, cmd->src);
         compile_cmdline_node_append_string_set_options(node, "/I", cmd->includes, OPTION_BRIGHT_FLAG);
         compile_cmdline_node_append_string_set_options(node, "/D", cmd->defines, OPTION_FLAG);
         compile_cmdline_node_append_string_array_options(node, NULL, cmd->flags, OPTION_FLAG);

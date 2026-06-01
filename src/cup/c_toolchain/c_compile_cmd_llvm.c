@@ -334,13 +334,13 @@ static void compile_cmdline_node_make_cmdline_llvm_asm(CompileCmdline* compile_c
     cmd_add_output_file_option(node, "-o ", cmd->out_obj);
     cmd_add_option(node, "-c", NULL, OPTION_FLAG);
     cmd_add_input_file_option(node, NULL, cmd->src);
-    if (cmd->arch)
-    {
-        cmd_add_option(node, get_arch_option_clang_or_gcc(cmd->arch), NULL, OPTION_FLAG);
-    }
     if (cmd->b_generate_debug_info)
     {
         cmd_add_option(node, "-g", NULL, OPTION_FLAG);
+    }
+    if (cmd->arch)
+    {
+        cmd_add_option(node, get_arch_option_clang_or_gcc(cmd->arch), NULL, OPTION_FLAG);
     }
     compile_cmdline_node_append_string_set_options(node, "-I", cmd->includes, OPTION_BRIGHT_FLAG);
     compile_cmdline_node_append_string_set_options(node, "-D", cmd->defines, OPTION_FLAG);
