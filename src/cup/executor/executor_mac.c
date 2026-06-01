@@ -105,7 +105,7 @@ void executor_update_process(ExecutorSlot* slot, struct kevent* e, ReadPipeConte
 void executor_update_thread(ExecutorSlot* slot, struct kevent* e)
 {
     char dummy;
-    read(slot->thread_done_pipe[0], &dummy, 1); // 清空信号
+    read(slot->thread_done_pipe[0], &dummy, 1);
 
     void* return_value;
     pthread_join(slot->thread_id, &return_value);
