@@ -114,7 +114,7 @@ void c_compile_cmd_prepare_msvc(Node* node, CCompileCmd* cmd)
         assert(cmd->export_bmi);
         cmd_add_output(node, cmd->export_bmi);
     }
-    if (cmd->b_generate_debug_info)
+    if (cmd->b_generate_debug_info && cmd->source_type != SOURCE_TYPE_ASM)
     {
         if (cmd->pdb == NULL)
         {
