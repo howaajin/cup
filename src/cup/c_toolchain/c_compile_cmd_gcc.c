@@ -24,6 +24,7 @@ void compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(Node* node, CCompil
 void cmd_add_option_mmd_mf(Node* node, CCompileCmd* cmd);
 void compile_cmdline_node_append_string_set_options(Node* node, char const* option, StringSet* set, OptionType option_type);
 void compile_cmdline_node_append_string_array_options(Node* node, char const* option, char** set, OptionType option_type);
+char const* get_arch_option_clang_or_gcc(ArchitectureType arch);
 
 static void compile_cmdline_node_make_cmdline_gcc_c_cpp_common(Node* node, CCompileCmd* cmd)
 {
@@ -74,7 +75,8 @@ static void compile_cmdline_node_make_cmdline_gcc_asm(CompileCmdline* compile_cm
     cmd_add_input_file_option(node, NULL, cmd->src);
     if (cmd->arch)
     {
-        cmd_add_option(node, cmd->arch == ARCH_X64 ? "-m64" : cmd->arch == ARCH_X86 ? "-m32" : NULL, NULL, OPTION_FLAG);
+        char const* arch = get_arch_option_clang_or_gcc(cmd->arch);
+        cmd_add_option(node, arch, NULL, OPTION_FLAG);
     }
     if (cmd->b_generate_debug_info)
     {
