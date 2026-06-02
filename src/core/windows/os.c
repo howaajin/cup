@@ -86,7 +86,7 @@ wchar_t* os_get_default_env(void)
 
     if (!default_env)
     {
-        CreateEnvironmentBlock((LPVOID*)&default_env, NULL, FALSE);
+        CreateEnvironmentBlock((LPVOID*)&default_env, NULL, TRUE);
         SetEnvironmentStringsW(default_env);
     }
     return default_env;
@@ -398,5 +398,3 @@ void os_set_console_utf8(void)
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 }
-
-
