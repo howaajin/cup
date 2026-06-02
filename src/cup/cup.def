@@ -210,6 +210,7 @@ EXPORTS
     is_test_exe
     get_test_entries
     module_from_src
+    module_from_src_with_variant
     c_compile_cmd_create
     c_compile_cmd_set_c_std
     c_compile_cmd_add_include_directory
@@ -224,6 +225,7 @@ EXPORTS
     c_compile_cmd_set_cpp_std
     obj_create
     obj_from_src
+    obj_from_src_with_variant
     obj_add_link_obj_from_src
     obj_add_link_node
     obj_add_link_lib
