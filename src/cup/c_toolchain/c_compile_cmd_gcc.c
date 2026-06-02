@@ -208,7 +208,7 @@ void c_compile_cmd_prepare_gcc(Node* node, CCompileCmd* cmd)
     {
         if (cmd->module_mapper == NULL)
         {
-            char const* mapper_path = determine_imtermediate_path(cmd->src->path, "mappers", ".txt", allocator_temp());
+            char const* mapper_path = determine_imtermediate_path(cmd->out_obj->path, "mappers", ".txt", allocator_temp());
             cmd->module_mapper = get_or_add_file(mapper_path);
             module_mapper_gen_cmd_create(cmd->module_mapper, cmd);
             cmd_add_input(node, cmd->module_mapper);
