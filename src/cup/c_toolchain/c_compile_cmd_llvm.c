@@ -20,7 +20,7 @@ extern ToolchainType default_toolchain;
 void compile_cmdline_node_append_string_set_options(Node* node, char const* option, StringSet* set, OptionType option_type);
 void compile_cmdline_node_append_string_array_options(Node* node, char const* option, char** set, OptionType option_type);
 
-static char const* get_arch_option_clang_or_gcc(ArchitectureType arch)
+char const* get_arch_option_clang_or_gcc(ArchitectureType arch)
 {
     if (arch == ARCH_UNSPECIFIED) return NULL;
     if (arch == ARCH_X64) return "-m64";
@@ -51,6 +51,7 @@ static char const* get_cpp_std_option_clang_or_gcc(CppLanguageStandard cpp_std)
     case CPP_LANGUAGE_STANDARD_17: return "-std=c++17";
     case CPP_LANGUAGE_STANDARD_20: return "-std=c++20";
     case CPP_LANGUAGE_STANDARD_23: return "-std=c++23";
+    case CPP_LANGUAGE_STANDARD_26: return "-std=c++26";
     default: assert(false); return NULL;
     }
 }

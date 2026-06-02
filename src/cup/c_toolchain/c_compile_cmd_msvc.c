@@ -38,6 +38,7 @@ static char const* get_cpp_std_option_cl(CppLanguageStandard cpp_std)
     case CPP_LANGUAGE_STANDARD_17: return "/std:c++17";
     case CPP_LANGUAGE_STANDARD_20: return "/std:c++20";
     case CPP_LANGUAGE_STANDARD_23: return "/std:c++latest";
+    case CPP_LANGUAGE_STANDARD_26: return "/std:c++latest";
     default: assert(false); return NULL;
     }
 }

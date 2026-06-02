@@ -94,6 +94,7 @@ typedef enum CppLanguageStandard
     CPP_LANGUAGE_STANDARD_17,
     CPP_LANGUAGE_STANDARD_20,
     CPP_LANGUAGE_STANDARD_23,
+    CPP_LANGUAGE_STANDARD_26,
     CPP_LANGUAGE_STANDARD_COUNT,
 } CppLanguageStandard;
 
@@ -107,6 +108,7 @@ static inline char const* get_cpp_std_string(CppLanguageStandard cpp_std)
     case CPP_LANGUAGE_STANDARD_17: return "cpp17";
     case CPP_LANGUAGE_STANDARD_20: return "cpp20";
     case CPP_LANGUAGE_STANDARD_23: return "cpp23";
+    case CPP_LANGUAGE_STANDARD_26: return "cpp26";
     default: return NULL;
     }
 }
