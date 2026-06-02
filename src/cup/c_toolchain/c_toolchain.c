@@ -308,6 +308,24 @@ Node* obj_from_src(Node* src)
     return (Node*)obj_create(obj_path);
 }
 
+Node* obj_from_src_with_variant(Node* src, char const* variant)
+{
+    Allocator* allocator = allocator_temp();
+    char const* obj_dir = get_var("obj_dir");
+    char const* obj_path = determine_imtermediate_path(src->path, obj_dir, OBJ_EXT, allocator);
+    char const* stem = path_stem(obj_path, allocator_temp());
+    char const* parent_path = path_parent_path(obj_path, allocator_temp());
+    if (parent_path)
+    {
+        obj_path = fmt("{}/{}{}{}", parent_path, stem, variant, OBJ_EXT);
+    }
+    else
+    {
+        obj_path = fmt("{}{}{}", stem, variant, OBJ_EXT);
+    }
+    return (Node*)obj_create(obj_path);
+}
+
 Node* get_default_obj(Node* node)
 {
     Src* src = (Src*)node;

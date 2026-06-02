@@ -252,3 +252,21 @@ Node* module_from_src(Node* src)
     char const* bmi_path = determine_imtermediate_path(src->path, "modules", ext, temp_allocator);
     return get_or_add_file(bmi_path);
 }
+
+Node* module_from_src_with_variant(Node* src, char const* variant)
+{
+    Allocator* temp_allocator = allocator_temp();
+    char const* ext = get_toolchain_bmi_extension(default_toolchain);
+    char const* bmi_path = determine_imtermediate_path(src->path, "modules", ext, temp_allocator);
+    char const* stem = path_stem(bmi_path, allocator_temp());
+    char const* parent_path = path_parent_path(bmi_path, allocator_temp());
+    if (parent_path)
+    {
+        bmi_path = fmt("{}/{}{}{}", parent_path, stem, variant, ext);
+    }
+    else
+    {
+        bmi_path = fmt("{}{}{}", stem, variant, ext);
+    }
+    return get_or_add_file(bmi_path);
+}

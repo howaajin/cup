@@ -194,6 +194,7 @@ void c_compile_cmd_add_self_build_options(Node* node);
 // Obj
 Obj* obj_create(char const* path);
 Node* obj_from_src(Node* src);
+Node* obj_from_src_with_variant(Node* src, char const* variant);
 void obj_add_link_obj_from_src(Node* node, Node* src);
 void obj_add_link_node(Node* node, Node* other);
 void obj_add_link_lib(Node* node, char const* lib);
