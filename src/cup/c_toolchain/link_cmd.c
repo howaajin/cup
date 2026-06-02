@@ -444,7 +444,11 @@ static char const* link_cmd_get_option_def(LinkerType linker_type)
     {
         return "/def:";
     }
-    if ((linker_type == LINKER_LLVM_LINK) || (CURRENT_PLATFORM == PLATFORM_WINDOWS && linker_type == LINKER_LLVM_LLD))
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && linker_type == LINKER_LD)
+    {
+        return "";
+    }
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
         return "-Wl,/def:";
     }
