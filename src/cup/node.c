@@ -543,6 +543,10 @@ void cmd_visit(Node* node, Graph* graph, Executor* executor)
 
 void cmd_prepare(Node* node)
 {
+    if (node->name == NULL)
+    {
+        node->name = fmt_alloc(node_allocator, "run: {}", node->cmdline);
+    }
 }
 
 void cmd_processed(Node* node, Graph* graph)

@@ -444,7 +444,7 @@ static char const* link_cmd_get_option_def(LinkerType linker_type)
     {
         return "/def:";
     }
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && linker_type == LINKER_LD)
+    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && (linker_type == LINKER_LD || linker_type == LINKER_ZIG_CC))
     {
         return "";
     }
@@ -705,12 +705,20 @@ static void link_cmd_prepare(Node* node)
             cmd_add_output(node, link->pdb);
         }
     }
-    if (CURRENT_PLATFORM == PLATFORM_WINDOWS && link->def)
+    if (link->def)
     {
-        char const* path = path_replace_extension(link->output->path, LIB_EXT, allocator_temp());
-        Node* import_lib = get_or_add_file(path);
-        make_implib_cmd_create(import_lib, link->def, link->toolchain, link->arch, __FILE__, __LINE__);
-        cmd_add_input(node, link->def);
+        if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+        {
+            cmd_add_input(node, link->def);
+        }
+    }
+    if (link->b_auto_gen_out_import_lib)
+    {
+        if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+        {
+            char const* path = path_replace_extension(link->output->path, LIB_EXT, allocator_temp());
+            link->out_import_lib = get_or_add_file(path);
+        }
     }
     Node* env = get_toolchain_env_node(link->toolchain, link->arch);
     if (env)

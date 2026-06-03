@@ -221,7 +221,7 @@ void link_cmd_setup_self_build(Node* cmd);
 Node* ar_cmd_create(Node* output, char const* file, int line);
 void ar_cmd_add_input(Node* node, Node* input);
 void ar_cmd_set_toolchain_type(Node* node, ToolchainType toolchain);
-Node* make_implib_cmd_create(Node* output, Node* def, ToolchainType toolchain_type, ArchitectureType architecture_type, char const* src_file_path, int line);
+Node* make_implib_from_def_cmd_create(Node* def, Node* output, ToolchainType toolchain_type, ArchitectureType architecture_type, char const* src_file_path, int line);
 
 Node* get_or_add_src(char const* path);
 

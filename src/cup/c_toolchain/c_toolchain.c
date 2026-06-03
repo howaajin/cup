@@ -516,7 +516,7 @@ static void c_toolchain_lib_output_filter(Node* cmd, char const* line)
     cmd_write_stdout_line(cmd, line);
 }
 
-Node* make_implib_cmd_create(Node* output, Node* def, ToolchainType toolchain_type, ArchitectureType architecture_type, char const* src_file_path, int line)
+Node* make_implib_from_def_cmd_create(Node* def, Node* output, ToolchainType toolchain_type, ArchitectureType architecture_type, char const* src_file_path, int line)
 {
     Node* cmd = add_process_cmd(NULL, src_file_path, line);
     cmd->cmd_ext_type = C_CMD_MAKE_IMPLIB;

@@ -147,7 +147,7 @@ ENTRY(build_cup_dll)
 
         // generate import library from modified def
         Node* import_lib = get_or_add_file_with_type(fmt("{out_dir}/{self_name}" LIB_EXT), FILE_TYPE_LIB);
-        make_implib_cmd_create(import_lib, modified_def, lcmd->toolchain, lcmd->arch, __FILE__, __LINE__);
+        make_implib_from_def_cmd_create(modified_def, import_lib, lcmd->toolchain, lcmd->arch, __FILE__, __LINE__);
         link_cmd_add_input(link, import_lib);
 
         if (lcmd->toolchain == TOOLCHAIN_TYPE_MSVC)

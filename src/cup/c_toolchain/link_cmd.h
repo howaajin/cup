@@ -24,5 +24,5 @@ struct LinkCmd
     ArchitectureType arch;
     bool b_generate_debug_info;
     bool b_link_cpp;
+    bool b_auto_gen_out_import_lib;
 };
-
