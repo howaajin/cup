@@ -112,44 +112,6 @@ void compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(Node* node, CCompil
     }
 }
 
-void cmd_after_execute_parse_depfile(Node* node)
-{
-    char const* path = node->ctx;
-    FILE* f = os_fopen(path, "rb");
-    if (!f)
-    {
-        return;
-    }
-    DepfileParser parser;
-    depfile_parser_init(&parser, f);
-    char* dep = NULL;
-    DepfileItemType item_type;
-    Allocator* allocator = allocator_create_tiny(4096, 4096);
-    while (depfile_parser_next(&parser, allocator, &dep, &item_type))
-    {
-        switch (item_type)
-        {
-        case DEPFILE_ITEM_NORMAL_DEP:
-            if (os_file_exists(dep))
-            {
-                cmd_add_implicit_input(node, dep);
-            }
-            break;
-        default:;
-        }
-        array_resize(allocator, dep, 0);
-    }
-    allocator_destroy(allocator);
-    fclose(f);
-    os_remove_file(path);
-}
-
-void compile_cmd_after_execute_llvm_gcc(Node* node)
-{
-    cmd_after_execute_parse_depfile(node);
-    cmd_after_execute(node);
-}
-
 static void compile_cmd_before_execute_rename_occupied_cc_file(Node* cmd)
 {
     void c_toolchain_rename_to_old(char const* path);
@@ -203,11 +165,6 @@ static Node* bmi_to_obj_cmd_create(CCompileCmd* cc, char const* file, int line)
     cmd->prepare(cmd);
     return cmd;
 }
-void c_compile_cmd_llvm_gcc_setup_after_execute_fn(Node* node, CCompileCmd* cmd, void (*fn)(Node*))
-{
-    node->after_execute = fn;
-    node->ctx = string_from_print(node_allocator, "%s.d", cmd->out_obj->path);
-}
 
 void c_compile_cmd_prepare_llvm(Node* node, CCompileCmd* cmd)
 {
@@ -219,7 +176,7 @@ void c_compile_cmd_prepare_llvm(Node* node, CCompileCmd* cmd)
     cmd_add_output(node, cmd->out_obj);
     if (cmd->scan_deps_cmd == NULL && cmd->b_cache_header_dependencies)
     {
-        c_compile_cmd_llvm_gcc_setup_after_execute_fn(node, cmd, compile_cmd_after_execute_llvm_gcc);
+        cmd_set_out_depfile(node, FILE("{}.d", cmd->out_obj->path));
     }
     if (cmd->export_bmi)
     {

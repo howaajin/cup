@@ -144,6 +144,7 @@ struct Node
             };
             void (*before_execute)(Node* node);
             void (*after_execute)(Node* node);
+            Node* depfile;
             Node** inputs;
             Node** outputs;
             Node** implicit_inputs;
@@ -153,6 +154,7 @@ struct Node
             int line;
         };
     };
+    bool b_keep_depfile : 1;
     bool b_default_excluded : 1;
     bool b_dynamic_indegree : 1;
     bool b_dirty : 1;
@@ -202,6 +204,7 @@ void cmd_add_output_file_option(Node* node, char const* option, Node* file);
 void cmd_set_source_location(Node* node, char const* file, int line);
 void cmd_write_stdout_line(Node* cmd, char const* line);
 void cmd_write_stderr_line(Node* cmd, char const* line);
+void cmd_set_out_depfile(Node* cmd, Node* depfile);
 void cmd_set_write_output_line_fn(Node* node, void (*fn)(Node* cmd, char const* line));
 void cmd_set_write_stderr_line_fn(Node* node, void (*fn)(Node* cmd, char const* line));
 void cmd_set_before_execute_fn(Node* node, FnBeforeExecute* fn);

@@ -116,8 +116,6 @@ void compile_cmdline_node_make_cmdline_gcc(CompileCmdline* compile_cmdline)
     }
 }
 
-void compile_cmd_after_execute_llvm_gcc(Node* node);
-void c_compile_cmd_llvm_gcc_setup_after_execute_fn(Node* node, CCompileCmd* cmd, void (*fn)(Node*));
 char* determine_imtermediate_path(char const* src_path, char const* sub_dir, char const* ext, Allocator* allocator);
 
 static char* module_mapper_to_string(ModuleMapper* data, Allocator* allocator)
@@ -217,6 +215,6 @@ void c_compile_cmd_prepare_gcc(Node* node, CCompileCmd* cmd)
     cmd_add_output(node, cmd->out_obj);
     if (cmd->scan_deps_cmd == NULL && cmd->b_cache_header_dependencies)
     {
-        c_compile_cmd_llvm_gcc_setup_after_execute_fn(node, cmd, compile_cmd_after_execute_llvm_gcc);
+        cmd_set_out_depfile(node, FILE("{}.d", cmd->out_obj->path));
     }
 }

@@ -27,7 +27,6 @@ static StringPtrHash* get_default_module_mapper()
 void compile_cmdline_node_make_cmdline_llvm_gcc_common(Node* node, CCompileCmd* cmd);
 void compile_cmdline_node_make_cmdline_msvc_scan_deps_common(Node* node, CCompileCmd* cmd);
 char const* c_compile_cmd_get_depfile_path(CCompileCmd* cmd);
-void cmd_after_execute_parse_depfile(Node* node);
 void c_compile_cmd_write_buffer_msvc(Node* node, char const* line);
 
 void scan_deps_cmd_add_option_mm_mf(Node* node, ScanDepsCmd* cmd)
@@ -180,29 +179,18 @@ static void scan_deps_cmd_after_execute(Node* node)
         warn("%s failed!", fmt("{:n}", cmd));
     }
     array_free(node_allocator, cmd->std_output);
-    ToolchainType toolchain = cmd->compile_cmd->toolchain;
-    if (toolchain == TOOLCHAIN_TYPE_LLVM || toolchain == TOOLCHAIN_TYPE_GCC)
-    {
-        cmd_after_execute_parse_depfile(node);
-    }
     cmd_update_output_mtime(node);
     scan_deps_cmd_update_cache(cmd);
     cmd_after_execute(node);
 }
 
-static void scan_deps_cmd_before_execute_llvm_gcc(Node* node)
-{
-    cmd_before_execute(node);
-    char const* depfile = node->ctx;
-    os_ensure_dir_existed(depfile);
-}
-
 void scan_deps_cmd_llvm_gcc_setup_execute_callback(Node* node, ScanDepsCmd* cmd)
 {
+    if (cmd->compile_cmd->b_cache_header_dependencies)
+    {
+        cmd_set_out_depfile(node, FILE("{}.d", cmd->compile_cmd->out_obj->path));
+    }
     node->after_execute = scan_deps_cmd_after_execute;
-    CCompileCmd* compile_cmd = cmd->compile_cmd;
-    node->ctx = string_from_print(node_allocator, "%s.d", compile_cmd->out_obj->path);
-    node->before_execute = scan_deps_cmd_before_execute_llvm_gcc;
 }
 
 Node* scan_deps_cmd_create(CCompileCmd* compile_cmd)

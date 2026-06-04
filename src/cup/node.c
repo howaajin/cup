@@ -9,6 +9,7 @@
 #include "core/utilities.h"
 #include "cup/c_toolchain/c_toolchain.h"
 #include "cup/cache.h"
+#include "cup/depfile.h"
 #include "cup/executor/executor.h"
 #include "cup/fmt.h"
 #include "cup/graph.h"
@@ -547,6 +548,10 @@ void cmd_prepare(Node* node)
     {
         node->name = fmt_alloc(node_allocator, "run: {}", node->cmdline);
     }
+    if (node->depfile && node->b_keep_depfile)
+    {
+        cmd_add_output(node, node->depfile);
+    }
 }
 
 void cmd_processed(Node* node, Graph* graph)
@@ -601,8 +606,46 @@ void cmd_update_output_mtime(Node* node)
     }
 }
 
+void cmd_after_execute_parse_depfile(Node* node)
+{
+    FILE* f = os_fopen(node->depfile->path, "rb");
+    if (!f)
+    {
+        return;
+    }
+    DepfileParser parser;
+    depfile_parser_init(&parser, f);
+    char* dep = NULL;
+    DepfileItemType item_type;
+    Allocator* allocator = allocator_create_tiny(4096, 4096);
+    while (depfile_parser_next(&parser, allocator, &dep, &item_type))
+    {
+        switch (item_type)
+        {
+        case DEPFILE_ITEM_NORMAL_DEP:
+            if (os_file_exists(dep))
+            {
+                cmd_add_implicit_input(node, dep);
+            }
+            break;
+        default:;
+        }
+        array_resize(allocator, dep, 0);
+    }
+    allocator_destroy(allocator);
+    fclose(f);
+    if (!node->b_keep_depfile)
+    {
+        os_remove_file(node->depfile->path);
+    }
+}
+
 void cmd_after_execute(Node* node)
 {
+    if (node->depfile)
+    {
+        cmd_after_execute_parse_depfile(node);
+    }
     cmd_update_output_mtime(node);
     Cache* cache = get_cache();
     if (cache)
@@ -663,6 +706,10 @@ void cmd_before_execute(Node* node)
     {
         Node* output = node->outputs[i];
         os_ensure_dir_existed(output->path);
+    }
+    if (node->depfile)
+    {
+        os_ensure_dir_existed(node->depfile->path);
     }
 }
 
@@ -867,6 +914,11 @@ void cmd_write_stderr_line(Node* cmd, char const* line)
     size_t num_bytes = array_size(line);
     array_push_v(node_allocator, cmd->std_error, line, num_bytes);
     string_putc(node_allocator, cmd->std_error, '\n');
+}
+
+void cmd_set_out_depfile(Node* cmd, Node* depfile)
+{
+    cmd->depfile = depfile;
 }
 
 void cmd_set_write_output_line_fn(Node* node, void (*fn)(Node* cmd, char const* line))

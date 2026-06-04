@@ -153,6 +153,7 @@ EXPORTS
     cmd_set_source_location
     cmd_write_stdout_line
     cmd_write_stderr_line
+    cmd_set_out_depfile
     cmd_set_write_output_line_fn
     cmd_set_write_stderr_line_fn
     cmd_set_before_execute_fn
