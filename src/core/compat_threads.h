@@ -1,7 +1,6 @@
 #pragma once
 
-#if defined(__APPLE__) || defined(__STDC_NO_THREADS__) || \
-    (defined(__has_include) && !__has_include(<threads.h>))
+#if defined(__has_include) && !__has_include(<threads.h>)
 
 #include <errno.h>
 #include <pthread.h>
