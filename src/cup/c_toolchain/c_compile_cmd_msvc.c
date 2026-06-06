@@ -69,7 +69,7 @@ void c_compile_cmd_write_buffer_msvc(Node* node, char const* line)
             {
                 if (path_is_under_directory(dep, cwd))
                 {
-                    Allocator* temp_allocator = allocator_arena_from_alloca(4096);
+                    Allocator* temp_allocator = allocator_temp();
                     dep = path_lexically_relative(dep, cwd, temp_allocator);
                     path_backslash_to_slash(dep);
                 }

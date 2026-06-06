@@ -511,7 +511,7 @@ char const* msvc_find_std_module_source(bool b_compat)
 ToolchainType c_toolchain_select_toolchain_automatically()
 {
     ToolchainType toolchain = get_toolchain_by_current_compiler();
-    Allocator* temp_allocator = allocator_arena_from_alloca(4096);
+    Allocator* temp_allocator = allocator_temp();
     bool b_no_msvc = false;
     bool b_no_llvm = false;
     bool b_no_gcc = false;

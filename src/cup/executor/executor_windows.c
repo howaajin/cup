@@ -71,8 +71,8 @@ void executor_execute_slot_thread(ExecutorSlot* slot)
 
 static char* executor_generate_unique_pipe_name(Allocator* allocator)
 {
-    Allocator* stack_allocator = allocator_arena_from_alloca(4096);
-    char* guid = os_create_guid(stack_allocator, false);
+    Allocator* temp_allocator = allocator_temp();
+    char* guid = os_create_guid(temp_allocator, false);
     char* pipe_name = string_from_print(allocator, "\\\\.\\pipe\\%s", guid);
     return pipe_name;
 }

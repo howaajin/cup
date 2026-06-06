@@ -267,7 +267,7 @@ static char const* c_toolchain_next_line(char const* str)
 
 char* determine_imtermediate_path(char const* src_path, char const* sub_dir, char const* ext, Allocator* allocator)
 {
-    Allocator* temp_allocator = allocator_arena_from_alloca(4096);
+    Allocator* temp_allocator = allocator_temp();
     char const* src_rel_path = src_path;
     if (path_is_absolute(src_path))
     {

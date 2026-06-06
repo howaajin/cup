@@ -50,7 +50,7 @@ char* os_get_current_exe_path(Allocator* allocator)
 
     if (_NSGetExecutablePath(pathbuf, &size) == 0)
     {
-        Allocator* stack_allocator = allocator_arena_from_alloca(4096);
+        Allocator* stack_allocator = allocator_temp();
         char const* path = get_absolute_path(pathbuf, stack_allocator);
         return path_lexically_normal(path, allocator);
     }

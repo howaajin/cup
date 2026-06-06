@@ -296,7 +296,7 @@ static void vcxproj_add_include_dir(Vcxproj* project, char const* include_dir)
     {
         return;
     }
-    Allocator* temp_allocator = allocator_arena_from_alloca(4096);
+    Allocator* temp_allocator = allocator_temp();
     char const* full_path = os_full_path(include_dir, temp_allocator);
     char* dir = string_from_c_str(project->allocator, full_path);
     path_slash_to_backslash(dir);

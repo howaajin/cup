@@ -56,7 +56,7 @@ DirectoryEntry* directory_read(Directory* dir)
     {
         dir->current_entry.is_directory = (dir->find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
         array_resize(dir->allocator, dir->current_entry.name, 0);
-        Allocator* stack_allocator = allocator_arena_from_alloca(4096);
+        Allocator* stack_allocator = allocator_temp();
         char const* name = wchars_to_utf8(stack_allocator, dir->find_data.cFileName);
         string_append(dir->allocator, dir->current_entry.name, name);
         if (!FindNextFileW(dir->handle, &dir->find_data))

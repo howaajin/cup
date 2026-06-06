@@ -8,7 +8,7 @@
 
 void os_ensure_dir_existed(char const* path)
 {
-    Allocator* stack_allocator = allocator_arena_from_alloca(4096);
+    Allocator* stack_allocator = allocator_temp();
     char const* dir = path_parent_path(path, stack_allocator);
     if (dir[0] && !os_file_exists(dir))
     {

@@ -83,8 +83,8 @@ bool os_copy_file(char const* src, char const* dst)
 
 char* get_absolute_path(char const* path, Allocator* allocator)
 {
-    Allocator* stack_allocator = allocator_arena_from_alloca(4096);
-    char* cwd = os_get_cwd(stack_allocator);
+    Allocator* stack_allocator = allocator_temp();
+    char const* cwd = os_get_cwd(stack_allocator);
     if (!path_is_absolute(path))
     {
         return path_combine(allocator, cwd, path, NULL);
@@ -153,7 +153,7 @@ Process* os_start_process(char const* cmd)
     }
     if (pid == 0)
     {
-        Allocator* stack_allocator = allocator_arena_from_alloca(65535);
+        Allocator* stack_allocator = allocator_temp();
         char* cmd_copied = string_from_c_str(stack_allocator, cmd);
         char const* p = cmd_copied;
         char** argv = NULL;
