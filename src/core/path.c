@@ -516,10 +516,13 @@ char* path_lexically_normal(char const* path, Allocator* allocator)
         {
             break;
         }
+        if (strcmp(n, ".") == 0)
+        {
+            continue;
+        }
         if (strcmp(n, "..") == 0)
         {
-            char* last = array_last(elements);
-            if (array_size(elements) && strcmp(last, "..") != 0)
+            if (array_size(elements) != 0 && array_size(elements) && strcmp(array_last(elements), "..") != 0)
             {
                 array_pop(elements);
             }
@@ -542,10 +545,7 @@ char* path_lexically_normal(char const* path, Allocator* allocator)
         {
             string_putc(allocator, result, sep);
         }
-        if (strcmp(elements[i], ".") != 0)
-        {
-            string_append(allocator, result, elements[i]);
-        }
+        string_append(allocator, result, elements[i]);
     }
     if (*result == 0)
     {
