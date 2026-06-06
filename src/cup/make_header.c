@@ -135,7 +135,7 @@ bool match_include_quote(char const* line, char** include, char** ext, char** en
     return true;
 }
 
-void merge_header(Allocator* allocator, char* path, StringHash* set, char** merged, bool b_is_source)
+void merge_header(Allocator* allocator, char* path, StringSet* set, char** merged, bool b_is_source)
 {
     bool b_existed;
     hash_insert_check(set, path, &b_existed);
@@ -257,7 +257,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     Allocator* allocator = allocator_create_chained();
-    StringHash set = {.allocator = allocator};
+    StringSet set = {.allocator = allocator};
     char* merged = NULL;
     string_printf(allocator, merged, "#ifndef CUP_H\n");
     char* include = string_from_c_str(allocator, input);

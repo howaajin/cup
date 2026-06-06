@@ -8,7 +8,7 @@
 
 typedef struct Node Node;
 typedef struct Graph Graph;
-typedef struct Hash Hash;
+typedef struct PtrHash PtrHash;
 typedef struct Set Set;
 typedef struct StringHash StringHash;
 typedef char const* FnOutputFilter(Node* cmd, Allocator* allocator, char const* line);
@@ -21,9 +21,9 @@ struct Graph
 {
     Allocator* allocator;
     Node** sources;
-    Hash* hash_node_to_next_set;
-    Hash* hash_node_to_prev_set;
-    Hash* hash_node_to_b_finished;
+    PtrHash* hash_node_to_next_set;
+    PtrHash* hash_node_to_prev_set;
+    PtrHash* hash_node_to_b_finished;
     Node** stack;
 };
 

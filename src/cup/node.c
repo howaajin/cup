@@ -18,7 +18,7 @@ bool b_node_default_excluded = false;
 
 Allocator* node_allocator;
 Node** nodes;
-StringHash* hash_name_to_node;
+StringPtrHash* hash_name_to_node;
 
 extern char const* desc_color_exe;
 extern char const* desc_color_input;
@@ -57,7 +57,7 @@ SourceType get_source_type(char const* path)
 void init_node(void)
 {
     node_allocator = allocator_create_tiny(4096, 4096 * 4096);
-    hash_name_to_node = allocator_calloc(node_allocator, 1, sizeof(StringHash));
+    hash_name_to_node = allocator_calloc(node_allocator, 1, sizeof(StringPtrHash));
     hash_name_to_node->allocator = node_allocator;
 }
 
@@ -114,6 +114,7 @@ void node_processed(Node* node, Graph* graph)
 Node* node_create(uint32_t type, char const* name, size_t num_bytes)
 {
     Node* node = allocator_calloc(node_allocator, 1, num_bytes);
+    assert(node);
     node->type = type;
     node->b_default_excluded = b_node_default_excluded;
     if (name)
@@ -171,7 +172,7 @@ void node_set_name(Node* node, char const* name)
     }
     node->name = string_append_c_str(node_allocator, node->name, name);
     hash_key(hash_name_to_node, i) = node->name;
-    hash_value(hash_name_to_node, i) = (uintptr_t)node;
+    hash_value(hash_name_to_node, i) = node;
 }
 
 void node_set_alias(Node* node, char const* alias)
@@ -184,7 +185,7 @@ void node_set_alias(Node* node, char const* alias)
     }
     alias = string_from_c_str(node_allocator, alias);
     hash_key(hash_name_to_node, i) = alias;
-    hash_value(hash_name_to_node, i) = (uintptr_t)node;
+    hash_value(hash_name_to_node, i) = node;
 }
 
 void node_add_debugger_argument(Node* node, char const* arg)
@@ -1023,7 +1024,7 @@ Node* add_process_cmd_from_exe_node(Node* exe, char const* name, char const* fil
 Node* find_node(char const* name)
 {
     assert(hash_name_to_node);
-    return (Node*)(uintptr_t)hash_get(hash_name_to_node, name);
+    return (Node*)hash_get(hash_name_to_node, name);
 }
 
 bool has_dependency(Node* node, Node* dependency)

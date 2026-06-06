@@ -462,6 +462,7 @@ static inline $value_type$ hash_get_$hash_name$($hash_name$ const* h, $key_type$
 typedef enum key_type_e
 {
     key_type_u64 = 0,
+    key_type_ptr,
     key_type_cstr,
     key_type_bytes,
 } key_type_e;
@@ -480,6 +481,7 @@ struct hash_key_t
     char const* key_raw;
 } g_keys[] = {
     [key_type_u64] = {.type = "uint64_t", .key_raw = NULL},
+    [key_type_ptr] = {.type = "ptr_t", .key_raw = "void*"},
     [key_type_cstr] = {.type = "cstr_t", .key_raw = "char const*"},
     [key_type_bytes] = {.type = "bytes_t", .key_raw = "struct {char* data; uint32_t len;}"},
 };
@@ -524,13 +526,13 @@ struct hash_t
         .value_type = value_type_u64,
     },
     {
-        .hash_name = "StringHash",
-        .key_type = key_type_cstr,
-        .value_type = value_type_u64,
+        .hash_name = "PtrHash",
+        .key_type = key_type_ptr,
+        .value_type = value_type_ptr,
     },
     {
-        .hash_name = "BytesHash",
-        .key_type = key_type_bytes,
+        .hash_name = "StringHash",
+        .key_type = key_type_cstr,
         .value_type = value_type_u64,
     },
     {
@@ -542,11 +544,6 @@ struct hash_t
         .hash_name = "StringSet",
         .key_type = key_type_cstr,
         .value_type = value_type_none,
-    },
-    {
-        .hash_name = "StringStringHash",
-        .key_type = key_type_cstr,
-        .value_type = value_type_cstr,
     },
 };
 

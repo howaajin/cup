@@ -13,7 +13,6 @@
 typedef struct Graph Graph;
 typedef struct Vcxproj Vcxproj;
 typedef struct VcxprojFilter VcxprojFilter;
-typedef struct StringStringHash StringStringHash;
 typedef struct StringSet StringSet;
 typedef struct StringPtrHash StringPtrHash;
 typedef struct SlnFile SlnFile;
@@ -35,8 +34,8 @@ struct SlnFile
     Vcxproj** projects;
     char const* configuration;
     char const* architecture;
-    StringStringHash* hash_folder_to_parent_guid;
-    StringStringHash* hash_folder_path_to_guid;
+    StringPtrHash* hash_folder_to_parent_guid;
+    StringPtrHash* hash_folder_path_to_guid;
 };
 
 struct Vcxproj
@@ -556,17 +555,17 @@ static void vcxproj_set_deps(Vcxproj* p, Node* cmd, Hash* hash_node_to_vcxproj)
     allocator_destroy(temp_allocator);
 }
 
-static char const* vcxproj_sln_add_folder_path(StringStringHash* hash, StringStringHash* hash_folder_to_parent_guid, char const* path, Allocator* allocator)
+static char* vcxproj_sln_add_folder_path(StringPtrHash* hash, StringPtrHash* hash_folder_to_parent_guid, char const* path, Allocator* allocator)
 {
     if (!path_has_relative_path(path))
     {
         return NULL;
     }
     char* parent = path_parent_path(path, allocator);
-    char const* parent_guid = vcxproj_sln_add_folder_path(hash, hash_folder_to_parent_guid, parent, allocator);
+    char* parent_guid = vcxproj_sln_add_folder_path(hash, hash_folder_to_parent_guid, parent, allocator);
     bool b_existed;
     uint32_t index = hash_insert_check(hash, path, &b_existed);
-    char const* guid;
+    char* guid;
     if (!b_existed)
     {
         guid = os_create_guid(allocator, false);
@@ -585,7 +584,7 @@ static char const* vcxproj_sln_add_folder_path(StringStringHash* hash, StringStr
     return guid;
 }
 
-static void vcxproj_make_sln_folder_hash(Vcxproj** projects, StringStringHash* hash_folder_to_parent_guid, StringStringHash* hash_folder_path_to_guid, Allocator* allocator)
+static void vcxproj_make_sln_folder_hash(Vcxproj** projects, StringPtrHash* hash_folder_to_parent_guid, StringPtrHash* hash_folder_path_to_guid, Allocator* allocator)
 {
     for (uint64_t i = 0; i != array_size(projects); i++)
     {
@@ -877,7 +876,7 @@ char* sln_to_string(SlnFile* sln, char const* old_guid, Allocator* allocator)
     }
 
     // Folders
-    StringStringHash* h = sln->hash_folder_path_to_guid;
+    StringPtrHash* h = sln->hash_folder_path_to_guid;
     for (uint32_t i = h->begin; i != h->end; i = hash_next(h, i))
     {
         char const* folder_path = hash_key(h, i);
@@ -990,9 +989,9 @@ static SlnFile* sln_from_graph(Allocator* allocator)
     Hash hash_node_to_vcxproj = {.allocator = allocator};
     SlnFile* sln = allocator_calloc(allocator, 1, sizeof(SlnFile));
     sln->allocator = allocator;
-    sln->hash_folder_path_to_guid = allocator_calloc(allocator, 1, sizeof(StringStringHash));
+    sln->hash_folder_path_to_guid = allocator_calloc(allocator, 1, sizeof(StringPtrHash));
     sln->hash_folder_path_to_guid->allocator = allocator;
-    sln->hash_folder_to_parent_guid = allocator_calloc(allocator, 1, sizeof(StringStringHash));
+    sln->hash_folder_to_parent_guid = allocator_calloc(allocator, 1, sizeof(StringPtrHash));
     sln->hash_folder_to_parent_guid->allocator = allocator;
     Node** nodes = get_all_nodes();
     for (size_t i = 0; i != array_size(nodes); i++)
