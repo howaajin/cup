@@ -64,6 +64,16 @@ static void arena_destroy(Allocator* instance)
 
 Allocator* allocator_create_arena(void* buffer, size_t buffer_size)
 {
+    uintptr_t addr = (uintptr_t)buffer;
+    uintptr_t aligned_addr = allocator_align_up(addr, ARENA_DEFAULT_ALIGNMENT);
+    size_t skip = (size_t)(aligned_addr - addr);
+    if (buffer_size <= skip)
+    {
+        assert(false && "Buffer too small after alignment");
+        return NULL;
+    }
+    buffer = (void*)aligned_addr;
+    buffer_size -= skip;
     if (buffer_size < sizeof(ArenaAllocator))
     {
         assert(false && "Buffer size is too small");
