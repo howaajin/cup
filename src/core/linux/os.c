@@ -3,6 +3,7 @@
 #include "core/path.h"
 #include "core/utilities.h"
 
+#include <assert.h>
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -41,11 +42,13 @@ char* get_absolute_path(char const* path, Allocator* allocator);
 
 char* os_get_current_exe_path(Allocator* allocator)
 {
-    Dl_info info;
-    dladdr(os_get_current_exe_path, &info);
-    Allocator* stack_allocator = allocator_arena_from_alloca(4096);
-    char const* path = get_absolute_path(info.dli_fname, stack_allocator);
-    return path_lexically_normal(path, allocator);
+    char buffer[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
+    assert(len != -1 && "Failed to read /proc/self/exe");
+    buffer[len] = '\0';
+    char* result = path_lexically_normal(buffer, allocator);
+    assert(result);
+    return result;
 }
 
 uint64_t os_get_rand_uint64()
