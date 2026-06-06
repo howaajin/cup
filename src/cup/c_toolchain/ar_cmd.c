@@ -3,6 +3,7 @@
 #include "core/allocator.h"
 #include "core/array.h"
 #include "core/hash.h"
+#include "core/macros.h"
 #include "core/platform.h"
 #include "cup/c_toolchain/c_toolchain.h"
 #include "cup/c_toolchain/ext_node_type.h"
@@ -58,6 +59,10 @@ static void ar_cmd_prepare(Node* node)
     for (size_t i = 0; i != array_size(cmd->ar_inputs); i++)
     {
         Node* input = cmd->ar_inputs[i];
+        if (input->file_type != FILE_TYPE_OBJ)
+        {
+            continue;
+        }
         cmd_add_option(node, NULL, input->path, OPTION_INPUT);
         cmd_add_input(node, input);
     }
@@ -82,6 +87,11 @@ Node* ar_cmd_create(Node* output, char const* file, int line)
 
 void ar_cmd_add_input(Node* node, Node* input)
 {
+    if (input->node_type != NODE_TYPE_FILE || (input->file_type != FILE_TYPE_OBJ && input->file_type != FILE_TYPE_LIB))
+    {
+        warn("An ar cmd input can only be a .lib (library) or another .obj (object file).");
+        return;
+    }
     ArCmd* cmd = (ArCmd*)node;
     array_push(node_allocator, cmd->ar_inputs, input);
 }
@@ -91,5 +101,3 @@ void ar_cmd_set_toolchain_type(Node* node, ToolchainType toolchain)
     ArCmd* cmd = (ArCmd*)node;
     cmd->toolchain = toolchain;
 }
-
-

@@ -127,12 +127,12 @@ static Node** collect_linked_node_recursively(Allocator* allocator, Node* input,
         ArCmd* ar_cmd = (ArCmd*)lib->build_cmd;
         for (size_t i = 0; i != array_size(ar_cmd->inputs); i++)
         {
-            Node* obj = ar_cmd->inputs[i];
-            if (obj->file_type != FILE_TYPE_OBJ)
+            Node* ar_input = ar_cmd->inputs[i];
+            if (ar_input->file_type != FILE_TYPE_OBJ && ar_input->file_type != FILE_TYPE_LIB)
             {
                 continue;
             }
-            nodes = collect_linked_node_recursively(allocator, obj, nodes, node_set, lib_set);
+            nodes = collect_linked_node_recursively(allocator, ar_input, nodes, node_set, lib_set);
         }
     }
     return nodes;
@@ -629,6 +629,14 @@ void link_cmd_make_cmdline(Node* cmd)
         char const* opt_shared = link_cmd_get_option_shared(link->linker_type);
         cmd_add_option(cmd, opt_shared, NULL, OPTION_FLAG);
     }
+    if (link->def)
+    {
+        char const* opt_def = link_cmd_get_option_def(link->linker_type);
+        if (opt_def)
+        {
+            cmd_add_option(cmd, opt_def, link->def->path, OPTION_INPUT);
+        }
+    }
     link_cmd_add_input_options(cmd);
     if (link->pdb)
     {
@@ -636,14 +644,6 @@ void link_cmd_make_cmdline(Node* cmd)
         if (opt_pdb)
         {
             cmd_add_option(cmd, opt_pdb, link->pdb->path, OPTION_OUTPUT);
-        }
-    }
-    if (link->def)
-    {
-        char const* opt_def = link_cmd_get_option_def(link->linker_type);
-        if (opt_def)
-        {
-            cmd_add_option(cmd, opt_def, link->def->path, OPTION_INPUT);
         }
     }
     char const* opt_out_import_lib = link_cmd_get_option_out_import_lib(link->linker_type);
