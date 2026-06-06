@@ -6,7 +6,7 @@ ENTRY(build_test_graph)
     Node* src = SRC("{dir}/test_graph.c");
     Node* obj = OBJ(src);
     CC(src, obj);
-    obj_add_link_obj_from_src(obj, SRC("src/core/allocator.c"));
+    obj_add_link_node(obj, LIB("{out_dir}/allocator"));
     obj_add_link_obj_from_src(obj, SRC("src/cup/graph.c"));
     obj_add_link_obj_from_src(obj, SRC("src/cup/node.c"));
     obj_add_link_obj_from_src(obj, SRC("src/cup/in_repo.c"));
@@ -40,7 +40,7 @@ ENTRY(build_test_string)
     Node* src = SRC("{dir}/test_string.c");
     Node* obj = get_default_obj(src);
     CC(src, obj);
-    obj_add_link_obj_from_src(obj, SRC("src/core/allocator.c"));
+    obj_add_link_node(obj, LIB("{out_dir}/allocator"));
 }
 
 ENTRY(build_test_json)
@@ -48,7 +48,7 @@ ENTRY(build_test_json)
     Node* src = SRC("{dir}/test_json.c");
     Node* obj = get_default_obj(src);
     CC(src, obj);
-    obj_add_link_obj_from_src(obj, SRC("src/core/allocator.c"));
+    obj_add_link_node(obj, LIB("{out_dir}/allocator"));
     obj_add_link_obj_from_src(obj, SRC("src/core/json.c"));
 }
 
@@ -86,5 +86,5 @@ ENTRY(build_test_path)
     Node* src = SRC("{dir}/test_path.c");
     Node* obj = get_default_obj(src);
     CC(src, obj);
-    obj_add_link_obj_from_src(obj, SRC("src/core/allocator.c"));
+    obj_add_link_obj_from_src(obj, SRC("src/core/path.c"));
 }

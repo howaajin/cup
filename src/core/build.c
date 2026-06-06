@@ -64,6 +64,7 @@ ENTRY(build_path)
     Node* src = SRC("src/core/path.c");
     Node* obj = OBJ(src);
     CC(src, obj);
+    obj_add_link_node(obj, LIB("{out_dir}/allocator"));
 }
 
 ENTRY(build_utilities)
@@ -161,92 +162,28 @@ ENTRY(build_os)
     }
 }
 
-ENTRY(build_arena_allocator)
-{
-    Node* src = SRC("{dir}/allocators/arena_allocator.c");
-    Node* obj = OBJ(src);
-    CC(src, obj);
-}
-
-ENTRY(build_c_allocator)
-{
-    Node* src = SRC("{dir}/allocators/c_allocator.c");
-    Node* obj = OBJ(src);
-    CC(src, obj);
-}
-
-ENTRY(build_chained_allocator)
-{
-    Node* src = SRC("{dir}/allocators/chained_allocator.c");
-    Node* obj = OBJ(src);
-    CC(src, obj);
-}
-
-ENTRY(build_tiny_allocator)
-{
-    Node* src = SRC("{dir}/allocators/tiny_allocator.c");
-    Node* obj = OBJ(src);
-    CC(src, obj);
-}
-
-ENTRY(set_var_allocator, PRIORITY_BEFORE_DEFAULT)
-{
-#if CURRENT_PLATFORM == PLATFORM_WINDOWS
-    set_var("platform_allocator_c", fmt("{dir}/windows/allocator.c"));
-#elif CURRENT_PLATFORM == PLATFORM_LINUX || CURRENT_PLATFORM == PLATFORM_MACOS
-    set_var("platform_allocator_c", fmt("{dir}/common/allocator.c"));
-#endif
-}
-
-ENTRY(build_platform_allocator)
-{
-    Node* src = SRC("{platform_allocator_c}");
-    Node* obj = OBJ(src);
-    CC(src, obj);
-}
-
-ENTRY(build_allocator)
-{
-    Node* src = SRC("{dir}/allocator.c");
-    Node* obj = OBJ(src);
-    CC(src, obj);
-    obj_add_link_obj_from_src(obj, SRC("{dir}/allocators/arena_allocator.c"));
-    obj_add_link_obj_from_src(obj, SRC("{dir}/allocators/c_allocator.c"));
-    obj_add_link_obj_from_src(obj, SRC("{dir}/allocators/chained_allocator.c"));
-    obj_add_link_obj_from_src(obj, SRC("{dir}/allocators/tiny_allocator.c"));
-    obj_add_link_obj_from_src(obj, SRC("{dir}/os.c"));
-    obj_add_link_obj_from_src(obj, SRC("{platform_allocator_c}"));
-    if (default_toolchain == TOOLCHAIN_TYPE_GCC && CURRENT_PLATFORM == PLATFORM_WINDOWS)
-    {
-        obj_add_link_lib(obj, "pthread");
-    }
-}
-
 ENTRY(build_core_lib)
 {
     extern ToolchainType self_build_toolchain;
 
-    Node* sources[] = {
-        SRC("{dir}/allocator.c"),
-        SRC("{dir}/allocators/arena_allocator.c"),
-        SRC("{dir}/allocators/c_allocator.c"),
-        SRC("{dir}/allocators/chained_allocator.c"),
-        SRC("{dir}/allocators/tiny_allocator.c"),
-        SRC("{dir}/os.c"),
-        SRC("{dir}/json.c"),
-        SRC("{dir}/path.c"),
-        SRC("{dir}/utilities.c"),
-        SRC("{dir}/{platform}/dylib.c"),
-        SRC("{dir}/{platform}/os.c"),
-        SRC("{platform_directory_c}"),
-        SRC("{platform_allocator_c}"),
+    Node* inputs[] = {
+        OBJ(SRC("{dir}/os.c")),
+        OBJ(SRC("{dir}/json.c")),
+        OBJ(SRC("{dir}/path.c")),
+        OBJ(SRC("{dir}/utilities.c")),
+        OBJ(SRC("{dir}/{platform}/dylib.c")),
+        OBJ(SRC("{dir}/{platform}/os.c")),
+        OBJ(SRC("{platform_directory_c}")),
+        LIB("{out_dir}/allocator.lib"),
     };
     Node* core_lib = LIB("{out_dir}/core");
     Node* cmd = AR(core_lib);
     ar_cmd_set_toolchain_type(cmd, self_build_toolchain);
-    for (size_t i = 0; i != static_array_size(sources); i++)
+    for (size_t i = 0; i != static_array_size(inputs); i++)
     {
-        Node* obj = get_default_obj(sources[i]);
-        ar_cmd_add_input(cmd, obj);
+        Node* input = inputs[i];
+        ar_cmd_add_input(cmd, input);
     }
 }
+
+#include "allocators/build.c"

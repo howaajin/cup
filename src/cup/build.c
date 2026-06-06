@@ -55,7 +55,7 @@ ENTRY(build_make_header)
             c_compile_cmd_add_define(cc, "_CRT_SECURE_NO_WARNINGS");
         }
         link_cmd_add_input(link, obj);
-        link_cmd_add_input(link, OBJ(SRC("src/core/allocator.c")));
+        link_cmd_add_input(link, LIB("{out_dir}/allocator"));
     }
 }
 
@@ -235,7 +235,7 @@ ENTRY(build_executor)
     Node* src = SRC("{dir}/executor/executor.c");
     Node* obj = OBJ(src);
     CC(src, obj);
-    obj_add_link_obj_from_src(obj, SRC("src/core/allocator.c"));
+    obj_add_link_node(obj, LIB("{out_dir}/allocator"));
     obj_add_link_obj_from_src(obj, SRC("{dir}/executor/executor_{platform}.c"));
 }
 
@@ -244,7 +244,7 @@ ENTRY(build_platform_executor)
     Node* src = SRC("{dir}/executor/executor_{platform}.c");
     Node* obj = OBJ(src);
     CC(src, obj);
-    obj_add_link_obj_from_src(obj, SRC("src/core/allocator.c"));
+    obj_add_link_node(obj, LIB("{out_dir}/allocator"));
     obj_add_link_obj_from_src(obj, SRC("src/core/os.c"));
     obj_add_link_obj_from_src(obj, SRC("{dir}/executor/executor.c"));
 }

@@ -1,7 +1,5 @@
 #include "core/allocator.h"
 
-#include "core/macros.h"
-
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -27,9 +25,9 @@ struct TinyNode
 
 struct TinyAllocator
 {
+    struct Allocator;
     Allocator* backend;
     TinyNode* head;
-    Allocator interface;
     uint32_t limit;
 };
 
@@ -45,7 +43,7 @@ static TinyNode* tiny_create_node(Allocator* backend, size_t size)
 
 static void tiny_free(Allocator* allocator, void* ptr)
 {
-    TinyAllocator* a = field_parent(TinyAllocator, allocator, interface);
+    TinyAllocator* a = (TinyAllocator*)allocator;
     if (!ptr)
     {
         return;
@@ -73,7 +71,7 @@ Loop:
 
 static void* tiny_malloc(Allocator* allocator, size_t size)
 {
-    TinyAllocator* a = field_parent(TinyAllocator, allocator, interface);
+    TinyAllocator* a = (TinyAllocator*)allocator;
     size_t adj_size = allocator_align_up(size, sizeof(size_t));
     TinyNode* node = a->head;
     while (true)
@@ -119,7 +117,7 @@ static void* tiny_realloc(Allocator* allocator, void* ptr, size_t size)
     {
         return tiny_malloc(allocator, size);
     }
-    TinyAllocator* a = field_parent(TinyAllocator, allocator, interface);
+    TinyAllocator* a = (TinyAllocator*)allocator;
     size_t adj_size = allocator_align_up(size, sizeof(size_t));
     TinyNode* node = a->head;
     bool is_own;
@@ -184,13 +182,13 @@ Loop:
 
 static void tiny_destroy(Allocator* allocator)
 {
-    TinyAllocator* a = field_parent(TinyAllocator, allocator, interface);
+    TinyAllocator* a = (TinyAllocator*)allocator;
     allocator_destroy(a->backend);
 }
 
 void tiny_reset(Allocator* allocator)
 {
-    TinyAllocator* a = field_parent(TinyAllocator, allocator, interface);
+    TinyAllocator* a = (TinyAllocator*)allocator;
     TinyNode* node = a->head;
     while (node)
     {
@@ -208,10 +206,10 @@ Allocator* allocator_create_tiny(uint32_t limit, uint32_t size)
     a->backend = backend;
     a->head = tiny_create_node(backend, size);
     a->limit = limit;
-    a->interface.malloc = tiny_malloc;
-    a->interface.calloc = tiny_calloc;
-    a->interface.realloc = tiny_realloc;
-    a->interface.free = tiny_free;
-    a->interface.destroy = tiny_destroy;
-    return &a->interface;
+    a->malloc = tiny_malloc;
+    a->calloc = tiny_calloc;
+    a->realloc = tiny_realloc;
+    a->free = tiny_free;
+    a->destroy = tiny_destroy;
+    return (Allocator*)a;
 }

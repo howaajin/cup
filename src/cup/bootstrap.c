@@ -1,9 +1,9 @@
 #include "core/platform.h"
 
-#include "core/allocator.c"
 #include "core/allocators/arena_allocator.c"
 #include "core/allocators/c_allocator.c"
 #include "core/allocators/chained_allocator.c"
+#include "core/allocators/temp_allocator.c"
 #include "core/allocators/tiny_allocator.c"
 #include "core/json.c"
 #include "core/os.c"
@@ -35,7 +35,7 @@
 #include "cup/c_toolchain/scan_test.c"
 
 #if CURRENT_PLATFORM == PLATFORM_WINDOWS
-#include "core/windows/allocator.c"
+#include "core/allocators/virtual_allocator_windows.c"
 #include "core/windows/directory.c"
 #include "core/windows/dylib.c"
 #include "core/windows/os.c"
@@ -43,14 +43,14 @@
 #include "cup/executor/executor_windows.c"
 #include "cup/vs.c"
 #elif CURRENT_PLATFORM == PLATFORM_LINUX
-#include "core/common/allocator.c"
+#include "core/allocators/virtual_allocator_linux_mac.c"
 #include "core/common/directory.c"
 #include "core/common/os.c"
 #include "core/linux/dylib.c"
 #include "core/linux/os.c"
 #include "cup/executor/executor_linux.c"
 #elif CURRENT_PLATFORM == PLATFORM_MACOS
-#include "core/common/allocator.c"
+#include "core/allocators/virtual_allocator_linux_mac.c"
 #include "core/common/directory.c"
 #include "core/common/os.c"
 #include "core/mac/dylib.c"
