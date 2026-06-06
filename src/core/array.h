@@ -66,6 +66,7 @@ static inline void* array_new_impl(Allocator* allocator, size_t item_size, size_
         new_capacity = capacity;
     }
     Array* a = allocator_malloc(allocator, sizeof(Array) + item_size * new_capacity);
+    assert(a);
     a->capacity = new_capacity;
     a->size = size;
     return a + 1;

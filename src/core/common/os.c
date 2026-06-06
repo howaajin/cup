@@ -38,6 +38,7 @@ bool os_file_exists(char const* path)
 char* os_get_cwd(Allocator* allocator)
 {
     char* p = getcwd(NULL, 0);
+    assert(p);
     char* cwd = string_from_c_str(allocator, p);
     free(p);
     return cwd;
@@ -294,5 +295,3 @@ bool os_is_terminal_supports_color(void)
 void os_set_console_utf8(void)
 {
 }
-
-
