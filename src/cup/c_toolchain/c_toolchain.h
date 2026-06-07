@@ -173,6 +173,7 @@ void set_test_enabled(bool b_enabled);
 void set_msvc_show_include_prefix(char const* prefix);
 char const* get_clang_c_compiler(void);
 char const* get_clang_cpp_compiler(void);
+void set_clang_path(char const* path);
 
 void set_zig_target(char const* target);
 void add_build_script(char const* path);

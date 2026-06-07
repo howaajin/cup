@@ -183,20 +183,42 @@ ToolchainType get_toolchain_by_current_compiler()
     return TOOLCHAIN_TYPE_UNSPECIFIED;
 }
 
+static bool clang_path_initialized = false;
+static char* clang_path = NULL;
+static bool clang_cpp_initialized = false;
+static char* clang_cpp_path = NULL;
+
+void set_clang_path(char const* path)
+{
+    if (clang_path_initialized && clang_path)
+    {
+        string_free(node_allocator, clang_path);
+    }
+    if (clang_cpp_initialized && clang_cpp_path)
+    {
+        string_free(node_allocator, clang_cpp_path);
+        clang_cpp_initialized = false;
+        clang_cpp_path = NULL;
+    }
+    clang_path_initialized = true;
+    clang_path = path ? string_from_c_str(node_allocator, path) : NULL;
+}
+
 static char const* get_clang_path(void)
 {
-    static char* path = NULL;
-    static bool initialized = false;
-    if (!initialized)
+    if (!clang_path_initialized)
     {
-        initialized = true;
         char const* env = getenv("CUP_CLANG");
         if (env && env[0])
         {
-            path = string_from_c_str(node_allocator, env);
+            set_clang_path(env);
+        }
+        else
+        {
+            clang_path_initialized = true;
         }
     }
-    return path;
+    return clang_path;
 }
 
 char const* get_clang_c_compiler(void)
@@ -207,17 +229,11 @@ char const* get_clang_c_compiler(void)
 
 char const* get_clang_cpp_compiler(void)
 {
-    static char* cached = NULL;
-    static bool initialized = false;
-    if (!initialized)
+    if (!clang_cpp_initialized)
     {
-        initialized = true;
+        clang_cpp_initialized = true;
         char const* path = get_clang_path();
-        if (!path)
-        {
-            cached = NULL;
-        }
-        else
+        if (path)
         {
             Allocator* ta = allocator_temp();
             char const* filename = path_filename(path, ta);
@@ -225,11 +241,11 @@ char const* get_clang_cpp_compiler(void)
             {
                 char const* suffix = filename + 5;
                 char const* dir = path_parent_path(path, ta);
-                cached = (char*)path_combine(node_allocator, dir, fmt("clang++{}", suffix), NULL);
+                clang_cpp_path = (char*)path_combine(node_allocator, dir, fmt("clang++{}", suffix), NULL);
             }
         }
     }
-    return cached ? cached : "clang++";
+    return clang_cpp_path ? clang_cpp_path : "clang++";
 }
 
 void set_debug_info_enabled(bool b_enabled)
