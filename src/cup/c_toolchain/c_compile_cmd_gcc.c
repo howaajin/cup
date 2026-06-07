@@ -31,12 +31,12 @@ static void compile_cmdline_node_make_cmdline_gcc_c_cpp_common(Node* node, CComp
     compile_cmdline_node_make_cmdline_llvm_gcc_common(node, cmd);
     if (array_size(cmd->export_name) || array_size(cmd->import_names))
     {
-        cmd_add_option(node, "-fmodules", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "-fmodules");
         cmd_add_input_file_option(node, "-fmodule-mapper=", cmd->module_mapper);
     }
     if (cmd->b_color_diagnostics)
     {
-        cmd_add_option(node, "-fdiagnostics-color", NULL, OPTION_HIDDEN);
+        cmd_add_option(node, OPTION_HIDDEN, "-fdiagnostics-color");
     }
 }
 
@@ -44,7 +44,7 @@ static void compile_cmdline_node_make_cmdline_gcc_cpp(CompileCmdline* compile_cm
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, NULL, "g++", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "g++");
     compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(node, cmd);
     compile_cmdline_node_make_cmdline_gcc_c_cpp_common(node, cmd);
 }
@@ -53,7 +53,7 @@ static void compile_cmdline_node_make_cmdline_gcc_c(CompileCmdline* compile_cmdl
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, NULL, "gcc", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "gcc");
     compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(node, cmd);
     compile_cmdline_node_make_cmdline_gcc_c_cpp_common(node, cmd);
 }
@@ -69,18 +69,18 @@ static void compile_cmdline_node_make_cmdline_gcc_asm(CompileCmdline* compile_cm
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
     char const* ext = path_extension(cmd->src->path);
     bool b_pure_asm = string_equal(ext, ".s");
-    cmd_add_option(node, NULL, "gcc", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "gcc");
     cmd_add_output_file_option(node, "-o ", cmd->out_obj);
-    cmd_add_option(node, "-c", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_FLAG, "-c");
     cmd_add_input_file_option(node, NULL, cmd->src);
     if (cmd->arch)
     {
         char const* arch = get_arch_option_clang_or_gcc(cmd->arch);
-        cmd_add_option(node, arch, NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, arch);
     }
     if (cmd->b_generate_debug_info)
     {
-        cmd_add_option(node, "-g", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "-g");
     }
     compile_cmdline_node_append_string_set_options(node, "-I", cmd->includes, OPTION_BRIGHT_FLAG);
     compile_cmdline_node_append_string_set_options(node, "-D", cmd->defines, OPTION_FLAG);

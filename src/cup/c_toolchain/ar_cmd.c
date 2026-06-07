@@ -50,11 +50,19 @@ static void ar_cmd_prepare(Node* node)
     cmd_set_env(node, env);
     char const* ar_name = get_ar_name();
     char const* opt_out = get_ar_option_out();
-    cmd_add_option(node, NULL, ar_name, OPTION_EXE);
-    cmd_add_option(node, opt_out, cmd->output->path, OPTION_OUTPUT);
+    cmd_add_option(node, OPTION_EXE, ar_name);
+    if (opt_out[0] != '\0')
+    {
+        cmd_add_option(node, OPTION_FLAG, opt_out);
+        cmd_add_option_no_sep(node, OPTION_OUTPUT, cmd->output->path);
+    }
+    else
+    {
+        cmd_add_option(node, OPTION_OUTPUT, cmd->output->path);
+    }
     if (default_toolchain == TOOLCHAIN_TYPE_MSVC)
     {
-        cmd_add_option(node, "/nologo", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "/nologo");
     }
     for (size_t i = 0; i != array_size(cmd->ar_inputs); i++)
     {
@@ -63,7 +71,7 @@ static void ar_cmd_prepare(Node* node)
         {
             continue;
         }
-        cmd_add_option(node, NULL, input->path, OPTION_INPUT);
+        cmd_add_option(node, OPTION_INPUT, input->path);
         cmd_add_input(node, input);
     }
     cmd_prepare(node);

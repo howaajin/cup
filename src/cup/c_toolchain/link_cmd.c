@@ -622,19 +622,21 @@ void link_cmd_make_cmdline(Node* cmd)
     array_resize(node_allocator, link->description, 0);
     char const* opt_out = link_cmd_get_out_option(link->linker_type);
     char const* linker = link_cmd_get_linker(link);
-    cmd_add_option(cmd, NULL, linker, OPTION_EXE);
-    cmd_add_option(cmd, opt_out, link->output->path, OPTION_OUTPUT);
+    cmd_add_option(cmd, OPTION_EXE, linker);
+    cmd_add_option(cmd, OPTION_FLAG, opt_out);
+    cmd_add_option_no_sep(cmd, OPTION_OUTPUT, link->output->path);
     if (link->output->file_type == FILE_TYPE_DLL)
     {
         char const* opt_shared = link_cmd_get_option_shared(link->linker_type);
-        cmd_add_option(cmd, opt_shared, NULL, OPTION_FLAG);
+        cmd_add_option(cmd, OPTION_FLAG, opt_shared);
     }
     if (link->def)
     {
         char const* opt_def = link_cmd_get_option_def(link->linker_type);
         if (opt_def)
         {
-            cmd_add_option(cmd, opt_def, link->def->path, OPTION_INPUT);
+            cmd_add_option(cmd, OPTION_FLAG, opt_def);
+            cmd_add_option_no_sep(cmd, OPTION_INPUT, link->def->path);
         }
     }
     link_cmd_add_input_options(cmd);
@@ -643,50 +645,52 @@ void link_cmd_make_cmdline(Node* cmd)
         char const* opt_pdb = link_cmd_get_option_pdb(link->linker_type);
         if (opt_pdb)
         {
-            cmd_add_option(cmd, opt_pdb, link->pdb->path, OPTION_OUTPUT);
+            cmd_add_option(cmd, OPTION_FLAG, opt_pdb);
+            cmd_add_option_no_sep(cmd, OPTION_OUTPUT, link->pdb->path);
         }
     }
     char const* opt_out_import_lib = link_cmd_get_option_out_import_lib(link->linker_type);
     if (link->out_import_lib && opt_out_import_lib)
     {
-        cmd_add_option(cmd, opt_out_import_lib, link->out_import_lib->path, OPTION_OUTPUT);
+        cmd_add_option(cmd, OPTION_FLAG, opt_out_import_lib);
+        cmd_add_option_no_sep(cmd, OPTION_OUTPUT, link->out_import_lib->path);
     }
     if (link->entry)
     {
         char const* opt_entry = link_cmd_get_option_entry(link->linker_type);
-        cmd_add_option(cmd, opt_entry, link->entry, OPTION_FLAG);
+        cmd_add_option(cmd, OPTION_FLAG, fmt("{}{}", opt_entry, link->entry));
     }
     char const* opt_default = link_cmd_get_default_options(link, allocator_temp());
     if (opt_default)
     {
-        cmd_add_option(cmd, opt_default + 1, NULL, OPTION_FLAG);
+        cmd_add_option(cmd, OPTION_FLAG, opt_default + 1);
     }
     if (link->toolchain != TOOLCHAIN_TYPE_MSVC)
     {
         char const* opt_arch = link_cmd_get_option_arch(link->toolchain, link->arch);
         if (opt_arch)
         {
-            cmd_add_option(cmd, opt_arch, NULL, OPTION_FLAG);
+            cmd_add_option(cmd, OPTION_FLAG, opt_arch);
         }
     }
     if (link->pdb)
     {
         char const* opt_debug = link_cmd_get_option_debug(link->linker_type);
-        cmd_add_option(cmd, opt_debug, NULL, OPTION_FLAG);
+        cmd_add_option(cmd, OPTION_FLAG, opt_debug);
     }
     for (size_t i = 0; i != array_size(link->flags); i++)
     {
-        cmd_add_option(cmd, link->flags[i], NULL, OPTION_FLAG);
+        cmd_add_option(cmd, OPTION_FLAG, link->flags[i]);
     }
     char const* opt_lib_dir = link_cmd_get_option_lib_dir(link->linker_type);
     for (size_t i = 0; i != array_size(link->lib_directories); i++)
     {
-        cmd_add_option(cmd, opt_lib_dir, link->lib_directories[i], OPTION_FLAG);
+        cmd_add_option(cmd, OPTION_FLAG, fmt("{}{}", opt_lib_dir, link->lib_directories[i]));
     }
 
     if (link->toolchain == TOOLCHAIN_TYPE_ZIG && g_zig_target)
     {
-        cmd_add_option(cmd, "-target ", g_zig_target, OPTION_FLAG);
+        cmd_add_option(cmd, OPTION_FLAG, fmt("-target {}", g_zig_target));
     }
 }
 

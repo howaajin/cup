@@ -31,9 +31,9 @@ static void compile_cmdline_node_make_cmdline_zigcc_common(Node* node, CCompileC
     compile_cmdline_node_make_cmdline_llvm_gcc_common(node, cmd);
     if (cmd->b_color_diagnostics)
     {
-        cmd_add_option(node, "-fcolor-diagnostics", NULL, OPTION_HIDDEN);
-        cmd_add_option(node, "-fansi-escape-codes", NULL, OPTION_HIDDEN);
-        cmd_add_option(node, "-fdiagnostics-color=always", NULL, OPTION_HIDDEN);
+        cmd_add_option(node, OPTION_HIDDEN, "-fcolor-diagnostics");
+        cmd_add_option(node, OPTION_HIDDEN, "-fansi-escape-codes");
+        cmd_add_option(node, OPTION_HIDDEN, "-fdiagnostics-color=always");
     }
 }
 
@@ -41,12 +41,12 @@ static void compile_cmdline_node_make_cmdline_zigcc_cpp_module(CompileCmdline* c
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, NULL, "zig c++", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "zig c++");
     cmd_add_output_file_option(node, "-o ", cmd->export_bmi);
-    cmd_add_option(node, "--precompile", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_FLAG, "--precompile");
     if (!is_clang_supported_module_extension(cmd->src->path))
     {
-        cmd_add_option(node, "-x c++-module", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "-x c++-module");
     }
     if (cmd->b_cache_header_dependencies && cmd->scan_deps_cmd == NULL)
     {
@@ -60,7 +60,7 @@ void compile_cmdline_node_make_cmdline_zigcc_c(CompileCmdline* compile_cmdline)
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, NULL, "zig cc", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "zig cc");
     compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(node, cmd);
     compile_cmdline_node_make_cmdline_zigcc_common(node, cmd);
 }
@@ -69,7 +69,7 @@ static void compile_cmdline_node_make_cmdline_zigcc_cpp(CompileCmdline* compile_
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, NULL, "zig c++", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "zig c++");
     compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(node, cmd);
     compile_cmdline_node_make_cmdline_zigcc_common(node, cmd);
     compile_cmdline_node_make_cmdline_llvm_add_module_ref_options(node, cmd);
@@ -81,9 +81,9 @@ static void compile_cmdline_node_make_cmdline_zigcc_asm(CompileCmdline* compile_
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
     char const* ext = path_extension(cmd->src->path);
     bool b_pure_asm = string_equal(ext, ".s");
-    cmd_add_option(node, NULL, "zig cc", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "zig cc");
     cmd_add_output_file_option(node, "-o ", cmd->out_obj);
-    cmd_add_option(node, "-c", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_FLAG, "-c");
     cmd_add_input_file_option(node, NULL, cmd->src);
     if (cmd->arch)
     {
@@ -91,11 +91,11 @@ static void compile_cmdline_node_make_cmdline_zigcc_asm(CompileCmdline* compile_
         if (cmd->arch == ARCH_X64) arch_opt = "-m64";
         else if (cmd->arch == ARCH_X86) arch_opt = "-m32";
         if (arch_opt)
-            cmd_add_option(node, arch_opt, NULL, OPTION_FLAG);
+            cmd_add_option(node, OPTION_FLAG, arch_opt);
     }
     if (cmd->b_generate_debug_info)
     {
-        cmd_add_option(node, "-g", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "-g");
     }
     compile_cmdline_node_append_string_set_options(node, "-I", cmd->includes, OPTION_BRIGHT_FLAG);
     compile_cmdline_node_append_string_set_options(node, "-D", cmd->defines, OPTION_FLAG);

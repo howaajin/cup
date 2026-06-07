@@ -99,13 +99,14 @@ char const* c_compile_cmd_get_depfile_path(CCompileCmd* cmd)
 void cmd_add_option_mmd_mf(Node* node, CCompileCmd* cmd)
 {
     char const* depfile_path = c_compile_cmd_get_depfile_path(cmd);
-    cmd_add_option(node, "-MMD -MF ", depfile_path, OPTION_HIDDEN);
+    cmd_add_option(node, OPTION_HIDDEN, "-MMD -MF");
+    cmd_add_option(node, OPTION_HIDDEN, depfile_path);
 }
 
 void compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(Node* node, CCompileCmd* cmd)
 {
     cmd_add_output_file_option(node, "-o ", cmd->out_obj);
-    cmd_add_option(node, "-c", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_FLAG, "-c");
     if (cmd->b_cache_header_dependencies && cmd->scan_deps_cmd == NULL)
     {
         cmd_add_option_mmd_mf(node, cmd);
@@ -140,13 +141,13 @@ static Node* bmi_to_obj_cmd_create(CCompileCmd* cc, char const* file, int line)
     BmiToObjCmd* cmd_bmi_to_obj = (BmiToObjCmd*)cmd;
     cmd_bmi_to_obj->c_compile_cmd = cc;
     char const* compiler = default_toolchain == TOOLCHAIN_TYPE_ZIG ? "zig c++" : "clang++";
-    cmd_add_option(cmd, NULL, compiler, OPTION_EXE);
+    cmd_add_option(cmd, OPTION_EXE, compiler);
     cmd_add_output_file_option(cmd, "-o ", obj);
     if (b_generate_debug_info)
     {
-        cmd_add_option(cmd, "-g", NULL, OPTION_FLAG);
+        cmd_add_option(cmd, OPTION_FLAG, "-g");
     }
-    cmd_add_option(cmd, "-c", NULL, OPTION_FLAG);
+    cmd_add_option(cmd, OPTION_FLAG, "-c");
     cmd_add_input_file_option(cmd, NULL, pcm);
     StringPtrHash map = {.allocator = allocator_temp()};
     c_compile_cmd_get_all_imports(cc, &map);
@@ -189,22 +190,22 @@ void compile_cmdline_node_make_cmdline_llvm_gcc_common(Node* node, CCompileCmd* 
     cmd_add_input_file_option(node, NULL, cmd->src);
     if (cmd->arch)
     {
-        cmd_add_option(node, get_arch_option_clang_or_gcc(cmd->arch), NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, get_arch_option_clang_or_gcc(cmd->arch));
     }
     if (cmd->optimization_type)
     {
-        cmd_add_option(node, get_optimization_option_clang_or_gcc(cmd->optimization_type), NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, get_optimization_option_clang_or_gcc(cmd->optimization_type));
     }
     if (cmd->b_generate_debug_info)
     {
-        cmd_add_option(node, "-g", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "-g");
     }
     if (cmd->b_cpp)
     {
         char const* cpp_std_option = get_cpp_std_option_clang_or_gcc(cmd->cpp_std);
         if (cpp_std_option)
         {
-            cmd_add_option(node, cpp_std_option, NULL, OPTION_FLAG);
+            cmd_add_option(node, OPTION_FLAG, cpp_std_option);
         }
     }
     else
@@ -212,7 +213,7 @@ void compile_cmdline_node_make_cmdline_llvm_gcc_common(Node* node, CCompileCmd* 
         char const* c_std_option = get_c_std_option_clang_or_gcc(cmd->c_std);
         if (c_std_option)
         {
-            cmd_add_option(node, c_std_option, NULL, OPTION_FLAG);
+            cmd_add_option(node, OPTION_FLAG, c_std_option);
         }
     }
     compile_cmdline_node_append_string_set_options(node, "-I", cmd->includes, OPTION_BRIGHT_FLAG);
@@ -225,8 +226,8 @@ void compile_cmdline_node_make_cmdline_llvm_common(Node* node, CCompileCmd* cmd)
     compile_cmdline_node_make_cmdline_llvm_gcc_common(node, cmd);
     if (cmd->b_color_diagnostics)
     {
-        cmd_add_option(node, "-fcolor-diagnostics", NULL, OPTION_HIDDEN);
-        cmd_add_option(node, "-fansi-escape-codes", NULL, OPTION_HIDDEN);
+        cmd_add_option(node, OPTION_HIDDEN, "-fcolor-diagnostics");
+        cmd_add_option(node, OPTION_HIDDEN, "-fansi-escape-codes");
     }
 }
 
@@ -234,7 +235,7 @@ void compile_cmdline_node_make_cmdline_llvm_c(CompileCmdline* compile_cmdline)
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, NULL, "clang", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "clang");
     compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(node, cmd);
     compile_cmdline_node_make_cmdline_llvm_common(node, cmd);
 }
@@ -256,13 +257,13 @@ static void compile_cmdline_node_make_cmdline_llvm_cpp_module(CompileCmdline* co
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, NULL, "clang++", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "clang++");
     cmd_add_output_file_option(node, "-o ", cmd->out_obj);
-    cmd_add_option(node, "-c", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_FLAG, "-c");
     cmd_add_output_file_option(node, "-fmodule-output=", cmd->export_bmi);
     if (!is_clang_supported_module_extension(cmd->src->path))
     {
-        cmd_add_option(node, "-x c++-module", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "-x c++-module");
     }
     if (cmd->b_cache_header_dependencies && cmd->scan_deps_cmd == NULL)
     {
@@ -276,7 +277,7 @@ static void compile_cmdline_node_make_cmdline_llvm_cpp(CompileCmdline* compile_c
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, NULL, "clang++", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "clang++");
     compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(node, cmd);
     compile_cmdline_node_make_cmdline_llvm_common(node, cmd);
     compile_cmdline_node_make_cmdline_llvm_add_module_ref_options(node, cmd);
@@ -288,17 +289,17 @@ static void compile_cmdline_node_make_cmdline_llvm_asm(CompileCmdline* compile_c
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
     char const* ext = path_extension(cmd->src->path);
     bool b_pure_asm = string_equal(ext, ".s");
-    cmd_add_option(node, NULL, "clang", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "clang");
     cmd_add_output_file_option(node, "-o ", cmd->out_obj);
-    cmd_add_option(node, "-c", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_FLAG, "-c");
     cmd_add_input_file_option(node, NULL, cmd->src);
     if (cmd->b_generate_debug_info)
     {
-        cmd_add_option(node, "-g", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "-g");
     }
     if (cmd->arch)
     {
-        cmd_add_option(node, get_arch_option_clang_or_gcc(cmd->arch), NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, get_arch_option_clang_or_gcc(cmd->arch));
     }
     compile_cmdline_node_append_string_set_options(node, "-I", cmd->includes, OPTION_BRIGHT_FLAG);
     compile_cmdline_node_append_string_set_options(node, "-D", cmd->defines, OPTION_FLAG);

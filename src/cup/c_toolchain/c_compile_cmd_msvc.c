@@ -143,33 +143,33 @@ static bool is_cl_supported_module_extension(char const* path)
 
 void compile_cmdline_node_make_cmdline_msvc_scan_deps_common(Node* node, CCompileCmd* cmd)
 {
-    cmd_add_option(node, "/nologo", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_FLAG, "/nologo");
     if (cmd->b_cpp)
     {
         if (!is_cl_supported_module_extension(cmd->src->path))
         {
-            cmd_add_option(node, "/TP", NULL, OPTION_FLAG);
+            cmd_add_option(node, OPTION_FLAG, "/TP");
         }
         if (cmd->export_name || cmd->export_bmi)
         {
-            cmd_add_option(node, "/interface", NULL, OPTION_FLAG);
+            cmd_add_option(node, OPTION_FLAG, "/interface");
         }
     }
     if (array_size(cmd->import_names) || cmd->export_name)
     {
-        cmd_add_option(node, "/EHsc", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "/EHsc");
     }
     cmd_add_input_file_option(node, NULL, cmd->src);
     if (cmd->optimization_type)
     {
-        cmd_add_option(node, get_optimization_option_cl(cmd->optimization_type), NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, get_optimization_option_cl(cmd->optimization_type));
     }
     if (cmd->b_cpp)
     {
         char const* cpp_std_option = get_cpp_std_option_cl(cmd->cpp_std);
         if (cpp_std_option)
         {
-            cmd_add_option(node, cpp_std_option, NULL, OPTION_FLAG);
+            cmd_add_option(node, OPTION_FLAG, cpp_std_option);
         }
     }
     else
@@ -177,7 +177,7 @@ void compile_cmdline_node_make_cmdline_msvc_scan_deps_common(Node* node, CCompil
         char const* c_std_option = get_c_std_option_cl(cmd->c_std);
         if (c_std_option)
         {
-            cmd_add_option(node, c_std_option, NULL, OPTION_FLAG);
+            cmd_add_option(node, OPTION_FLAG, c_std_option);
         }
     }
     compile_cmdline_node_append_string_set_options(node, "/I", cmd->includes, OPTION_BRIGHT_FLAG);
@@ -187,14 +187,14 @@ void compile_cmdline_node_make_cmdline_msvc_scan_deps_common(Node* node, CCompil
 
 void compile_cmdline_node_make_cmdline_msvc_common(Node* node, CCompileCmd* cmd)
 {
-    cmd_add_option(node, NULL, "cl", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "cl");
     cmd_add_output_file_option(node, "/Fo:", cmd->out_obj);
-    cmd_add_option(node, "/c", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_FLAG, "/c");
     compile_cmdline_node_make_cmdline_msvc_scan_deps_common(node, cmd);
     if (cmd->b_generate_debug_info)
     {
         assert(cmd->pdb);
-        cmd_add_option(node, "/Zi", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "/Zi");
         cmd_add_output_file_option(node, "/Fd", cmd->pdb);
     }
 }
@@ -210,8 +210,9 @@ static void compile_cmdline_node_make_cmdline_msvc_add_module_ref_options(Node* 
         if (file_path_has_space(bmi))
         {
             char const* option = fmt("/reference \"{}=", module_name);
-            cmd_add_option(node, option, bmi->path, OPTION_INPUT);
-            cmd_add_option(node, "\"", NULL, OPTION_NONE);
+            cmd_add_option(node, OPTION_FLAG, option);
+            cmd_add_option_no_sep(node, OPTION_INPUT, bmi->path);
+            cmd_add_option_no_sep(node, OPTION_NONE, "\"");
         }
         else
         {
@@ -227,7 +228,7 @@ static void compile_cmdline_node_make_cmdline_msvc_cppm(Node* node, CCompileCmd*
     cmd_add_output_file_option(node, "/ifcOutput ", cmd->export_bmi);
     if (cmd->b_cache_header_dependencies && cmd->scan_deps_cmd == NULL)
     {
-        cmd_add_option(node, "/showIncludes", NULL, OPTION_HIDDEN);
+        cmd_add_option(node, OPTION_HIDDEN, "/showIncludes");
     }
     compile_cmdline_node_make_cmdline_msvc_add_module_ref_options(node, cmd);
 }
@@ -237,7 +238,7 @@ static void compile_cmdline_node_make_cmdline_msvc_c_cpp(Node* node, CCompileCmd
     compile_cmdline_node_make_cmdline_msvc_common(node, cmd);
     if (cmd->b_cache_header_dependencies && cmd->scan_deps_cmd == NULL)
     {
-        cmd_add_option(node, "/showIncludes", NULL, OPTION_HIDDEN);
+        cmd_add_option(node, OPTION_HIDDEN, "/showIncludes");
     }
     compile_cmdline_node_make_cmdline_msvc_add_module_ref_options(node, cmd);
 }
@@ -252,15 +253,16 @@ static void compile_cmdline_node_make_cmdline_msvc_asm(CompileCmdline* compile_c
     string_tolower(ext);
     if (string_equal(ext, ".asm"))
     {
-        cmd_add_option(node, NULL, cmd->arch == ARCH_X64 ? "ml64" : "ml", OPTION_EXE);
-        cmd_add_option(node, "/nologo", NULL, OPTION_FLAG);
-        cmd_add_option(node, "/quiet", NULL, OPTION_FLAG);
-        cmd_add_option(node, "/c", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_EXE, cmd->arch == ARCH_X64 ? "ml64" : "ml");
+        cmd_add_option(node, OPTION_FLAG, "/nologo");
+        cmd_add_option(node, OPTION_FLAG, "/quiet");
+        cmd_add_option(node, OPTION_FLAG, "/c");
         if (cmd->b_generate_debug_info)
         {
-            cmd_add_option(node, "/Zi", NULL, OPTION_FLAG);
+            cmd_add_option(node, OPTION_FLAG, "/Zi");
         }
-        cmd_add_option(node, "/Fo", cmd->out_obj->path, OPTION_OUTPUT);
+        cmd_add_option(node, OPTION_FLAG, "/Fo");
+        cmd_add_option_no_sep(node, OPTION_OUTPUT, cmd->out_obj->path);
         cmd_add_output(node, cmd->out_obj);
         cmd_add_input_file_option(node, NULL, cmd->src);
         compile_cmdline_node_append_string_set_options(node, "/I", cmd->includes, OPTION_BRIGHT_FLAG);

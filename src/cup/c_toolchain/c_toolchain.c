@@ -532,9 +532,11 @@ Node* make_implib_from_def_cmd_create(Node* def, Node* output, ToolchainType too
     {
         lib_name = "zig lib";
     }
-    cmd_add_option(cmd, NULL, lib_name, OPTION_EXE);
-    cmd_add_option(cmd, "/out:", output->path, OPTION_OUTPUT);
-    cmd_add_option(cmd, "/def:", def->path, OPTION_INPUT);
+    cmd_add_option(cmd, OPTION_EXE, lib_name);
+    cmd_add_option(cmd, OPTION_FLAG, "/out:");
+    cmd_add_option_no_sep(cmd, OPTION_OUTPUT, output->path);
+    cmd_add_option(cmd, OPTION_FLAG, "/def:");
+    cmd_add_option_no_sep(cmd, OPTION_INPUT, def->path);
     char const* arch;
     if (architecture_type == ARCH_X64)
     {
@@ -549,12 +551,12 @@ Node* make_implib_from_def_cmd_create(Node* def, Node* output, ToolchainType too
         error("Unsupported arch");
         exit(EXIT_FAILURE);
     }
-    cmd_add_option(cmd, "/machine:", arch, OPTION_FLAG);
+    cmd_add_option(cmd, OPTION_FLAG, fmt("/machine:{}", arch));
     cmd_add_input(cmd, def);
     cmd_add_output(cmd, output);
     if (toolchain_type == TOOLCHAIN_TYPE_MSVC)
     {
-        cmd_add_option(cmd, "/nologo", NULL, OPTION_HIDDEN);
+        cmd_add_option(cmd, OPTION_HIDDEN, "/nologo");
         char const* exp_path = path_replace_extension(output->path, ".exp", allocator_temp());
         Node* exp = get_or_add_file(exp_path);
         cmd_add_output(cmd, exp);

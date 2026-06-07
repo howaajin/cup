@@ -32,16 +32,16 @@ void c_compile_cmd_write_buffer_msvc(Node* node, char const* line);
 void scan_deps_cmd_add_option_mm_mf(Node* node, ScanDepsCmd* cmd)
 {
     char const* depfile_path = c_compile_cmd_get_depfile_path(cmd->compile_cmd);
-    cmd_add_option(node, "-MM -MF ", depfile_path, OPTION_FLAG);
+    cmd_add_option(node, OPTION_FLAG, fmt("-MM -MF {}", depfile_path));
 }
 
 static void scan_deps_cmd_make_cmdline_llvm(Node* node, ScanDepsCmd* cmd)
 {
     array_resize(node_allocator, node->cmdline, 0);
     array_resize(node_allocator, node->description, 0);
-    cmd_add_option(node, NULL, "clang-scan-deps", OPTION_EXE);
-    cmd_add_option(node, "--format ", "p1689", OPTION_FLAG);
-    cmd_add_option(node, "-- ", "clang++", OPTION_FLAG);
+    cmd_add_option(node, OPTION_EXE, "clang-scan-deps");
+    cmd_add_option(node, OPTION_FLAG, "--format p1689");
+    cmd_add_option(node, OPTION_FLAG, "-- clang++");
     compile_cmdline_node_make_cmdline_llvm_gcc_common(node, cmd->compile_cmd);
     if (cmd->compile_cmd->b_cache_header_dependencies)
     {
@@ -53,11 +53,11 @@ static void scan_deps_cmd_make_cmdline_msvc(Node* node, ScanDepsCmd* cmd)
 {
     array_resize(node_allocator, node->cmdline, 0);
     array_resize(node_allocator, node->description, 0);
-    cmd_add_option(node, NULL, "cl", OPTION_EXE);
-    cmd_add_option(node, "/scanDependencies-", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_EXE, "cl");
+    cmd_add_option(node, OPTION_FLAG, "/scanDependencies-");
     if (cmd->compile_cmd->b_cache_header_dependencies)
     {
-        cmd_add_option(node, "/showIncludes", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "/showIncludes");
     }
     compile_cmdline_node_make_cmdline_msvc_scan_deps_common(node, cmd->compile_cmd);
 }
@@ -66,14 +66,14 @@ static void scan_deps_cmd_make_cmdline_gcc(Node* node, ScanDepsCmd* cmd)
 {
     array_resize(node_allocator, node->cmdline, 0);
     array_resize(node_allocator, node->description, 0);
-    cmd_add_option(node, NULL, "g++", OPTION_EXE);
-    cmd_add_option(node, "-fmodules", NULL, OPTION_FLAG);
-    cmd_add_option(node, "-E", NULL, OPTION_FLAG);
-    cmd_add_option(node, "-fdirectives-only", NULL, OPTION_FLAG);
-    cmd_add_option(node, "-fdeps-format=", "p1689r5", OPTION_FLAG);
-    cmd_add_option(node, "-fdeps-file=", "-", OPTION_FLAG);
-    cmd_add_option(node, "-MM", NULL, OPTION_FLAG);
-    cmd_add_option(node, "-MG", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_EXE, "g++");
+    cmd_add_option(node, OPTION_FLAG, "-fmodules");
+    cmd_add_option(node, OPTION_FLAG, "-E");
+    cmd_add_option(node, OPTION_FLAG, "-fdirectives-only");
+    cmd_add_option(node, OPTION_FLAG, "-fdeps-format=p1689r5");
+    cmd_add_option(node, OPTION_FLAG, "-fdeps-file=-");
+    cmd_add_option(node, OPTION_FLAG, "-MM");
+    cmd_add_option(node, OPTION_FLAG, "-MG");
     compile_cmdline_node_make_cmdline_llvm_gcc_common(node, cmd->compile_cmd);
     if (cmd->compile_cmd->b_cache_header_dependencies)
     {

@@ -71,21 +71,23 @@ static void bootstrap_compile_link_make_cmdline_llvm_gcc_zig(Node* node, Node* o
     ToolchainType toolchain = default_toolchain;
     char const* compiler = (toolchain == TOOLCHAIN_TYPE_GCC ? "gcc" : (toolchain == TOOLCHAIN_TYPE_LLVM ? "clang" : "zig cc"));
     Node* cup_h = FILE("cup.h");
-    cmd_add_option(node, NULL, compiler, OPTION_EXE);
-    cmd_add_option(node, "-o ", out_exe->path, OPTION_OUTPUT);
-    cmd_add_option(node, "-x c ", cup_h->path, OPTION_INPUT);
-    cmd_add_option(node, "-D", "MAIN_ENTRY", OPTION_FLAG);
+    cmd_add_option(node, OPTION_EXE, compiler);
+    cmd_add_option(node, OPTION_FLAG, "-o");
+    cmd_add_option(node, OPTION_OUTPUT, out_exe->path);
+    cmd_add_option(node, OPTION_FLAG, "-x c");
+    cmd_add_option(node, OPTION_INPUT, cup_h->path);
+    cmd_add_option(node, OPTION_FLAG, "-DMAIN_ENTRY");
     if (CURRENT_PLATFORM == PLATFORM_LINUX)
     {
-        cmd_add_option(node, "-D", "_GNU_SOURCE", OPTION_FLAG);
-        cmd_add_option(node, "-fms-extensions", NULL, OPTION_FLAG);
+        cmd_add_option(node, OPTION_FLAG, "-D_GNU_SOURCE");
+        cmd_add_option(node, OPTION_FLAG, "-fms-extensions");
     }
     if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
         if (default_toolchain == TOOLCHAIN_TYPE_GCC)
         {
-            cmd_add_option(node, "-l", "userenv", OPTION_FLAG);
-            cmd_add_option(node, "-l", "bcrypt", OPTION_FLAG);
+            cmd_add_option(node, OPTION_FLAG, "-luserenv");
+            cmd_add_option(node, OPTION_FLAG, "-lbcrypt");
         }
     }
     cmd_add_input(node, cup_h);
@@ -110,20 +112,24 @@ static void bootstrap_compile_link_make_cmdline_msvc(Node* node, Node* out_exe)
     Node* cup_h = FILE("cup.h");
     Node* pdb = FILE("{out_dir}/{}.pdb", out_exe->path);
     node->ctx = pdb;
-    cmd_add_option(node, NULL, "cl", OPTION_EXE);
-    cmd_add_option(node, "/Fe:", out_exe->path, OPTION_OUTPUT);
-    cmd_add_option(node, "/Tc ", cup_h->path, OPTION_INPUT);
-    cmd_add_option(node, "/std:", "clatest", OPTION_FLAG);
-    cmd_add_option(node, "/D", "MAIN_ENTRY", OPTION_BRIGHT_FLAG);
-    cmd_add_option(node, "/Od", NULL, OPTION_FLAG);
-    cmd_add_option(node, "/nologo", NULL, OPTION_FLAG);
-    cmd_add_option(node, "/Z7", NULL, OPTION_FLAG);
-    cmd_add_option(node, "/link", NULL, OPTION_FLAG);
-    cmd_add_option(node, "/debug", NULL, OPTION_FLAG);
-    cmd_add_option(node, "/incremental:", "no", OPTION_FLAG);
-    cmd_add_option(node, "/noexp", NULL, OPTION_FLAG);
-    cmd_add_option(node, "/noimplib", NULL, OPTION_FLAG);
-    cmd_add_option(node, "/pdb:", pdb->path, OPTION_OUTPUT);
+    cmd_add_option(node, OPTION_EXE, "cl");
+    cmd_add_option(node, OPTION_FLAG, "/Fe:");
+    cmd_add_option_no_sep(node, OPTION_OUTPUT, out_exe->path);
+    cmd_add_option(node, OPTION_FLAG, "/Tc");
+    cmd_add_option(node, OPTION_INPUT, cup_h->path);
+    cmd_add_option(node, OPTION_FLAG, "/std:clatest");
+    cmd_add_option(node, OPTION_FLAG, "/D");
+    cmd_add_option_no_sep(node, OPTION_BRIGHT_FLAG, "MAIN_ENTRY");
+    cmd_add_option(node, OPTION_FLAG, "/Od");
+    cmd_add_option(node, OPTION_FLAG, "/nologo");
+    cmd_add_option(node, OPTION_FLAG, "/Z7");
+    cmd_add_option(node, OPTION_FLAG, "/link");
+    cmd_add_option(node, OPTION_FLAG, "/debug");
+    cmd_add_option(node, OPTION_FLAG, "/incremental:no");
+    cmd_add_option(node, OPTION_FLAG, "/noexp");
+    cmd_add_option(node, OPTION_FLAG, "/noimplib");
+    cmd_add_option(node, OPTION_FLAG, "/pdb:");
+    cmd_add_option_no_sep(node, OPTION_OUTPUT, pdb->path);
     cmd_add_input(node, cup_h);
     cmd_add_output(node, out_exe);
     cmd_add_output(node, pdb);

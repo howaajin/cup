@@ -726,7 +726,15 @@ void cmd_add_input_file_option(Node* node, char const* option, Node* file)
     {
         path = file->path;
     }
-    cmd_add_option(node, option, path, OPTION_INPUT);
+    if (option)
+    {
+        cmd_add_option(node, OPTION_FLAG, option);
+        cmd_add_option_no_sep(node, OPTION_INPUT, path);
+    }
+    else
+    {
+        cmd_add_option(node, OPTION_INPUT, path);
+    }
     cmd_add_input(node, file);
 }
 
@@ -742,7 +750,15 @@ void cmd_add_output_file_option(Node* node, char const* option, Node* file)
     {
         path = file->path;
     }
-    cmd_add_option(node, option, path, OPTION_OUTPUT);
+    if (option)
+    {
+        cmd_add_option(node, OPTION_FLAG, option);
+        cmd_add_option_no_sep(node, OPTION_OUTPUT, path);
+    }
+    else
+    {
+        cmd_add_option(node, OPTION_OUTPUT, path);
+    }
     cmd_add_output(node, file);
 }
 
@@ -758,7 +774,7 @@ static char const* get_option_color(OptionType type)
     return NULL;
 }
 
-void cmd_add_option(Node* node, char const* option, char const* param, OptionType type)
+static void cmd_add_option_impl(Node* node, OptionType type, char const* option, bool add_sep)
 {
     if (type == OPTION_HIDDEN)
     {
@@ -770,39 +786,36 @@ void cmd_add_option(Node* node, char const* option, char const* param, OptionTyp
             }
             string_printf(node_allocator, node->extra_options, "%s", option);
         }
-        if (param)
-        {
-            if (!option && array_size(node->extra_options))
-            {
-                string_putc(node_allocator, node->extra_options, ' ');
-            }
-            string_printf(node_allocator, node->extra_options, "%s", param);
-        }
         return;
     }
-    if (type != OPTION_EXE && type != OPTION_NONE)
+    if (add_sep && type != OPTION_EXE)
     {
         string_putc(node_allocator, node->cmdline, ' ');
         string_putc(node_allocator, node->description, ' ');
     }
-    if (option)
+    if (!option)
     {
-        string_concat_c_str(node_allocator, node->cmdline, option);
-        string_printf(node_allocator, node->description, "%s%s%s", get_option_color(OPTION_FLAG), option, desc_color_reset);
+        return;
     }
-    if (param)
+    string_concat_c_str(node_allocator, node->cmdline, option);
+    char const* color = get_option_color(type);
+    if (color)
     {
-        string_concat_c_str(node_allocator, node->cmdline, param);
-        char const* color = get_option_color(type);
-        if (color)
-        {
-            string_printf(node_allocator, node->description, "%s%s%s", color, param, desc_color_reset);
-        }
-        else
-        {
-            string_concat_c_str(node_allocator, node->description, param);
-        }
+        string_printf(node_allocator, node->description, "%s%s%s", color, option, desc_color_reset);
     }
+    else
+    {
+        string_concat_c_str(node_allocator, node->description, option);
+    }
+}
+
+void cmd_add_option(Node* node, OptionType type, char const* option)
+{
+    cmd_add_option_impl(node, type, option, true);
+}
+void cmd_add_option_no_sep(Node* node, OptionType type, char const* option)
+{
+    cmd_add_option_impl(node, type, option, false);
 }
 
 void cmd_remove_input(Node* node, Node* file)
@@ -993,7 +1006,7 @@ Node* add_process_cmd(char const* string, char const* file, int line)
     Node* n = node_create(node_type, NULL, sizeof(Node));
     if (string)
     {
-        cmd_add_option(n, NULL, string, OPTION_EXE);
+        cmd_add_option(n, OPTION_EXE, string);
     }
     cmd_set_source_location(n, file, line);
     return n;

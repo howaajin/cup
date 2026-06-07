@@ -59,7 +59,15 @@ void compile_cmdline_node_append_string_set_options(Node* node, char const* opti
     for (uint32_t i = set->begin; i != set->end; i = hash_next(set, i))
     {
         char const* param = hash_key(set, i);
-        cmd_add_option(node, option, param, option_type);
+        if (option)
+        {
+            cmd_add_option(node, OPTION_FLAG, option);
+            cmd_add_option_no_sep(node, option_type, param);
+        }
+        else
+        {
+            cmd_add_option(node, option_type, param);
+        }
     }
 }
 
@@ -68,7 +76,15 @@ void compile_cmdline_node_append_string_array_options(Node* node, char const* op
     for (size_t i = 0; i != array_size(set); i++)
     {
         char const* param = set[i];
-        cmd_add_option(node, option, param, option_type);
+        if (option)
+        {
+            cmd_add_option(node, OPTION_FLAG, option);
+            cmd_add_option_no_sep(node, option_type, param);
+        }
+        else
+        {
+            cmd_add_option(node, option_type, param);
+        }
     }
 }
 

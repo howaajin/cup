@@ -1156,11 +1156,11 @@ static Node* add_copy_cmd_windows(Node* input, Node* output, char const* file, i
     uint32_t type = node_make_cmd_type(CMD_TYPE_EXECUTABLE, 0);
     char const* name = fmt("copy: output: {:n}", output);
     Node* node = node_create(type, name, sizeof(Node));
-    cmd_add_option(node, NULL, "cmd /c copy", OPTION_EXE);
-    cmd_add_option(node, NULL, src, OPTION_INPUT);
-    cmd_add_option(node, NULL, dst, OPTION_OUTPUT);
-    cmd_add_option(node, "/Y", NULL, OPTION_FLAG);
-    cmd_add_option(node, "> nul", NULL, OPTION_FLAG);
+    cmd_add_option(node, OPTION_EXE, "cmd /c copy");
+    cmd_add_option(node, OPTION_INPUT, src);
+    cmd_add_option(node, OPTION_OUTPUT, dst);
+    cmd_add_option(node, OPTION_FLAG, "/Y");
+    cmd_add_option(node, OPTION_FLAG, "> nul");
     cmd_add_input(node, input);
     cmd_add_output(node, output);
     return node;
@@ -1171,7 +1171,7 @@ static Node* add_copy_cmd_linux(Node* input, Node* output, char const* file, int
     uint32_t type = node_make_cmd_type(CMD_TYPE_EXECUTABLE, 0);
     char const* name = fmt("copy: output: {:n}", output);
     Node* node = node_create(type, name, sizeof(Node));
-    cmd_add_option(node, NULL, "cp", OPTION_EXE);
+    cmd_add_option(node, OPTION_EXE, "cp");
     cmd_add_input_file_option(node, NULL, input);
     cmd_add_output_file_option(node, NULL, output);
     return node;
