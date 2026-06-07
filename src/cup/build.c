@@ -59,6 +59,10 @@ ENTRY(build_make_header)
 
 ENTRY(build_gen_def)
 {
+    if (CURRENT_PLATFORM != PLATFORM_WINDOWS)
+    {
+        return;
+    }
     Node* gen_def = EXE("{out_dir}/gen_def");
     Node* link = LINK(gen_def);
     link_cmd_setup_self_build(link);
@@ -349,6 +353,10 @@ ENTRY(build_cup_h_no_impl)
 
 ENTRY(build_cup_def)
 {
+    if (CURRENT_PLATFORM != PLATFORM_WINDOWS)
+    {
+        return;
+    }
     Node* cup_h = FILE("{out_dir}/embedded/cup.h");
     Node* cup_def = FILE("{out_dir}/cup.def");
     Node* gen_def = EXE("{out_dir}/gen_def");
