@@ -23,7 +23,7 @@ static void test_binary_mode_impl(char const* file, int line)
     }
     else if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
-        if (system(fmt("rmdir /s /q \"{}\" 2>NUL", dir)) != 0)
+        if (os_file_exists(dir) && system(fmt("rmdir /s /q \"{}\" 2>NUL", dir)) != 0)
         {
             fprintf(stderr, "WARNING: rmdir failed for '%s'\n", dir);
         }
@@ -46,22 +46,25 @@ static void test_binary_mode_impl(char const* file, int line)
     assert_impl(result == 0, "run cup failed", file, line);
     assert_impl(build_c_exists, "build.c not generated", file, line);
     assert_impl(dll_exists, "build/cup" DLL_EXT " not generated", file, line);
-    if (!string_starts_with(dir, tests_dir))
+    if (os_file_exists(dir))
     {
-        fprintf(stderr, "WARNING: refusing to delete path not under build/tests/: %s\n", dir);
-    }
-    else if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
-    {
-        if (system(fmt("rmdir /s /q \"{}\" 2>NUL", dir)) != 0)
+        if (!string_starts_with(dir, tests_dir))
         {
-            fprintf(stderr, "WARNING: rmdir failed for '%s'\n", dir);
+            fprintf(stderr, "WARNING: refusing to delete path not under build/tests/: %s\n", dir);
         }
-    }
-    else
-    {
-        if (system(fmt("rm -rf \"{}\" 2>/dev/null", dir)) != 0)
+        else if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
         {
-            fprintf(stderr, "WARNING: rm failed for '%s'\n", dir);
+            if (system(fmt("rmdir /s /q \"{}\" 2>NUL", dir)) != 0)
+            {
+                fprintf(stderr, "WARNING: rmdir failed for '%s'\n", dir);
+            }
+        }
+        else
+        {
+            if (system(fmt("rm -rf \"{}\" 2>/dev/null", dir)) != 0)
+            {
+                fprintf(stderr, "WARNING: rm failed for '%s'\n", dir);
+            }
         }
     }
 }
