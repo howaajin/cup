@@ -57,6 +57,25 @@ ENTRY(build_make_header)
     }
 }
 
+ENTRY(build_gen_def)
+{
+    Node* gen_def = EXE("{out_dir}/gen_def");
+    Node* link = LINK(gen_def);
+    link_cmd_setup_self_build(link);
+    {
+        link_cmd_set_arch(link, get_self_build_arch());
+        Node* src = get_or_add_src("src/cup/gen_def.c");
+        Node* obj = OBJ(src);
+        Node* cc = CC(src, obj);
+        if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
+        {
+            c_compile_cmd_add_define(cc, "_CRT_SECURE_NO_WARNINGS");
+        }
+        link_cmd_add_input(link, obj);
+        link_cmd_add_input(link, LIB("{out_dir}/allocator"));
+    }
+}
+
 static void make_header_output_filter(Node* cmd, char const* line)
 {
     cmd_add_implicit_input(cmd, line);
@@ -328,6 +347,17 @@ ENTRY(build_cup_h_no_impl)
     cmd_set_write_output_line_fn(cmd, make_header_output_filter);
 }
 
+ENTRY(build_cup_def)
+{
+    Node* cup_h = FILE("{out_dir}/embedded/cup.h");
+    Node* cup_def = FILE("{out_dir}/cup.def");
+    Node* gen_def = EXE("{out_dir}/gen_def");
+    Node* cmd = CMD_FROM_EXE(gen_def, fmt("gen: {:n}", cup_def));
+    cmd_add_option(cmd, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(cmd, cup_def);
+    cmd_add_input_file_option(cmd, cup_h);
+}
+
 ENTRY(build_embedded_cup_h_c)
 {
     Node* bin2c = EXE("{out_dir}/bin2c");
@@ -348,7 +378,7 @@ ENTRY(build_embedded_cup_def_c)
     Node* bin2c = EXE("{out_dir}/bin2c");
     Node* output = SRC("{out_dir}/embedded/cup.def.c");
     Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
-    Node* input = FILE("{dir}/cup.def");
+    Node* input = FILE("{out_dir}/cup.def");
     cmd_add_option(cmd, OPTION_FLAG, "-base64");
     cmd_add_output_file_option(cmd, output);
     cmd_add_input_file_option(cmd, input);
@@ -374,7 +404,7 @@ ENTRY(build_cup_embedded)
     Node* link = LINK(exe);
     link_cmd_setup_self_build(link);
     link_cmd_set_arch(link, get_self_build_arch());
-    Node* def = FILE("{dir}/cup.def");
+    Node* def = FILE("{out_dir}/cup.def");
     link_cmd_set_def_file(link, def);
     for (size_t i = 0; i != static_array_size(cup_common_sources); i++)
     {
