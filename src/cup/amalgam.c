@@ -18,6 +18,7 @@
 // Linux/macOS(-D_GNU_SOURCE can be omitted on macOS):
 // gcc -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions
 // clang -x c cup.h -DMAIN_ENTRY -o cup -D_GNU_SOURCE -fms-extensions
+// tcc -DMAIN_ENTRY -xc -run cup.h
 
 #ifdef MAIN_ENTRY
 int main(int argc, char** argv)

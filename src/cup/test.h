@@ -36,7 +36,7 @@ static inline void test_push_entry(TestEntry entry)
     static void name(void);                 \
     __declspec(allocate(".CRT$XCU")) void (*name##_ptr)(void) = name;
 #else
-#define CONSTRUCTOR(name) __attribute__((constructor(101)))
+#define CONSTRUCTOR(name) __attribute__((constructor))
 #endif
 #endif
 #define TEST_REGISTER(fn, ...)                                     \

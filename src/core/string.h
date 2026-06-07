@@ -2,6 +2,7 @@
 
 #include "core/allocator.h"
 #include "core/array.h"
+#include "core/macros.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -19,7 +20,7 @@
 #define STRING_FORMAT_CHECK(fmt_idx, arg_idx)
 #endif
 
-[[nodiscard]]
+NODISCARD
 static inline char* string_new(Allocator* allocator, size_t length, char const* data)
 {
     char* str = array_new(allocator, char, length, length + 1);
@@ -31,7 +32,7 @@ static inline char* string_new(Allocator* allocator, size_t length, char const* 
     return str;
 }
 
-[[nodiscard]]
+NODISCARD
 static inline char* string_clone(Allocator* allocator, char const* other)
 {
     return string_new(allocator, array_size(other), other);
@@ -52,14 +53,14 @@ static inline void string_free(Allocator* allocator, char* str)
     array_free(allocator, str);
 }
 
-[[nodiscard]]
+NODISCARD
 static inline char* string_from_c_str(Allocator* allocator, char const* c_str)
 {
     size_t len = c_str ? strlen(c_str) : 0;
     return string_new(allocator, len, c_str);
 }
 
-[[nodiscard]] STRING_FORMAT_CHECK(2, 0)
+NODISCARD STRING_FORMAT_CHECK(2, 0)
 static inline char* string_from_vprint(Allocator* allocator, char const* fmt, va_list args)
 {
     va_list args_copy;
@@ -72,7 +73,7 @@ static inline char* string_from_vprint(Allocator* allocator, char const* fmt, va
     return result;
 }
 
-[[nodiscard]] STRING_FORMAT_CHECK(2, 3)
+NODISCARD STRING_FORMAT_CHECK(2, 3)
 static inline char* string_from_print(Allocator* allocator, char const* fmt, ...)
 {
     va_list args;
@@ -82,7 +83,7 @@ static inline char* string_from_print(Allocator* allocator, char const* fmt, ...
     return result;
 }
 
-[[nodiscard("string_push may reallocate memory")]]
+NODISCARD_MSG("string_push may reallocate memory")
 static inline char* string_push(Allocator* allocator, char* str, char ch)
 {
     array_push(allocator, str, ch);
@@ -91,7 +92,7 @@ static inline char* string_push(Allocator* allocator, char* str, char ch)
     return str;
 }
 
-[[nodiscard]]
+NODISCARD
 static inline size_t string_length(char const* str)
 {
     return array_size(str);
@@ -119,7 +120,7 @@ static inline char* string_ensure_space(Allocator* allocator, char* str, size_t 
     }
 }
 
-[[nodiscard("string_append_slice may reallocate memory")]]
+NODISCARD_MSG("string_append_slice may reallocate memory")
 static inline char* string_append_slice(Allocator* allocator, char* str1, size_t slice_len, char const* data)
 {
     if (slice_len == 0)
@@ -138,20 +139,20 @@ static inline char* string_append_slice(Allocator* allocator, char* str1, size_t
     return new_str1;
 }
 
-[[nodiscard("string_append_impl may reallocate memory")]]
+NODISCARD_MSG("string_append_impl may reallocate memory")
 static inline char* string_append_impl(Allocator* allocator, char* str1, char const* str2)
 {
     return string_append_slice(allocator, str1, string_length(str2), str2);
 }
 
-[[nodiscard("string_append_c_str may reallocate memory")]]
+NODISCARD_MSG("string_append_c_str may reallocate memory")
 static inline char* string_append_c_str(Allocator* allocator, char* str1, char const* str2)
 {
     size_t str2_len = str2 ? strlen(str2) : 0;
     return string_append_slice(allocator, str1, str2_len, str2);
 }
 
-[[nodiscard("string_append_fmt may reallocate memory")]] STRING_FORMAT_CHECK(3, 4)
+NODISCARD_MSG("string_append_fmt may reallocate memory") STRING_FORMAT_CHECK(3, 4)
 static inline char* string_append_fmt(Allocator* allocator, char* str, char const* fmt, ...)
 {
     va_list args;
@@ -164,20 +165,20 @@ static inline char* string_append_fmt(Allocator* allocator, char* str, char cons
     return str;
 }
 
-[[nodiscard]]
+NODISCARD
 static inline bool string_equal(char const* str1, char const* str2)
 {
     return strcmp(str1, str2) == 0;
 }
 
-[[nodiscard("string_shrink_to_fit may reallocate memory")]]
+NODISCARD_MSG("string_shrink_to_fit may reallocate memory")
 static inline char* string_shrink_to_fit(Allocator* allocator, char* str)
 {
     array_reserve(allocator, str, string_length(str) + 1);
     return str;
 }
 
-[[nodiscard]]
+NODISCARD
 static inline size_t string_find_substr(char* str, size_t length, char const* data)
 {
     if (length == 0) return string_npos;

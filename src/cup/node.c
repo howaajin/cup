@@ -63,7 +63,9 @@ void init_node(void)
 
 uint32_t node_make_file_type(FileType file_type, uint32_t ext_type)
 {
-    Node node = {.node_type = NODE_TYPE_FILE};
+    Node node;
+    memset(&node, 0, sizeof(node));
+    node.file_node_type = NODE_TYPE_FILE;
     node.file_type = file_type;
     node.file_ext_type = ext_type;
     return node.type;
@@ -71,7 +73,9 @@ uint32_t node_make_file_type(FileType file_type, uint32_t ext_type)
 
 uint32_t node_make_cmd_type(CmdType cmd_type, uint32_t ext_type)
 {
-    Node node = {.node_type = NODE_TYPE_CMD};
+    Node node;
+    memset(&node, 0, sizeof(node));
+    node.cmd_node_type = NODE_TYPE_CMD;
     node.cmd_type = cmd_type;
     node.cmd_ext_type = ext_type;
     return node.type;
@@ -79,7 +83,10 @@ uint32_t node_make_cmd_type(CmdType cmd_type, uint32_t ext_type)
 
 uint32_t node_make_virtual_type(uint32_t ext_type)
 {
-    Node node = {.node_type = NODE_TYPE_VIRTUAL, .virtual_ext_type = ext_type};
+    Node node;
+    memset(&node, 0, sizeof(node));
+    node.node_type = NODE_TYPE_VIRTUAL;
+    node.virtual_ext_type = ext_type;
     return node.type;
 }
 

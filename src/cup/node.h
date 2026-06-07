@@ -78,15 +78,15 @@ struct Node
         {
             struct
             {
-                NodeType : 3;
-                uint32_t : 1;
+                NodeType file_node_type : 3;
+                uint32_t file_internal_flag : 1;
                 FileType file_type : 5;
                 uint32_t file_ext_type : 23;
             };
             struct
             {
-                NodeType : 3;
-                uint32_t : 1;
+                NodeType cmd_node_type : 3;
+                uint32_t cmd_internal_flag : 1;
                 CmdType cmd_type : 3;
                 uint32_t cmd_ext_type : 25;
             };

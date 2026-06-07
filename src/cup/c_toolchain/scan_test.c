@@ -44,7 +44,7 @@ static void scan_test_update_cache(ScanTestCmd* cmd)
         }
     }
     return;
-WriteNew:
+WriteNew:; // tcc: label must be followed by a statement, not a declaration
     CacheRecordFile* src_record = cache_get_or_add_in_file_record(cache, cmd->src->path);
     CacheRecordTestExe new_record = {
         .source_id = src_record->id,

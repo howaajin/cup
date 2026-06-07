@@ -72,8 +72,8 @@
     void name(void);                        \
     __declspec(allocate(".CRT$XTU")) void (*name##_ptr)(void) = name;
 #else
-#define CONSTRUCTOR(name) __attribute__((constructor(101)))
-#define DESTRUCTOR(name) __attribute__((destructor(101)))
+#define CONSTRUCTOR(name) __attribute__((constructor))
+#define DESTRUCTOR(name) __attribute__((destructor))
 #endif
 #endif
 

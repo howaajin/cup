@@ -3,6 +3,14 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#if defined(__TINYC__)
+#define NODISCARD
+#define NODISCARD_MSG(msg)
+#else
+#define NODISCARD [[nodiscard]]
+#define NODISCARD_MSG(msg) [[nodiscard(msg)]]
+#endif
+
 #define field_parent(type, ptr, field) (type*)((uint8_t*)(ptr) - offsetof(type, field))
 #define stringify(token) #token
 #define static_array_size(a) (sizeof(a) / sizeof((a)[0]))

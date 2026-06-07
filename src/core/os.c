@@ -38,7 +38,9 @@ char* os_create_guid(Allocator* allocator, bool lowercase)
             uint64_t u64_1;
             uint64_t u64_2;
         };
-    } guid = {.u64_1 = os_get_rand_uint64(), os_get_rand_uint64()};
+    } guid = {0};
+    guid.u64_1 = os_get_rand_uint64();
+    guid.u64_2 = os_get_rand_uint64();
 
     return string_from_print(allocator, fmt, guid.a, guid.b, guid.c, guid.d, guid.e, guid.f, guid.g);
 }

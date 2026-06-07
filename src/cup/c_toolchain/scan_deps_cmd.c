@@ -10,6 +10,7 @@
 #include "core/array.h"
 
 extern Allocator* node_allocator;
+void c_compile_cmd_init_msvc(CCompileCmd* cmd);
 
 Node** scan_deps_cmds = NULL;
 
@@ -160,8 +161,7 @@ static void scan_deps_cmd_update_cache(ScanDepsCmd* cmd)
         goto WriteNew;
     }
     return;
-WriteNew:
-
+WriteNew:; // tcc: label must be followed by a statement, not a declaration
     CacheRecordFile* src_record = cache_get_or_add_in_file_record(cache, src->path);
     CacheRecordCppModule new_record = {
         .source_id = src_record->id,
@@ -224,7 +224,6 @@ Node* scan_deps_cmd_create(CCompileCmd* compile_cmd)
     switch (compile_cmd->toolchain)
     {
     case TOOLCHAIN_TYPE_MSVC:
-        void c_compile_cmd_init_msvc(CCompileCmd * cmd);
         c_compile_cmd_init_msvc(compile_cmd);
         cmd_set_env(node, msvc_get_env_node(compile_cmd->toolchain, compile_cmd->arch));
         node->ctx = compile_cmd;
