@@ -1,3 +1,4 @@
+#include "core/hash.h"
 #include "core/os.h"
 #include "core/string.h"
 #include "core/utilities.h"
@@ -6,7 +7,7 @@
 #include "cup/node.h"
 #include "cup/var.h"
 
-#include "core/hash.h"
+void restart(void);
 
 static void after_self_built(Node* cmd)
 {
