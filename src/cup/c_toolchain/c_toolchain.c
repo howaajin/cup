@@ -183,6 +183,55 @@ ToolchainType get_toolchain_by_current_compiler()
     return TOOLCHAIN_TYPE_UNSPECIFIED;
 }
 
+static char const* get_clang_path(void)
+{
+    static char* path = NULL;
+    static bool initialized = false;
+    if (!initialized)
+    {
+        initialized = true;
+        char const* env = getenv("CUP_CLANG");
+        if (env && env[0])
+        {
+            path = string_from_c_str(node_allocator, env);
+        }
+    }
+    return path;
+}
+
+char const* get_clang_c_compiler(void)
+{
+    char const* path = get_clang_path();
+    return path ? path : "clang";
+}
+
+char const* get_clang_cpp_compiler(void)
+{
+    static char* cached = NULL;
+    static bool initialized = false;
+    if (!initialized)
+    {
+        initialized = true;
+        char const* path = get_clang_path();
+        if (!path)
+        {
+            cached = NULL;
+        }
+        else
+        {
+            Allocator* ta = allocator_temp();
+            char const* filename = path_filename(path, ta);
+            if (string_starts_with(filename, "clang"))
+            {
+                char const* suffix = filename + 5;
+                char const* dir = path_parent_path(path, ta);
+                cached = (char*)path_combine(node_allocator, dir, fmt("clang++{}", suffix), NULL);
+            }
+        }
+    }
+    return cached ? cached : "clang++";
+}
+
 void set_debug_info_enabled(bool b_enabled)
 {
     b_generate_debug_info = b_enabled;

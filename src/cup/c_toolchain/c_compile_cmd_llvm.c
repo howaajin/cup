@@ -141,7 +141,7 @@ static Node* bmi_to_obj_cmd_create(CCompileCmd* cc, char const* file, int line)
     cmd_set_source_location(cmd, file, line);
     BmiToObjCmd* cmd_bmi_to_obj = (BmiToObjCmd*)cmd;
     cmd_bmi_to_obj->c_compile_cmd = cc;
-    char const* compiler = default_toolchain == TOOLCHAIN_TYPE_ZIG ? "zig c++" : "clang++";
+    char const* compiler = default_toolchain == TOOLCHAIN_TYPE_ZIG ? "zig c++" : get_clang_cpp_compiler();
     cmd_add_option(cmd, OPTION_EXE, compiler);
     cmd_add_option(cmd, OPTION_FLAG, "-o");
     cmd_add_output_file_option(cmd, obj);
@@ -238,7 +238,7 @@ void compile_cmdline_node_make_cmdline_llvm_c(CompileCmdline* compile_cmdline)
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, OPTION_EXE, "clang");
+    cmd_add_option(node, OPTION_EXE, get_clang_c_compiler());
     compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(node, cmd);
     compile_cmdline_node_make_cmdline_llvm_common(node, cmd);
 }
@@ -261,7 +261,7 @@ static void compile_cmdline_node_make_cmdline_llvm_cpp_module(CompileCmdline* co
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, OPTION_EXE, "clang++");
+    cmd_add_option(node, OPTION_EXE, get_clang_cpp_compiler());
     cmd_add_option(node, OPTION_FLAG, "-o");
     cmd_add_output_file_option(node, cmd->out_obj);
     cmd_add_option(node, OPTION_FLAG, "-c");
@@ -283,7 +283,7 @@ static void compile_cmdline_node_make_cmdline_llvm_cpp(CompileCmdline* compile_c
 {
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
-    cmd_add_option(node, OPTION_EXE, "clang++");
+    cmd_add_option(node, OPTION_EXE, get_clang_cpp_compiler());
     compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(node, cmd);
     compile_cmdline_node_make_cmdline_llvm_common(node, cmd);
     compile_cmdline_node_make_cmdline_llvm_add_module_ref_options(node, cmd);
@@ -295,7 +295,7 @@ static void compile_cmdline_node_make_cmdline_llvm_asm(CompileCmdline* compile_c
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
     char const* ext = path_extension(cmd->src->path);
     bool b_pure_asm = string_equal(ext, ".s");
-    cmd_add_option(node, OPTION_EXE, "clang");
+    cmd_add_option(node, OPTION_EXE, get_clang_c_compiler());
     cmd_add_option(node, OPTION_FLAG, "-o");
     cmd_add_output_file_option(node, cmd->out_obj);
     cmd_add_option(node, OPTION_FLAG, "-c");

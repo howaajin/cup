@@ -1,5 +1,6 @@
 #include "core/macros.h"
 #include "cup/c_toolchain/c_toolchain.h"
+#include "cup/fmt.h"
 #include "cup/node.h"
 
 #include <assert.h>
@@ -25,9 +26,13 @@ ToolchainType c_toolchain_select_toolchain_automatically()
     ToolchainType toolchain = get_toolchain_by_current_compiler();
     bool b_no_llvm = false;
     bool b_no_gcc = false;
+
+    char const* clang_exe = get_clang_c_compiler();
+    char const* clang_cmd = fmt("{} --version > /dev/null 2>&1", clang_exe);
+
     if (toolchain == TOOLCHAIN_TYPE_LLVM)
     {
-        if (system("clang --version > /dev/null 2>&1") == 0)
+        if (system(clang_cmd) == 0)
         {
             return TOOLCHAIN_TYPE_LLVM;
         }
@@ -47,7 +52,7 @@ ToolchainType c_toolchain_select_toolchain_automatically()
             b_no_gcc = true;
         }
     }
-    if (!b_no_llvm && system("clang --version > /dev/null 2>&1") == 0)
+    if (!b_no_llvm && system(clang_cmd) == 0)
     {
         return TOOLCHAIN_TYPE_LLVM;
     }

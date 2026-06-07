@@ -515,6 +515,10 @@ ToolchainType c_toolchain_select_toolchain_automatically()
     bool b_no_msvc = false;
     bool b_no_llvm = false;
     bool b_no_gcc = false;
+
+    char const* clang_exe = get_clang_c_compiler();
+    char const* clang_cmd = fmt("{} --version > NUL 2>&1", clang_exe);
+
     if (toolchain == TOOLCHAIN_TYPE_MSVC)
     {
         if (msvc_find_installation_path(temp_allocator))
@@ -528,7 +532,7 @@ ToolchainType c_toolchain_select_toolchain_automatically()
     }
     if (toolchain == TOOLCHAIN_TYPE_LLVM)
     {
-        if (system("clang --version > NUL 2>&1") == 0)
+        if (system(clang_cmd) == 0)
         {
             return TOOLCHAIN_TYPE_LLVM;
         }
@@ -552,7 +556,7 @@ ToolchainType c_toolchain_select_toolchain_automatically()
     {
         return TOOLCHAIN_TYPE_MSVC;
     }
-    if (!b_no_llvm && system("clang --version > NUL 2>&1") == 0)
+    if (!b_no_llvm && system(clang_cmd) == 0)
     {
         return TOOLCHAIN_TYPE_LLVM;
     }

@@ -368,11 +368,11 @@ static char const* link_cmd_get_linker_gcc_llvm_zig(LinkCmd* cmd, ToolchainType 
     {
         if (cmd->b_link_cpp)
         {
-            return "clang++";
+            return get_clang_cpp_compiler();
         }
         else
         {
-            return "clang";
+            return get_clang_c_compiler();
         }
     }
     if (toolchain_type == TOOLCHAIN_TYPE_ZIG)
