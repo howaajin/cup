@@ -105,7 +105,8 @@ void cmd_add_option_mmd_mf(Node* node, CCompileCmd* cmd)
 
 void compile_cmdline_node_make_cmdline_llvm_gcc_c_cpp_common(Node* node, CCompileCmd* cmd)
 {
-    cmd_add_output_file_option(node, "-o ", cmd->out_obj);
+    cmd_add_option(node, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(node, cmd->out_obj);
     cmd_add_option(node, OPTION_FLAG, "-c");
     if (cmd->b_cache_header_dependencies && cmd->scan_deps_cmd == NULL)
     {
@@ -142,13 +143,14 @@ static Node* bmi_to_obj_cmd_create(CCompileCmd* cc, char const* file, int line)
     cmd_bmi_to_obj->c_compile_cmd = cc;
     char const* compiler = default_toolchain == TOOLCHAIN_TYPE_ZIG ? "zig c++" : "clang++";
     cmd_add_option(cmd, OPTION_EXE, compiler);
-    cmd_add_output_file_option(cmd, "-o ", obj);
+    cmd_add_option(cmd, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(cmd, obj);
     if (b_generate_debug_info)
     {
         cmd_add_option(cmd, OPTION_FLAG, "-g");
     }
     cmd_add_option(cmd, OPTION_FLAG, "-c");
-    cmd_add_input_file_option(cmd, NULL, pcm);
+    cmd_add_input_file_option(cmd, pcm);
     StringPtrHash map = {.allocator = allocator_temp()};
     c_compile_cmd_get_all_imports(cc, &map);
     for (uint32_t i = map.begin; i != map.end; i = hash_next(&map, i))
@@ -160,7 +162,8 @@ static Node* bmi_to_obj_cmd_create(CCompileCmd* cc, char const* file, int line)
             continue;
         }
         char const* option = fmt("-fmodule-file={}=", name);
-        cmd_add_input_file_option(cmd, option, bmi);
+        cmd_add_option(cmd, OPTION_FLAG, option);
+        cmd_add_input_file_option_no_sep(cmd, bmi);
         cmd_add_input(cmd, bmi);
     }
     cmd->prepare(cmd);
@@ -187,7 +190,7 @@ void c_compile_cmd_prepare_llvm(Node* node, CCompileCmd* cmd)
 
 void compile_cmdline_node_make_cmdline_llvm_gcc_common(Node* node, CCompileCmd* cmd)
 {
-    cmd_add_input_file_option(node, NULL, cmd->src);
+    cmd_add_input_file_option(node, cmd->src);
     if (cmd->arch)
     {
         cmd_add_option(node, OPTION_FLAG, get_arch_option_clang_or_gcc(cmd->arch));
@@ -249,7 +252,8 @@ void compile_cmdline_node_make_cmdline_llvm_add_module_ref_options(Node* node, C
         char const* module_name = hash_key(h, i);
         Node* bmi = hash_value(h, i);
         char const* option = fmt("-fmodule-file={}=", module_name);
-        cmd_add_input_file_option(node, option, bmi);
+        cmd_add_option(node, OPTION_FLAG, option);
+        cmd_add_input_file_option_no_sep(node, bmi);
     }
 }
 
@@ -258,9 +262,11 @@ static void compile_cmdline_node_make_cmdline_llvm_cpp_module(CompileCmdline* co
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
     cmd_add_option(node, OPTION_EXE, "clang++");
-    cmd_add_output_file_option(node, "-o ", cmd->out_obj);
+    cmd_add_option(node, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(node, cmd->out_obj);
     cmd_add_option(node, OPTION_FLAG, "-c");
-    cmd_add_output_file_option(node, "-fmodule-output=", cmd->export_bmi);
+    cmd_add_option(node, OPTION_FLAG, "-fmodule-output=");
+    cmd_add_output_file_option_no_sep(node, cmd->export_bmi);
     if (!is_clang_supported_module_extension(cmd->src->path))
     {
         cmd_add_option(node, OPTION_FLAG, "-x c++-module");
@@ -290,9 +296,10 @@ static void compile_cmdline_node_make_cmdline_llvm_asm(CompileCmdline* compile_c
     char const* ext = path_extension(cmd->src->path);
     bool b_pure_asm = string_equal(ext, ".s");
     cmd_add_option(node, OPTION_EXE, "clang");
-    cmd_add_output_file_option(node, "-o ", cmd->out_obj);
+    cmd_add_option(node, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(node, cmd->out_obj);
     cmd_add_option(node, OPTION_FLAG, "-c");
-    cmd_add_input_file_option(node, NULL, cmd->src);
+    cmd_add_input_file_option(node, cmd->src);
     if (cmd->b_generate_debug_info)
     {
         cmd_add_option(node, OPTION_FLAG, "-g");

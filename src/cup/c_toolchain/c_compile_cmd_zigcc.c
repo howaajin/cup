@@ -42,7 +42,8 @@ static void compile_cmdline_node_make_cmdline_zigcc_cpp_module(CompileCmdline* c
     Node* node = (Node*)compile_cmdline->cmd;
     CCompileCmd* cmd = (CCompileCmd*)compile_cmdline->cmd;
     cmd_add_option(node, OPTION_EXE, "zig c++");
-    cmd_add_output_file_option(node, "-o ", cmd->export_bmi);
+    cmd_add_option(node, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(node, cmd->export_bmi);
     cmd_add_option(node, OPTION_FLAG, "--precompile");
     if (!is_clang_supported_module_extension(cmd->src->path))
     {
@@ -82,9 +83,10 @@ static void compile_cmdline_node_make_cmdline_zigcc_asm(CompileCmdline* compile_
     char const* ext = path_extension(cmd->src->path);
     bool b_pure_asm = string_equal(ext, ".s");
     cmd_add_option(node, OPTION_EXE, "zig cc");
-    cmd_add_output_file_option(node, "-o ", cmd->out_obj);
+    cmd_add_option(node, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(node, cmd->out_obj);
     cmd_add_option(node, OPTION_FLAG, "-c");
-    cmd_add_input_file_option(node, NULL, cmd->src);
+    cmd_add_input_file_option(node, cmd->src);
     if (cmd->arch)
     {
         char const* arch_opt = NULL;

@@ -32,7 +32,8 @@ static void compile_cmdline_node_make_cmdline_gcc_c_cpp_common(Node* node, CComp
     if (array_size(cmd->export_name) || array_size(cmd->import_names))
     {
         cmd_add_option(node, OPTION_FLAG, "-fmodules");
-        cmd_add_input_file_option(node, "-fmodule-mapper=", cmd->module_mapper);
+        cmd_add_option(node, OPTION_FLAG, "-fmodule-mapper=");
+        cmd_add_input_file_option_no_sep(node, cmd->module_mapper);
     }
     if (cmd->b_color_diagnostics)
     {
@@ -70,9 +71,10 @@ static void compile_cmdline_node_make_cmdline_gcc_asm(CompileCmdline* compile_cm
     char const* ext = path_extension(cmd->src->path);
     bool b_pure_asm = string_equal(ext, ".s");
     cmd_add_option(node, OPTION_EXE, "gcc");
-    cmd_add_output_file_option(node, "-o ", cmd->out_obj);
+    cmd_add_option(node, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(node, cmd->out_obj);
     cmd_add_option(node, OPTION_FLAG, "-c");
-    cmd_add_input_file_option(node, NULL, cmd->src);
+    cmd_add_input_file_option(node, cmd->src);
     if (cmd->arch)
     {
         char const* arch = get_arch_option_clang_or_gcc(cmd->arch);

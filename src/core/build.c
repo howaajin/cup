@@ -56,8 +56,9 @@ ENTRY(build_hash_h)
     Node* cmd_hash_gen = CMD_FROM_EXE(exe, fmt("gen: {:n}", output));
     cmd_hash_gen->prepare = gen_hash_h_prepare;
     cmd_hash_gen->extra_data = cc;
-    cmd_add_output_file_option(cmd_hash_gen, "-o ", output);
-    cmd_add_input_file_option(cmd_hash_gen, NULL, input);
+    cmd_add_option(cmd_hash_gen, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(cmd_hash_gen, output);
+    cmd_add_input_file_option(cmd_hash_gen, input);
 }
 ENTRY(build_path)
 {

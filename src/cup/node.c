@@ -714,7 +714,7 @@ void cmd_before_execute(Node* node)
     }
 }
 
-void cmd_add_input_file_option(Node* node, char const* option, Node* file)
+void cmd_add_input_file_option(Node* node, Node* file)
 {
     char const* path;
     if (file_path_has_space(file))
@@ -726,19 +726,11 @@ void cmd_add_input_file_option(Node* node, char const* option, Node* file)
     {
         path = file->path;
     }
-    if (option)
-    {
-        cmd_add_option(node, OPTION_FLAG, option);
-        cmd_add_option_no_sep(node, OPTION_INPUT, path);
-    }
-    else
-    {
-        cmd_add_option(node, OPTION_INPUT, path);
-    }
+    cmd_add_option(node, OPTION_INPUT, path);
     cmd_add_input(node, file);
 }
 
-void cmd_add_output_file_option(Node* node, char const* option, Node* file)
+void cmd_add_input_file_option_no_sep(Node* node, Node* file)
 {
     char const* path;
     if (file_path_has_space(file))
@@ -750,15 +742,39 @@ void cmd_add_output_file_option(Node* node, char const* option, Node* file)
     {
         path = file->path;
     }
-    if (option)
+    cmd_add_option_no_sep(node, OPTION_INPUT, path);
+    cmd_add_input(node, file);
+}
+
+void cmd_add_output_file_option(Node* node, Node* file)
+{
+    char const* path;
+    if (file_path_has_space(file))
     {
-        cmd_add_option(node, OPTION_FLAG, option);
-        cmd_add_option_no_sep(node, OPTION_OUTPUT, path);
+        Allocator* allocator = allocator_temp();
+        path = string_from_print(allocator, "\"%s\"", file->path);
     }
     else
     {
-        cmd_add_option(node, OPTION_OUTPUT, path);
+        path = file->path;
     }
+    cmd_add_option(node, OPTION_OUTPUT, path);
+    cmd_add_output(node, file);
+}
+
+void cmd_add_output_file_option_no_sep(Node* node, Node* file)
+{
+    char const* path;
+    if (file_path_has_space(file))
+    {
+        Allocator* allocator = allocator_temp();
+        path = string_from_print(allocator, "\"%s\"", file->path);
+    }
+    else
+    {
+        path = file->path;
+    }
+    cmd_add_option_no_sep(node, OPTION_OUTPUT, path);
     cmd_add_output(node, file);
 }
 

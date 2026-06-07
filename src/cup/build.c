@@ -33,8 +33,8 @@ ENTRY(gen_embedded_files)
         Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
         Node* input = get_or_add_src(embedded_sources[i].path);
         cmd_add_option(cmd, OPTION_FLAG, "-base64");
-        cmd_add_output_file_option(cmd, NULL, output);
-        cmd_add_input_file_option(cmd, NULL, input);
+        cmd_add_output_file_option(cmd, output);
+        cmd_add_input_file_option(cmd, input);
     }
 }
 
@@ -68,7 +68,8 @@ ENTRY(build_cup_h)
     Node* cup_h = FILE("{out_dir}/header_only/cup.h");
     Node* make_header = EXE("{out_dir}/make_header");
     Node* cmd = CMD_FROM_EXE(make_header, fmt("gen: {:n}", cup_h));
-    cmd_add_output_file_option(cmd, "-o ", cup_h);
+    cmd_add_option(cmd, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(cmd, cup_h);
     cmd_add_option(cmd, OPTION_INPUT, "cup/amalgam.c");
     cmd_add_input(cmd, amalgam);
     for (size_t i = 0; i != static_array_size(embedded_sources); i++)
@@ -314,7 +315,8 @@ ENTRY(build_cup_h_no_impl)
     Node* cup_h = FILE("{out_dir}/embedded/cup.h");
     Node* make_header = EXE("{out_dir}/make_header");
     Node* cmd = CMD_FROM_EXE(make_header, fmt("gen: {:n}", cup_h));
-    cmd_add_output_file_option(cmd, "-o ", cup_h);
+    cmd_add_option(cmd, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(cmd, cup_h);
     cmd_add_option(cmd, OPTION_INPUT, "cup/amalgam.c");
     cmd_add_option(cmd, OPTION_FLAG, "-h");
     cmd_add_input(cmd, amalgam);
@@ -333,8 +335,8 @@ ENTRY(build_embedded_cup_h_c)
     Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
     Node* input = FILE("{out_dir}/embedded/cup.h");
     cmd_add_option(cmd, OPTION_FLAG, "-base64");
-    cmd_add_output_file_option(cmd, NULL, output);
-    cmd_add_input_file_option(cmd, NULL, input);
+    cmd_add_output_file_option(cmd, output);
+    cmd_add_input_file_option(cmd, input);
 }
 
 ENTRY(build_embedded_cup_def_c)
@@ -348,8 +350,8 @@ ENTRY(build_embedded_cup_def_c)
     Node* cmd = CMD_FROM_EXE(bin2c, fmt("gen: {:n}", output));
     Node* input = FILE("{dir}/cup.def");
     cmd_add_option(cmd, OPTION_FLAG, "-base64");
-    cmd_add_output_file_option(cmd, NULL, output);
-    cmd_add_input_file_option(cmd, NULL, input);
+    cmd_add_output_file_option(cmd, output);
+    cmd_add_input_file_option(cmd, input);
 }
 
 ENTRY(build_gen_test_src)
@@ -446,8 +448,8 @@ ENTRY(build_cup_icon)
     Node* readme_png = FILE("assets/icon.png");
     Node* gen_icon = EXE("{out_dir}/gen_icon");
     Node* cmd = CMD_FROM_EXE(gen_icon, fmt("gen: {:n}", icon));
-    cmd_add_output_file_option(cmd, NULL, icon);
-    cmd_add_output_file_option(cmd, NULL, readme_png);
+    cmd_add_output_file_option(cmd, icon);
+    cmd_add_output_file_option(cmd, readme_png);
 }
 
 ENTRY(build_cup_res)
@@ -463,8 +465,9 @@ ENTRY(build_cup_res)
         Node* cmd = CMD("windres");
         Node* icon = FILE("{out_dir}/icon.ico");
         Node* rc = FILE("{dir}/cup.rc");
-        cmd_add_output_file_option(cmd, "-o", res);
-        cmd_add_input_file_option(cmd, NULL, rc);
+        cmd_add_option(cmd, OPTION_FLAG, "-o");
+        cmd_add_output_file_option(cmd, res);
+        cmd_add_input_file_option(cmd, rc);
         cmd_add_option(cmd, OPTION_FLAG, "-O coff");
         cmd_add_input(cmd, icon);
     }
@@ -491,8 +494,9 @@ ENTRY(build_cup_res)
         Node* icon = FILE("{out_dir}/icon.ico");
         Node* rc = FILE("{dir}/cup.rc");
         cmd_add_option(cmd, OPTION_FLAG, "/nologo");
-        cmd_add_output_file_option(cmd, "/fo", res);
-        cmd_add_input_file_option(cmd, NULL, rc);
+        cmd_add_option(cmd, OPTION_FLAG, "/fo");
+        cmd_add_output_file_option(cmd, res);
+        cmd_add_input_file_option(cmd, rc);
         cmd_add_input(cmd, icon);
     }
 }

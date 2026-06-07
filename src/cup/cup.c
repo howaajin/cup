@@ -1172,8 +1172,8 @@ static Node* add_copy_cmd_linux(Node* input, Node* output, char const* file, int
     char const* name = fmt("copy: output: {:n}", output);
     Node* node = node_create(type, name, sizeof(Node));
     cmd_add_option(node, OPTION_EXE, "cp");
-    cmd_add_input_file_option(node, NULL, input);
-    cmd_add_output_file_option(node, NULL, output);
+    cmd_add_input_file_option(node, input);
+    cmd_add_output_file_option(node, output);
     return node;
 }
 

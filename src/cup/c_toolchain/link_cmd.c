@@ -236,7 +236,7 @@ void link_cmd_add_input_options(Node* cmd)
         {
             continue;
         }
-        cmd_add_input_file_option(cmd, NULL, input);
+        cmd_add_input_file_option(cmd, input);
     }
     for (size_t i = 0; i != array_size(all_inputs); i++)
     {
@@ -245,7 +245,7 @@ void link_cmd_add_input_options(Node* cmd)
         {
             continue;
         }
-        cmd_add_input_file_option(cmd, NULL, input);
+        cmd_add_input_file_option(cmd, input);
     }
     LibOrderPair* lib_order_pairs = NULL;
     for (uint32_t i = lib_set.begin; i != lib_set.end; i = hash_next(&lib_set, i))
