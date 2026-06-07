@@ -85,6 +85,13 @@ Always run `cup -hh` for the actual artifact in the current project before relyi
 
 Cup records the last selected toolchain, optimization level, and LLVM linker in `{out_dir}/.last_status`. If later commands omit `-t`, `-O...`, or `-linker`, Cup reuses those saved values. Pass these flags explicitly when changing configuration or when reproducibility matters. Changing `-out_dir` changes where this status is read and written.
 
+The `CUP_CLANG` environment variable overrides the LLVM toolchain's C/C++ compiler path:
+
+```sh
+export CUP_CLANG=/usr/lib/llvm-21/bin/clang-21
+./cup -t llvm           # uses clang-21 / clang++-21
+```
+
 ## Minimal build.c
 
 Use this shape when creating or repairing a simple project:
