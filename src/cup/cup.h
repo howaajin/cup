@@ -29,6 +29,7 @@ ArchitectureType get_self_build_arch(void);
 Node* add_copy_cmd(Node* input, Node* output, char const* file, int line);
 
 int execute(void);
+void restart(void);
 
 #define CUP_VERSION "1.0.0"
 

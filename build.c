@@ -1,6 +1,5 @@
 #include "cup/c_toolchain/ext_node_type.h"
 #include "cup/cup.h"
-#include "cup/cup.private.h"
 
 bool b_enable_sanitizer = false;
 

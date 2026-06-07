@@ -1,5 +1,4 @@
 #include "cup/cup.h"
-#include "cup/cup.private.h"
 
 ENTRY(build_test_graph)
 {

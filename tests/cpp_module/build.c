@@ -1,11 +1,10 @@
 #include "cup/cup.h"
-#include "cup/cup.private.h"
 
 bool b_build_cpp_tests = false;
 
 bool build_cpp_tests()
 {
-    if (default_toolchain == TOOLCHAIN_TYPE_ZIG || !b_build_cpp_tests)
+    if (get_default_toolchain() == TOOLCHAIN_TYPE_ZIG || !b_build_cpp_tests)
     {
         return false;
     }

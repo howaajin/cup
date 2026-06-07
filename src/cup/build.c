@@ -1,7 +1,5 @@
 #include "core/macros.h"
 #include "cup/cup.h"
-#include "cup/cup.private.h"
-
 static struct
 {
     char const* path;
@@ -459,7 +457,7 @@ ENTRY(build_cup_res)
         return;
     }
     Node* res = FILE("{out_dir}/cup.res");
-    ToolchainType toolchain_type = default_toolchain;
+    ToolchainType toolchain_type = get_default_toolchain();
     if (toolchain_type == TOOLCHAIN_TYPE_GCC)
     {
         Node* cmd = CMD("windres");

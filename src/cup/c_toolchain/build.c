@@ -1,5 +1,4 @@
 #include "cup/cup.h"
-#include "cup/cup.private.h"
 
 ENTRY(build_c_compile_cmd_llvm)
 {

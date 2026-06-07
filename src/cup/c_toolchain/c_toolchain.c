@@ -12,7 +12,6 @@
 #include "cup/c_toolchain/ext_node_type.h"
 #include "cup/c_toolchain/link_cmd.h"
 #include "cup/cache.h"
-#include "cup/cup.private.h"
 #include "cup/fmt.h"
 #include "cup/node.h"
 #include "cup/var.h"
@@ -22,6 +21,7 @@
 #include <stdlib.h>
 
 extern Allocator* node_allocator;
+extern char const* compile_commands_json_path;
 
 ToolchainType default_toolchain = TOOLCHAIN_TYPE_UNSPECIFIED;
 ToolchainType self_build_toolchain = TOOLCHAIN_TYPE_UNSPECIFIED;

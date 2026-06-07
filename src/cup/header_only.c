@@ -2,7 +2,6 @@
 #include "core/string.h"
 #include "core/utilities.h"
 #include "cup/c_toolchain/c_toolchain.h"
-#include "cup/cup.private.h"
 #include "cup/entry.h"
 #include "cup/node.h"
 #include "cup/var.h"
@@ -34,7 +33,7 @@ ENTRY(build_self_header_only)
         {
             Node* pdb = FILE("{out_dir}/cup.exe.pdb");
             link_cmd_set_pdb(cmd_link, pdb);
-            if (default_toolchain == TOOLCHAIN_TYPE_GCC)
+            if (get_default_toolchain() == TOOLCHAIN_TYPE_GCC)
             {
                 link_cmd_add_lib(cmd_link, "userenv");
                 link_cmd_add_lib(cmd_link, "bcrypt");
@@ -68,7 +67,7 @@ ENTRY(build_self_header_only)
 
 static void bootstrap_compile_link_make_cmdline_llvm_gcc_zig(Node* node, Node* out_exe)
 {
-    ToolchainType toolchain = default_toolchain;
+    ToolchainType toolchain = get_default_toolchain();
     char const* compiler = (toolchain == TOOLCHAIN_TYPE_GCC ? "gcc" : (toolchain == TOOLCHAIN_TYPE_LLVM ? "clang" : "zig cc"));
     Node* cup_h = FILE("cup.h");
     cmd_add_option(node, OPTION_EXE, compiler);
@@ -84,7 +83,7 @@ static void bootstrap_compile_link_make_cmdline_llvm_gcc_zig(Node* node, Node* o
     }
     if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
     {
-        if (default_toolchain == TOOLCHAIN_TYPE_GCC)
+        if (get_default_toolchain() == TOOLCHAIN_TYPE_GCC)
         {
             cmd_add_option(node, OPTION_FLAG, "-luserenv");
             cmd_add_option(node, OPTION_FLAG, "-lbcrypt");
@@ -107,7 +106,7 @@ static void bootstrap_compile_link_make_cmdline_msvc(Node* node, Node* out_exe)
 {
     extern Node* msvc_get_env_node(ToolchainType toolchain_type, ArchitectureType arch);
 
-    Node* env = msvc_get_env_node(default_toolchain, CURRENT_ARCHITECTURE);
+    Node* env = msvc_get_env_node(get_default_toolchain(), CURRENT_ARCHITECTURE);
     cmd_set_env(node, env);
     Node* cup_h = FILE("cup.h");
     Node* pdb = FILE("{out_dir}/{}.pdb", out_exe->path);
