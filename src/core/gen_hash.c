@@ -654,7 +654,7 @@ int main(int argc, char** argv)
     }
     if (input == NULL || output == NULL)
     {
-        printf("Usage: hash_gen -o <output> <input>\n");
+        printf("Usage: gen_hash -o <output> <input>\n");
         return EXIT_FAILURE;
     }
     FILE* input_file = fopen(input, "rb");

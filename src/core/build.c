@@ -10,12 +10,12 @@
 
 extern ToolchainType default_toolchain;
 
-static void gen_hash_h_prepare(Node* cmd_hash_gen)
+static void gen_hash_h_prepare(Node* cmd_gen_hash)
 {
-    cmd_prepare(cmd_hash_gen);
+    cmd_prepare(cmd_gen_hash);
     Node** nodes = get_all_nodes();
-    Node* hash_h = cmd_hash_gen->outputs[0];
-    Node* cc = cmd_hash_gen->extra_data;
+    Node* hash_h = cmd_gen_hash->outputs[0];
+    Node* cc = cmd_gen_hash->extra_data;
     for (size_t i = 0; i != array_size(nodes); i++)
     {
         Node* node = nodes[i];
@@ -37,11 +37,11 @@ static void gen_hash_h_prepare(Node* cmd_hash_gen)
 
 ENTRY(build_hash_h)
 {
-    Node* exe = EXE("{out_dir}/hash_gen");
+    Node* exe = EXE("{out_dir}/gen_hash");
     Node* link = LINK(exe);
     link_cmd_setup_self_build(link);
 
-    Node* src = get_or_add_src("src/core/hash_gen.c");
+    Node* src = get_or_add_src("src/core/gen_hash.c");
     Node* obj = OBJ(src);
     Node* cc = CC(src, obj);
     if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
@@ -51,14 +51,14 @@ ENTRY(build_hash_h)
     link_cmd_add_input(link, obj);
 
     Node* output = get_or_add_file("src/core/hash.h");
-    Node* input = get_or_add_src("src/core/hash_gen.c");
+    Node* input = get_or_add_src("src/core/gen_hash.c");
 
-    Node* cmd_hash_gen = CMD_FROM_EXE(exe, fmt("gen: {:n}", output));
-    cmd_hash_gen->prepare = gen_hash_h_prepare;
-    cmd_hash_gen->extra_data = cc;
-    cmd_add_option(cmd_hash_gen, OPTION_FLAG, "-o");
-    cmd_add_output_file_option(cmd_hash_gen, output);
-    cmd_add_input_file_option(cmd_hash_gen, input);
+    Node* cmd_gen_hash = CMD_FROM_EXE(exe, fmt("gen: {:n}", output));
+    cmd_gen_hash->prepare = gen_hash_h_prepare;
+    cmd_gen_hash->extra_data = cc;
+    cmd_add_option(cmd_gen_hash, OPTION_FLAG, "-o");
+    cmd_add_output_file_option(cmd_gen_hash, output);
+    cmd_add_input_file_option(cmd_gen_hash, input);
 }
 ENTRY(build_path)
 {

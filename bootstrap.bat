@@ -74,15 +74,15 @@ if /i "%ARCH%"=="x86" (
 ) else (
     set ARCH= -m64
 )
-set "CC_CLANG_HASH=clang src/core/hash_gen.c%ARCH% -g -O0 -Isrc -o build/hash_gen.exe -Wno-deprecated-declarations -Wno-microsoft-anon-tag -Xlinker /incremental:no -Xlinker /pdb:build/hash_gen.exe.pdb"
+set "CC_CLANG_HASH=clang src/core/gen_hash.c%ARCH% -g -O0 -Isrc -o build/gen_hash.exe -Wno-deprecated-declarations -Wno-microsoft-anon-tag -Xlinker /incremental:no -Xlinker /pdb:build/gen_hash.exe.pdb"
 set "CC_CLANG_CUP=clang build.c src/core/build.c src/cup/build.c src/cup/in_repo.c src/cup/c_toolchain/build.c src/cup/bootstrap.c%ARCH% -g -O0 -Isrc -o cup.exe -Wno-deprecated-declarations -Wno-microsoft-anon-tag -Xlinker /noimplib -Xlinker /incremental:no -Xlinker /pdb:build/cup.exe.pdb"
 
 %CC_CLANG_HASH% || exit /B 1
-build\hash_gen.exe -o src/core/hash.h src/core/hash_gen.c || exit /B 1
+build\gen_hash.exe -o src/core/hash.h src/core/gen_hash.c || exit /B 1
 %CC_CLANG_CUP% || exit /B 1
 
 call :gen_compile_commands ^
-    "src/core/hash_gen.c|CC_CLANG_HASH" ^
+    "src/core/gen_hash.c|CC_CLANG_HASH" ^
     "build.c|CC_CLANG_CUP"
 echo compile_commands.json generated successfully.
 exit /B 0
@@ -94,7 +94,7 @@ if not exist build\obj\src\core mkdir build\obj\src\core
 if not exist build\obj\src\cup mkdir build\obj\src\cup
 if not exist build\obj\src\cup\c_toolchain mkdir build\obj\src\cup\c_toolchain
 
-set "CC_MSVC_HASH=cl /nologo src/core/hash_gen.c /I src /c /Fobuild/hash_gen.obj"
+set "CC_MSVC_HASH=cl /nologo src/core/gen_hash.c /I src /c /Fobuild/gen_hash.obj"
 set "CC_MSVC_ROOT=cl /Fo:build/obj/build.c.obj /c /nologo build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/build.c.obj.pdb"
 set "CC_MSVC_CORE=cl /Fo:build/obj/src/core/build.c.obj /c /nologo src/core/build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/core/build.c.obj.pdb"
 set "CC_MSVC_CUP=cl /Fo:build/obj/src/cup/build.c.obj /c /nologo src/cup/build.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/build.c.obj.pdb"
@@ -103,8 +103,8 @@ set "CC_MSVC_CT=cl /Fo:build/obj/src/cup/c_toolchain/build.c.obj /c /nologo src/
 set "CC_MSVC_BOOT=cl /Fo:build/obj/src/cup/bootstrap.c.obj /c /nologo src/cup/bootstrap.c /Od /std:clatest /Isrc /Zi /Fdbuild/obj/src/cup/bootstrap.c.obj.pdb"
 
 %CC_MSVC_HASH% || exit /B 1
-link /nologo build\hash_gen.obj /out:build\hash_gen.exe /incremental:no /pdb:build\hash_gen.exe.pdb || exit /B 1
-build\hash_gen.exe -o src\core\hash.h src\core\hash_gen.c || exit /B 1
+link /nologo build\gen_hash.obj /out:build\gen_hash.exe /incremental:no /pdb:build\gen_hash.exe.pdb || exit /B 1
+build\gen_hash.exe -o src\core\hash.h src\core\gen_hash.c || exit /B 1
 %CC_MSVC_ROOT% || exit /B 1
 %CC_MSVC_CORE% || exit /B 1
 %CC_MSVC_CUP% || exit /B 1
@@ -114,7 +114,7 @@ build\hash_gen.exe -o src\core\hash.h src\core\hash_gen.c || exit /B 1
 link /nologo build/obj/build.c.obj build/obj/src/core/build.c.obj build/obj/src/cup/build.c.obj build/obj/src/cup/in_repo.c.obj build/obj/src/cup/c_toolchain/build.c.obj build/obj/src/cup/bootstrap.c.obj /debug /out:cup.exe /incremental:no /pdb:build\cup.exe.pdb || exit /B 1
 
 call :gen_compile_commands ^
-    "src/core/hash_gen.c|CC_MSVC_HASH" ^
+    "src/core/gen_hash.c|CC_MSVC_HASH" ^
     "build.c|CC_MSVC_ROOT" ^
     "src/core/build.c|CC_MSVC_CORE" ^
     "src/cup/build.c|CC_MSVC_CUP" ^

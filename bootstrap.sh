@@ -39,10 +39,10 @@ fi
 
 mkdir -p build
 
-$CC $CLANG_FLAGS src/core/hash_gen.c -g -O0 -Isrc -fms-extensions -Wno-microsoft-anon-tag -o build/hash_gen \
+$CC $CLANG_FLAGS src/core/gen_hash.c -g -O0 -Isrc -fms-extensions -Wno-microsoft-anon-tag -o build/gen_hash \
     -Wno-deprecated-declarations
 
-build/hash_gen -o src/core/hash.h src/core/hash_gen.c
+build/gen_hash -o src/core/hash.h src/core/gen_hash.c
 
 $CC $CLANG_FLAGS build.c src/core/build.c src/cup/build.c src/cup/in_repo.c src/cup/c_toolchain/build.c \
     src/cup/bootstrap.c -D_GNU_SOURCE -g -O0 -fms-extensions -Wno-microsoft-anon-tag -Isrc -o cup \

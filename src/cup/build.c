@@ -38,14 +38,14 @@ ENTRY(gen_embedded_files)
     }
 }
 
-ENTRY(build_make_header)
+ENTRY(build_gen_cup_h)
 {
-    Node* make_header = EXE("{out_dir}/make_header");
-    Node* link = LINK(make_header);
+    Node* gen_cup_h = EXE("{out_dir}/gen_cup_h");
+    Node* link = LINK(gen_cup_h);
     link_cmd_setup_self_build(link);
     {
         link_cmd_set_arch(link, get_self_build_arch());
-        Node* src = get_or_add_src("src/cup/make_header.c");
+        Node* src = get_or_add_src("src/cup/gen_cup_h.c");
         Node* obj = OBJ(src);
         Node* cc = CC(src, obj);
         if (CURRENT_PLATFORM == PLATFORM_WINDOWS)
@@ -80,7 +80,7 @@ ENTRY(build_gen_def)
     }
 }
 
-static void make_header_output_filter(Node* cmd, char const* line)
+static void gen_cup_h_output_filter(Node* cmd, char const* line)
 {
     cmd_add_implicit_input(cmd, line);
 }
@@ -89,8 +89,8 @@ ENTRY(build_cup_h)
 {
     Node* amalgam = get_or_add_src("src/cup/amalgam.c");
     Node* cup_h = FILE("{out_dir}/header_only/cup.h");
-    Node* make_header = EXE("{out_dir}/make_header");
-    Node* cmd = CMD_FROM_EXE(make_header, fmt("gen: {:n}", cup_h));
+    Node* gen_cup_h = EXE("{out_dir}/gen_cup_h");
+    Node* cmd = CMD_FROM_EXE(gen_cup_h, fmt("gen: {:n}", cup_h));
     cmd_add_option(cmd, OPTION_FLAG, "-o");
     cmd_add_output_file_option(cmd, cup_h);
     cmd_add_option(cmd, OPTION_INPUT, "cup/amalgam.c");
@@ -100,7 +100,7 @@ ENTRY(build_cup_h)
         Node* src = get_or_add_src(embedded_sources[i].out_path);
         cmd_add_input(cmd, src);
     }
-    cmd_set_write_output_line_fn(cmd, make_header_output_filter);
+    cmd_set_write_output_line_fn(cmd, gen_cup_h_output_filter);
 }
 
 static void self_with_source_built_restart(Node* cmd)
@@ -336,8 +336,8 @@ ENTRY(build_cup_h_no_impl)
 {
     Node* amalgam = get_or_add_src("src/cup/amalgam.c");
     Node* cup_h = FILE("{out_dir}/embedded/cup.h");
-    Node* make_header = EXE("{out_dir}/make_header");
-    Node* cmd = CMD_FROM_EXE(make_header, fmt("gen: {:n}", cup_h));
+    Node* gen_cup_h = EXE("{out_dir}/gen_cup_h");
+    Node* cmd = CMD_FROM_EXE(gen_cup_h, fmt("gen: {:n}", cup_h));
     cmd_add_option(cmd, OPTION_FLAG, "-o");
     cmd_add_output_file_option(cmd, cup_h);
     cmd_add_option(cmd, OPTION_INPUT, "cup/amalgam.c");
@@ -348,7 +348,7 @@ ENTRY(build_cup_h_no_impl)
         Node* src = SRC(embedded_sources[i].out_path);
         cmd_add_input(cmd, src);
     }
-    cmd_set_write_output_line_fn(cmd, make_header_output_filter);
+    cmd_set_write_output_line_fn(cmd, gen_cup_h_output_filter);
 }
 
 ENTRY(build_cup_def)
