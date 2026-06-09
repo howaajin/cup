@@ -41,7 +41,7 @@ Cup can be used in two ways:
 
 ## Quick Start
 
-1. Download the latest release for your platform (`cup`, `cup.exe`, or `cup.h`) from the Releases page.
+1. Download the latest release for your platform (`cup`, `cup.exe`, or `cup.h`) from the [Releases page](https://github.com/howaajin/cup/releases).
 2. Run the executable or compile `cup.h` with `-DMAIN_ENTRY` (see compile commands at the end of `cup.h`).
 3. If no `build.c` exists, Cup generates a default one. Edit it as needed.
 4. You can run `cup -h` to see more command-line options.
