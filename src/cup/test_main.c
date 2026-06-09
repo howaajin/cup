@@ -1,6 +1,5 @@
 #include "test.h"
 
-#include "core/macros.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -88,7 +87,7 @@ static bool run_all_tests()
         {
             size_t i = -1;
             while (slots[++i].pipe);
-            expect(i != MAX_JOBS, "all job slots are occupied");
+            assert(i != MAX_JOBS);
             char cmdbuffer[4096];
             TestEntry* e = &test_entries[next_test++];
             snprintf(cmdbuffer, sizeof(cmdbuffer), "\"%s\" %s 2>&1", cur_exe_path, e->name);
@@ -98,7 +97,7 @@ static bool run_all_tests()
             slots[i].output_size = 0;
             slots[i].output_capacity = 4096;
             slots[i].output = malloc(slots[i].output_capacity);
-            expect(slots[i].output, "output buffer reallocation failed");
+            assert(slots[i].output);
             num_running += 1;
         }
         for (size_t i = 0; i != MAX_JOBS; i++)
@@ -113,7 +112,7 @@ static bool run_all_tests()
                     {
                         slots[i].output_capacity = slots[i].output_capacity * 2 + n;
                         slots[i].output = realloc(slots[i].output, slots[i].output_capacity);
-                        expect(slots[i].output, "output buffer allocation failed");
+                        assert(slots[i].output);
                     }
                     memcpy(slots[i].output + slots[i].output_size, buffer, n);
                     slots[i].output_size += n;
