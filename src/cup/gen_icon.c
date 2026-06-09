@@ -203,13 +203,18 @@ typedef struct
     float iTime;
 } Uniforms;
 
+#ifndef CUP_VERSION_MAJOR
+#define CUP_VERSION_MAJOR 1
+#endif
+
 static vec3 shader_func_cup_icon(vec2 uv, Uniforms u)
 {
     vec2 p = vec2_sub(uv, vec2_new(0.5f, 0.5f));
     vec3 col = get_bg_color();
     float px = 1.0f / u.height;
     vec2 pCore = p;
-    pCore = rotate2d(pCore, 0.0f);
+    float angle = (float)(CUP_VERSION_MAJOR - 1) * 10.0f * (PI / 180.0f);
+    pCore = rotate2d(pCore, angle);
     float dHex = sdf_hexagon(pCore, 0.18f);
     col = draw_shape(col, get_core_color(), dHex, px * 1.5f);
     float dHole = sdf_hexagon(pCore, 0.08f);

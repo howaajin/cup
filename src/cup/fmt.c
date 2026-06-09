@@ -122,7 +122,7 @@ static char const* fmt_get_placeholder_value(Placeholder const* placeholder, voi
         if (placeholder->arg_type == ARG_INT)
         {
             int i = (int)(uintptr_t)args[placeholder->index];
-            result = string_from_print(allocator_temp(), result, "%d", i);
+            result = string_from_print(allocator_temp(), "%d", i);
         }
         else if (placeholder->arg_type == ARG_NODE)
         {
