@@ -45,6 +45,7 @@ Cup can be used in two ways:
 2. Run the executable or compile `cup.h` with `-DMAIN_ENTRY` (see compile commands at the end of `cup.h`).
 3. If no `build.c` exists, Cup generates a default one. Edit it as needed.
 4. You can run `cup -h` to see more command-line options.
+5. If you break your `build.c` causing cup to load a crashing dynamic library or enter an infinite loop, use `cup -r` to re-bootstrap. If you break cup itself (only possible with Single Header Mode, and even `cup -r` won't work), recompile manually.
 
 ### AI Agent Skills
 
