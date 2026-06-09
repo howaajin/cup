@@ -393,6 +393,7 @@ Node* obj_from_src_with_variant(Node* src, char const* variant)
 
 Node* get_default_obj(Node* node)
 {
+    expect(node->node_type == NODE_TYPE_FILE && node->file_type == FILE_TYPE_SRC, "The node is not of type Src.");
     Src* src = (Src*)node;
     if (src->default_obj == NULL)
     {
@@ -700,6 +701,13 @@ Node* get_or_add_src(char const* path)
     {
         uint32_t node_type = node_make_file_type(FILE_TYPE_SRC, 0);
         node = node_create(node_type, path, sizeof(Src));
+    }
+    else
+    {
+        if (node->node_type != NODE_TYPE_FILE && node->file_type != FILE_TYPE_SRC)
+        {
+            fatal("The node was previously defined, but its type does not match the one currently requested.");
+        }
     }
     return node;
 }
