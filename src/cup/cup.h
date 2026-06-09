@@ -31,6 +31,6 @@ Node* add_copy_cmd(Node* input, Node* output, char const* file, int line);
 int execute(void);
 void restart(void);
 
-#define CUP_VERSION "1.0.0"
+#define CUP_VERSION "1.2.0"
 
 #define COPY(src, dst) add_copy_cmd(src, dst, __FILE__, __LINE__)
