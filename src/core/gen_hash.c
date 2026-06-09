@@ -2,7 +2,7 @@
 
 #include "core/allocator.h"
 
-#include <assert.h>
+#include "core/macros.h"
 #include <inttypes.h>
 #include <stdbool.h>
 #include <string.h>
@@ -132,7 +132,7 @@ static inline uint32_t hash_hash_func_$key_type$($key_type$ key, uint32_t num_bu
     //$ }
     //$ return h & (num_buckets - 1);
     /*$ default -*/
-    //$ assert(0);
+    //$ fatal("unreachable");
     /*$*/
 }
 /*$*/
@@ -193,14 +193,14 @@ static inline uint32_t hash_index_$hash_name$($hash_name$ const* h, $key_type$ k
 
 static inline uint32_t hash_index_no_check_$hash_name$(const HashFlags* flags, uint32_t num_buckets, $key_type$ key)
 {
-    assert(num_buckets);
+    expect(num_buckets, "num_buckets is zero");
     uint32_t begin = hash_hash_func_$key_type$(key, num_buckets);
     uint32_t i = begin;
     uint32_t d = 0;
     while (flags[i].is_occupied)
     {
         i = hash_index_next(i, ++d, num_buckets);
-        assert(i != begin);
+        expect(i != begin, "index wrapped around");
     }
     return i;
 }
@@ -230,7 +230,7 @@ static inline void hash_grow_$hash_name$($hash_name$* h, uint32_t grow_size)
     size_t total_bytes = current_offset;
 
     char* raw_mem = allocator_malloc(h->allocator, total_bytes);
-    assert(raw_mem);
+    expect(raw_mem, "allocation failed");
 
     $key_type$* new_keys = ($key_type$*)(raw_mem + keys_offset);
     HashFlags* new_flags = (HashFlags*)(raw_mem + flags_offset);
@@ -326,8 +326,8 @@ static inline uint32_t hash_insert_$hash_name$($hash_name$* h, $key_type$ key)
 
 static inline void hash_remove_$hash_name$($hash_name$* h, uint32_t i)
 {
-    assert(h && h->size != 0);
-    assert(h->flags[i].is_occupied == true && h->flags[i].is_deleted == false);
+    expect(h && h->size != 0, "hash is invalid or empty");
+    expect(h->flags[i].is_occupied == true && h->flags[i].is_deleted == false, "invalid hash entry state");
     h->flags[i].is_deleted = true;
     --h->size;
     if (h->begin == i)
@@ -658,9 +658,9 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     FILE* input_file = fopen(input, "rb");
-    assert(input_file);
+    expect(input_file, "input file is NULL");
     FILE* output_file = fopen(output, "wb");
-    assert(output_file);
+    expect(output_file, "output file is NULL");
     template_t* tpl = template_create(&AllocatorC);
     add_keys(tpl);
     add_values(tpl);

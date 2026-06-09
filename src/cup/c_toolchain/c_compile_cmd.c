@@ -50,7 +50,7 @@ char const* get_toolchain_bmi_extension(ToolchainType toolchain_type)
     {
         return ".gcm";
     }
-    assert(false);
+    fatal("unreachable");
     return NULL;
 }
 
@@ -97,7 +97,7 @@ void compile_cmdline_node_make_cmdline(CompileCmdline* node)
     case TOOLCHAIN_TYPE_GCC: compile_cmdline_node_make_cmdline_gcc(node); break;
     case TOOLCHAIN_TYPE_MSVC: compile_cmdline_node_make_cmdline_msvc(node); break;
     case TOOLCHAIN_TYPE_ZIG: compile_cmdline_node_make_cmdline_zigcc(node); break;
-    default: assert(false);
+    default: fatal("unreachable");
     }
 }
 
@@ -204,7 +204,7 @@ static void c_compile_cmd_prepare(Node* node)
     case TOOLCHAIN_TYPE_LLVM: c_compile_cmd_prepare_llvm(node, cmd); break;
     case TOOLCHAIN_TYPE_GCC: c_compile_cmd_prepare_gcc(node, cmd); break;
     case TOOLCHAIN_TYPE_ZIG: c_compile_cmd_prepare_zigcc(node, cmd); break;
-    default: assert(false);
+    default: fatal("unreachable");
     }
 
     cmd_prepare(node);
@@ -226,9 +226,9 @@ bool c_compile_cmd_check_dirty(Node* node)
 
 Node* c_compile_cmd_create(Node* input, Node* out_obj, char const* file, int line)
 {
-    assert(input);
-    assert(out_obj);
-    assert(out_obj->build_cmd == NULL);
+    expect(input, "input is NULL");
+    expect(out_obj, "out_obj is NULL");
+    expect(out_obj->build_cmd == NULL, "out_obj already has a build command");
 
     uint32_t type = node_make_cmd_type(CMD_TYPE_EXECUTABLE, C_CMD_COMPILE);
     char const* name = fmt("compile: {:n}", out_obj);

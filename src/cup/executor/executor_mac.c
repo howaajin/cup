@@ -1,6 +1,7 @@
 #include "cup/executor/executor_mac.h"
 #include "cup/executor/executor.h"
 
+#include "core/macros.h"
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -27,7 +28,7 @@ static void kq_update_event(int kq, int fd, int filter, int flags, void* udata)
 void executor_platform_init(Executor* executor)
 {
     executor->kq_fd = kqueue();
-    assert(executor->kq_fd != -1);
+    expect(executor->kq_fd != -1, "failed to create kqueue");
     for (size_t i = 0; i != executor->num_slots; i++)
     {
         ExecutorSlot* slot = &executor->slots[i];
@@ -54,7 +55,7 @@ void executor_platform_set_slot(Executor* executor, uint32_t slot_id, Task* task
 
 void executor_set_task_env_block(Task* task, wchar_t* env_block)
 {
-    assert(false && "Not implemented on macOS.");
+    fatal("Not implemented on macOS.");
 }
 
 void executor_platform_destroy(Executor* executor)
@@ -186,7 +187,7 @@ void executor_execute_slot_thread(ExecutorSlot* slot)
     kq_update_event(slot->kq_fd, slot->thread_done_pipe[0], EVFILT_READ, EV_ADD, &slot->ctx_thread);
 
     int result = pthread_create(&slot->thread_id, NULL, executor_callback_thread_wrapper, slot);
-    assert(result == 0);
+    expect(result == 0, "pthread_create failed");
 }
 
 void executor_execute_slot_process(ExecutorSlot* slot)

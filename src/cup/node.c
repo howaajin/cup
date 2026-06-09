@@ -121,7 +121,7 @@ void node_processed(Node* node, Graph* graph)
 Node* node_create(uint32_t type, char const* name, size_t num_bytes)
 {
     Node* node = allocator_calloc(node_allocator, 1, num_bytes);
-    assert(node);
+    expect(node, "node is NULL");
     node->type = type;
     node->b_default_excluded = b_node_default_excluded;
     if (name)
@@ -793,7 +793,7 @@ static char const* get_option_color(OptionType type)
     if (type == OPTION_FLAG) return desc_color_flag;
     if (type == OPTION_BRIGHT_FLAG) return desc_color_bright_flag;
     if (type == OPTION_HIDDEN) return NULL;
-    assert(false);
+    fatal("unreachable");
     return NULL;
 }
 
@@ -917,8 +917,8 @@ void cmd_set_after_execute_fn(Node* node, FnAfterExecute* fn)
 
 void cmd_set_env(Node* node, Node* env)
 {
-    assert(!env || env->node_type == NODE_TYPE_FILE);
-    assert(node->node_type == NODE_TYPE_CMD && node->cmd_type == CMD_TYPE_EXECUTABLE);
+    expect(!env || env->node_type == NODE_TYPE_FILE, "env must be NULL or a FILE node");
+    expect(node->node_type == NODE_TYPE_CMD && node->cmd_type == CMD_TYPE_EXECUTABLE, "node must be a CMD of type EXECUTABLE");
     if (node->env_node)
     {
         cmd_remove_input(node, node->env_node);
@@ -1059,7 +1059,7 @@ Node* add_process_cmd_from_exe_node(Node* exe, char const* name, char const* fil
 
 Node* find_node(char const* name)
 {
-    assert(hash_name_to_node);
+    expect(hash_name_to_node, "hash_name_to_node is NULL");
     return (Node*)hash_get(hash_name_to_node, name);
 }
 

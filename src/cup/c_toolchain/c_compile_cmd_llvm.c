@@ -11,6 +11,7 @@
 #include "cup/fmt.h"
 #include "cup/node.h"
 
+#include "core/macros.h"
 #include <assert.h>
 #include <stdio.h>
 
@@ -36,7 +37,7 @@ static char const* get_optimization_option_clang_or_gcc(OptimizationType optimiz
     case OPTIMIZATION_TYPE_DEBUG: return "-O0";
     case OPTIMIZATION_TYPE_RELEASE_FAST: return "-O3";
     case OPTIMIZATION_TYPE_RELEASE_SMALL: return "-Os";
-    default: assert(false); return NULL;
+    default: fatal("unknown optimization type"); return NULL;
     }
 }
 
@@ -52,7 +53,7 @@ static char const* get_cpp_std_option_clang_or_gcc(CppLanguageStandard cpp_std)
     case CPP_LANGUAGE_STANDARD_20: return "-std=c++20";
     case CPP_LANGUAGE_STANDARD_23: return "-std=c++23";
     case CPP_LANGUAGE_STANDARD_26: return "-std=c++26";
-    default: assert(false); return NULL;
+    default: fatal("unknown C++ language standard"); return NULL;
     }
 }
 
@@ -65,7 +66,7 @@ static char const* get_c_std_option_clang_or_gcc(CLanguageStandard c_std)
     case C_LANGUAGE_STANDARD_11: return "-std=c11";
     case C_LANGUAGE_STANDARD_17: return "-std=c17";
     case C_LANGUAGE_STANDARD_23: return "-std=c2x";
-    default: assert(false); return NULL;
+    default: fatal("unknown C language standard"); return NULL;
     }
 }
 
@@ -174,7 +175,7 @@ void c_compile_cmd_prepare_llvm(Node* node, CCompileCmd* cmd)
 {
     if (cmd->source_type == SOURCE_TYPE_CPPM)
     {
-        assert(cmd->export_bmi);
+        expect(cmd->export_bmi, "export BMI is NULL");
         cmd_add_output(node, cmd->export_bmi);
     }
     cmd_add_output(node, cmd->out_obj);
@@ -338,6 +339,6 @@ void compile_cmdline_node_make_cmdline_llvm(CompileCmdline* compile_cmdline)
     }
     else
     {
-        assert(false);
+        fatal("unreachable");
     }
 }

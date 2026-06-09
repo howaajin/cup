@@ -7,6 +7,7 @@
 #include "cup/fmt.h"
 #include "cup/node.h"
 
+#include "core/macros.h"
 #include <assert.h>
 
 extern Allocator* node_allocator;
@@ -23,7 +24,7 @@ static char const* get_optimization_option_cl(OptimizationType optimization)
     case OPTIMIZATION_TYPE_RELEASE_FAST: return "/Ox";
     case OPTIMIZATION_TYPE_RELEASE_SMALL: return "/Os";
     case OPTIMIZATION_TYPE_UNSPECIFIED: return NULL;
-    default: assert(false); return NULL;
+    default: fatal("unknown optimization type"); return NULL;
     }
 }
 
@@ -39,7 +40,7 @@ static char const* get_cpp_std_option_cl(CppLanguageStandard cpp_std)
     case CPP_LANGUAGE_STANDARD_20: return "/std:c++20";
     case CPP_LANGUAGE_STANDARD_23: return "/std:c++latest";
     case CPP_LANGUAGE_STANDARD_26: return "/std:c++latest";
-    default: assert(false); return NULL;
+    default: fatal("unknown C++ language standard"); return NULL;
     }
 }
 
@@ -112,7 +113,7 @@ void c_compile_cmd_prepare_msvc(Node* node, CCompileCmd* cmd)
     cmd_add_output(node, cmd->out_obj);
     if (cmd->source_type == SOURCE_TYPE_CPPM)
     {
-        assert(cmd->export_bmi);
+        expect(cmd->export_bmi, "export BMI is NULL");
         cmd_add_output(node, cmd->export_bmi);
     }
     if (cmd->b_generate_debug_info && cmd->source_type != SOURCE_TYPE_ASM)
@@ -194,7 +195,7 @@ void compile_cmdline_node_make_cmdline_msvc_common(Node* node, CCompileCmd* cmd)
     compile_cmdline_node_make_cmdline_msvc_scan_deps_common(node, cmd);
     if (cmd->b_generate_debug_info)
     {
-        assert(cmd->pdb);
+        expect(cmd->pdb, "PDB path is NULL");
         cmd_add_option(node, OPTION_FLAG, "/Zi");
         cmd_add_option(node, OPTION_FLAG, "/Fd");
         cmd_add_output_file_option_no_sep(node, cmd->pdb);
@@ -275,7 +276,7 @@ static void compile_cmdline_node_make_cmdline_msvc_asm(CompileCmdline* compile_c
     }
     else
     {
-        assert(false && "MSVC does not support .s/.S files; use .asm with MASM syntax");
+        fatal("MSVC does not support .s/.S files; use .asm with MASM syntax");
     }
 }
 

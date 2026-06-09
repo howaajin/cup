@@ -1,7 +1,9 @@
 #include "core/os.h"
 #include "core/allocator.h"
+#include "core/macros.h"
 #include "core/path.h"
 #include "core/utilities.h"
+
 
 #include <assert.h>
 #include <dlfcn.h>
@@ -44,10 +46,10 @@ char* os_get_current_exe_path(Allocator* allocator)
 {
     char buffer[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
-    assert(len != -1 && "Failed to read /proc/self/exe");
+    expect(len != -1, "Failed to read /proc/self/exe");
     buffer[len] = '\0';
     char* result = path_lexically_normal(buffer, allocator);
-    assert(result);
+    expect(result, "result is NULL");
     return result;
 }
 

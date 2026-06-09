@@ -13,6 +13,7 @@
 #error "unknown platform"
 #endif
 
+#include "core/macros.h"
 #include <assert.h>
 
 void executor_platform_init(Executor* executor);
@@ -136,7 +137,7 @@ static void executor_execute_slot(Executor* executor, uint32_t slot_id)
 static void executor_flush_task(Executor* executor, Task* task)
 {
     uint32_t slot_id = executor_find_empty_slot(executor);
-    assert(slot_id);
+    expect(slot_id, "no empty slot available");
     executor_set_slot_task(executor, slot_id, task);
     executor_execute_slot(executor, slot_id);
     executor->num_running_tasks += 1;

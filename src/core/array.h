@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/allocator.h"
+#include "core/macros.h"
 
 #include <assert.h>
 #include <stdint.h>
@@ -66,7 +67,7 @@ static inline void* array_new_impl(Allocator* allocator, size_t item_size, size_
         new_capacity = capacity;
     }
     Array* a = allocator_malloc(allocator, sizeof(Array) + item_size * new_capacity);
-    assert(a);
+    expect(a, "allocation failed");
     a->capacity = new_capacity;
     a->size = size;
     return a + 1;
@@ -107,7 +108,7 @@ static inline void array_push_v_impl(Allocator* allocator, void** ptr, size_t it
 static inline void array_insert_impl(Allocator* allocator, void** ptr, size_t item_size, size_t index, size_t n)
 {
     size_t old_size = *ptr ? array_size(*ptr) : 0;
-    assert(index <= old_size);
+    expect(index <= old_size, "index out of bounds");
     array_resize_impl(allocator, ptr, item_size, old_size + n);
     size_t bytes_to_move = (old_size - index) * item_size;
     if (bytes_to_move)

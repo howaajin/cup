@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/array.h"
+#include "core/macros.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -194,14 +195,14 @@ static void template_read_string(template_t* t, void* buffer)
         template_peek(t->input, 1, &ch);
         if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_')
         {
-            assert(i < MAX_STR_LEN);
+            expect(i < MAX_STR_LEN, "string length exceeds MAX_STR_LEN");
             ((char*)buffer)[i] = ch;
             i++;
             template_eat(t, 1, NULL);
         }
         else
         {
-            assert(i < MAX_STR_LEN);
+            expect(i < MAX_STR_LEN, "string length exceeds MAX_STR_LEN");
             ((char*)buffer)[i] = '\0';
             break;
         }
@@ -214,8 +215,8 @@ static void template_skip_until_block_comment_end(template_t* t)
     while (true)
     {
         template_peek(t->input, 3, ch);
-        assert(ch[0] != 0);
-        assert(ch[1] != 0);
+        expect(ch[0] != 0, "unexpected end of block comment");
+        expect(ch[1] != 0, "unexpected end of block comment");
         if (ch[0] == '*' && ch[1] == '/')
         {
             template_eat(t, 2, NULL);
@@ -274,7 +275,7 @@ static void template_skip_until_next_end_mark(template_t* t)
 {
     if (!template_try_read_end_mark(t))
     {
-        assert(false);
+        fatal("unreachable");
     }
 }
 
@@ -308,7 +309,7 @@ static void template_block(template_t* t, template_dict_t const* dict);
 static void template_if(template_t* t, template_dict_t const* dict, char const* value_name)
 {
     value_t const* value = template_dict_get(dict, value_name);
-    assert(value != NULL);
+    expect(value, "value is NULL");
     bool b_ok;
     if (value->type == template_value_bool)
     {
@@ -320,8 +321,7 @@ static void template_if(template_t* t, template_dict_t const* dict, char const* 
     }
     else
     {
-        fprintf(stderr, "Cannot convert value to boolean: %s", value_name);
-        assert(false);
+        fatal("Cannot convert value to boolean: %s", value_name);
     }
     t->b_skip = !b_ok;
     template_block(t, dict);
@@ -347,7 +347,7 @@ static void template_if(template_t* t, template_dict_t const* dict, char const* 
     }
     if (!template_try_read_end_mark(t))
     {
-        assert(false);
+        fatal("unreachable");
     }
     t->b_skip = false;
 }
@@ -372,14 +372,14 @@ static void template_string(template_t* t, template_dict_t const* dict)
     if (!t->b_skip)
     {
         value_t* value = template_dict_get(dict, buffer);
-        assert(value != NULL);
-        assert(value->type == template_value_string);
-        assert(value->str);
+        expect(value, "value is NULL");
+        expect(value->type == template_value_string, "value type is not string");
+        expect(value->str, "value string is NULL");
         fputs(value->str, t->output);
     }
     char ch;
     template_eat(t, 1, &ch);
-    assert(ch == '$');
+    expect(ch == '$', "expected '$' delimiter");
 }
 
 static bool template_try_read_tag(template_t* t, char const* name)
@@ -411,7 +411,7 @@ static void template_switch(template_t* t, template_dict_t const* dict, char con
     bool b_matched = false;
     t->b_skip = true;
     value_t* var = template_dict_get(dict, var_name);
-    assert(var->type == template_value_string);
+    expect(var->type == template_value_string, "variable type is not string");
     while (true)
     {
         char buffer[MAX_STR_LEN];
@@ -451,7 +451,7 @@ static void template_switch(template_t* t, template_dict_t const* dict, char con
         {
             break;
         }
-        assert(false);
+        fatal("unreachable");
     }
     t->b_skip = false;
 }
@@ -525,7 +525,7 @@ static void template_block(template_t* t, template_dict_t const* dict)
                 template_switch(t, dict, buffer);
                 continue;
             }
-            assert(false && "unknown directive");
+            fatal("unknown directive");
         }
         template_putc(t, ch[0]);
         template_eat(t, 1, NULL);
@@ -535,12 +535,12 @@ static void template_block(template_t* t, template_dict_t const* dict)
 static void template_foreach(template_t* t, char const* array_name)
 {
     value_t* value = template_dict_get(&t->value.dict, array_name);
-    assert(value && value->type == template_value_array);
+    expect(value && value->type == template_value_array, "value is not an array");
     template_array_t array = value->array;
     long start = ftell(t->input);
     for (uint64_t i = 0; i != array_size(array.values); i++)
     {
-        assert(array.values[i].type == template_value_dict);
+        expect(array.values[i].type == template_value_dict, "array element is not a dict");
         template_block(t, &array.values[i].dict);
         if (i != array_size(array.values) - 1)
         {

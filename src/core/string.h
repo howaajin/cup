@@ -101,7 +101,7 @@ static inline size_t string_length(char const* str)
 static inline char* string_ensure_space(Allocator* allocator, char* str, size_t old_len, size_t add_len)
 {
     size_t old_capacity = array_capacity(str);
-    assert((old_len == 0 && old_capacity == 0) || old_len < old_capacity);
+    expect((old_len == 0 && old_capacity == 0) || old_len < old_capacity, "string capacity inconsistency");
     size_t new_size = old_len + add_len;
     if (old_capacity < new_size + 1)
     {

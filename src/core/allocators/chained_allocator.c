@@ -1,5 +1,6 @@
 #include "core/allocator.h"
 #include "core/compat_threads.h" // IWYU pragma: keep
+#include "core/macros.h"
 
 #include <assert.h>
 
@@ -28,7 +29,7 @@ static void* chained_allocator_malloc(Allocator* allocator, size_t size)
 {
     ChainedAllocator* chained_allocator = (ChainedAllocator*)allocator;
     ChainedBlock* block = allocator_malloc(chained_allocator->backend, sizeof(ChainedBlock) + size);
-    assert(block);
+    expect(block, "allocation failed");
     block->next = NULL;
     block->prev = NULL;
     mtx_lock(&chained_allocator->mutex);
@@ -47,7 +48,7 @@ static void* chained_allocator_calloc(Allocator* allocator, size_t count, size_t
     ChainedAllocator* chained_allocator = (ChainedAllocator*)allocator;
     size_t num_bytes = count * size + sizeof(ChainedBlock);
     ChainedBlock* block = allocator_calloc(chained_allocator->backend, num_bytes, 1);
-    assert(block);
+    expect(block, "allocation failed");
     block->next = NULL;
     block->prev = NULL;
     mtx_lock(&chained_allocator->mutex);
@@ -67,7 +68,7 @@ static void* chained_allocator_realloc(Allocator* allocator, void* ptr, size_t s
     mtx_lock(&chained_allocator->mutex);
     ChainedBlock* old_block = ptr == NULL ? NULL : (ChainedBlock*)ptr - 1;
     ChainedBlock* new_block = allocator_realloc(chained_allocator->backend, old_block, sizeof(ChainedBlock) + size);
-    assert(new_block);
+    expect(new_block, "reallocation failed");
     if (ptr != NULL)
     {
         if (new_block->prev)

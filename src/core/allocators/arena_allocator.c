@@ -1,4 +1,5 @@
 #include "core/allocator.h"
+#include "core/macros.h"
 
 #include <assert.h>
 #include <stdbool.h>
@@ -29,7 +30,7 @@ static void* arena_malloc(Allocator* allocator, size_t size)
     size_t aligned_offset = (size_t)(aligned_addr - (uintptr_t)arena->buffer);
     if (aligned_offset + size > arena->capacity)
     {
-        assert(false && "Arena overflow!");
+        fatal("Arena overflow!");
         return NULL;
     }
     arena->offset = aligned_offset + size;
@@ -69,14 +70,14 @@ Allocator* allocator_create_arena(void* buffer, size_t buffer_size)
     size_t skip = (size_t)(aligned_addr - addr);
     if (buffer_size <= skip)
     {
-        assert(false && "Buffer too small after alignment");
+        fatal("Buffer too small after alignment");
         return NULL;
     }
     buffer = (void*)aligned_addr;
     buffer_size -= skip;
     if (buffer_size < sizeof(ArenaAllocator))
     {
-        assert(false && "Buffer size is too small");
+        fatal("Buffer size is too small");
         return NULL;
     }
     ArenaAllocator* stack_allocator = buffer;

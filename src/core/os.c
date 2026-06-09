@@ -2,6 +2,7 @@
 #include "core/allocator.h"
 #include "core/path.h"
 #include "core/string.h"
+#include "core/macros.h"
 
 #include <assert.h>
 #include <time.h>
@@ -13,7 +14,7 @@ void os_ensure_dir_existed(char const* path)
     if (dir[0] && !os_file_exists(dir))
     {
         bool check = os_create_directory_tree(dir);
-        assert(check);
+        expect(check, "os_create_directory_tree failed");
     }
 }
 

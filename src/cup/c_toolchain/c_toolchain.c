@@ -415,7 +415,7 @@ void obj_add_link_node(Node* node, Node* other)
     if (node->node_type != NODE_TYPE_FILE ||
         (node->file_type != FILE_TYPE_OBJ && node->file_type != FILE_TYPE_LIB))
     {
-        assert(false && "An object link node can only be a .lib (library) or another .obj (object file).");
+        fatal("An object link node can only be a .lib (library) or another .obj (object file).");
     }
     Obj* obj = (Obj*)node;
     array_push(node_allocator, obj->link_nodes, other);

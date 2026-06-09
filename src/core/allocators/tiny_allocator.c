@@ -1,4 +1,5 @@
 #include "core/allocator.h"
+#include "core/macros.h"
 
 #include <assert.h>
 #include <stdbool.h>
@@ -202,7 +203,7 @@ Allocator* allocator_create_tiny(uint32_t limit, uint32_t size)
 {
     Allocator* backend = allocator_create_chained();
     TinyAllocator* a = allocator_malloc(backend, sizeof(TinyAllocator));
-    assert(a);
+    expect(a, "allocation failed");
     a->backend = backend;
     a->head = tiny_create_node(backend, size);
     a->limit = limit;

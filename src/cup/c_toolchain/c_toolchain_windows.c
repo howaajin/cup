@@ -425,7 +425,7 @@ bool msvc_set_arch_env(ArchitectureType type)
 NotFound:
     ret = false;
 Found:
-    assert(allocator);
+    expect(allocator, "allocator is NULL");
     allocator_destroy(allocator);
     return ret;
 }

@@ -2,8 +2,7 @@
 #include "core/allocator.h"
 #include "core/array.h"
 #include "core/string.h"
-
-#include <assert.h>
+#include "core/macros.h"
 
 struct PathParser
 {
@@ -71,7 +70,7 @@ void* path_backslash_to_slash(char* path)
 
 char const* path_skip_root_name(char const* p)
 {
-    assert(p);
+    expect(p, "p is NULL");
 
     if (*p && *(p + 1) == ':')
     {
@@ -82,7 +81,7 @@ char const* path_skip_root_name(char const* p)
 
 char const* path_skip_root_directory(char const* p)
 {
-    assert(p);
+    expect(p, "p is NULL");
 
     if (*p == '/' || *p == '\\')
     {
@@ -93,7 +92,7 @@ char const* path_skip_root_directory(char const* p)
 
 char const* path_skip_root_path(char const* p)
 {
-    assert(p);
+    expect(p, "p is NULL");
     p = path_skip_root_name(p);
     p = path_skip_root_directory(p);
     return p;
@@ -101,7 +100,7 @@ char const* path_skip_root_path(char const* p)
 
 int path_root_name_length(char const* p)
 {
-    assert(p);
+    expect(p, "p is NULL");
     if (*p && *(p + 1) == ':')
     {
         return 2;
@@ -111,14 +110,14 @@ int path_root_name_length(char const* p)
 
 char* path_root_name(char const* p, Allocator* allocator)
 {
-    assert(p);
+    expect(p, "p is NULL");
     int root_name_len = path_root_name_length(p);
     return string_from_print(allocator, "%.*s", root_name_len, p);
 }
 
 char* path_root_directory(char const* p, Allocator* allocator)
 {
-    assert(p);
+    expect(p, "p is NULL");
     p = path_skip_root_name(p);
     char* root_directory = string_new(allocator, 0, NULL);
     while (*p == '/' || *p == '\\')
@@ -131,7 +130,7 @@ char* path_root_directory(char const* p, Allocator* allocator)
 
 char* path_root_path(char const* p, Allocator* allocator)
 {
-    assert(p);
+    expect(p, "p is NULL");
     Allocator* temp_allocator = allocator_temp();
     char* root_name = path_root_name(p, temp_allocator);
     char* root_dir = path_root_directory(p, temp_allocator);
@@ -141,26 +140,26 @@ char* path_root_path(char const* p, Allocator* allocator)
 
 char const* path_relative_path(char const* p)
 {
-    assert(p);
+    expect(p, "p is NULL");
     return path_skip_root_path(p);
 }
 
 bool path_has_relative_path(char const* p)
 {
-    assert(p);
+    expect(p, "p is NULL");
     char const* relative_path = path_skip_root_path(p);
     return *relative_path;
 }
 
 bool path_is_empty(char const* p)
 {
-    assert(p);
+    expect(p, "p is NULL");
     return *p == 0;
 }
 
 bool path_has_root_name(char const* p)
 {
-    assert(p);
+    expect(p, "p is NULL");
     if (*p && *(p + 1) == ':')
     {
         return true;
@@ -170,7 +169,7 @@ bool path_has_root_name(char const* p)
 
 bool path_has_root_directory(char const* p)
 {
-    assert(p);
+    expect(p, "p is NULL");
     p = path_skip_root_name(p);
     if (*p == '/' || *p == '\\')
     {
@@ -181,9 +180,9 @@ bool path_has_root_directory(char const* p)
 
 void path_parse_root_name(char const* p, struct PathElement* e)
 {
-    assert(p);
-    assert(e);
-    assert(e->allocator);
+    expect(p, "p is NULL");
+    expect(e, "e is NULL");
+    expect(e->allocator, "e->allocator is NULL");
 
     if (*p && *(p + 1) == ':')
     {
@@ -200,9 +199,9 @@ void path_parse_root_name(char const* p, struct PathElement* e)
 
 void path_parse_root_directory(char const* p, struct PathElement* e)
 {
-    assert(p);
-    assert(e);
-    assert(e->allocator);
+    expect(p, "p is NULL");
+    expect(e, "e is NULL");
+    expect(e->allocator, "e->allocator is NULL");
 
     char const* q = p;
     while (*p == '/' || *p == '\\')
@@ -224,9 +223,9 @@ void path_parse_root_directory(char const* p, struct PathElement* e)
 
 void path_parse_relative_path(char const* p, struct PathElement* e, bool with_sep)
 {
-    assert(p);
-    assert(e);
-    assert(e->allocator);
+    expect(p, "p is NULL");
+    expect(e, "e is NULL");
+    expect(e->allocator, "e->allocator is NULL");
 
     e->begin = p;
     while (*p == '/' || *p == '\\')
@@ -277,7 +276,7 @@ void path_parse_relative_path(char const* p, struct PathElement* e, bool with_se
 
 void path_parse(char const* p, struct PathElement** elements, Allocator* allocator)
 {
-    assert(p);
+    expect(p, "p is NULL");
     struct PathElement e = {.allocator = allocator};
     path_parse_root_name(p, &e);
     if (e.type != PATH_ELEMENT_NONE)
@@ -308,7 +307,7 @@ void path_parse(char const* p, struct PathElement** elements, Allocator* allocat
 
 char* path_filename(char const* p, Allocator* allocator)
 {
-    assert(p);
+    expect(p, "p is NULL");
 
     char const* relative_path = path_relative_path(p);
     if (*relative_path == 0)
@@ -326,7 +325,7 @@ char* path_filename(char const* p, Allocator* allocator)
 
 char const* path_extension(char const* path)
 {
-    assert(path);
+    expect(path, "path is NULL");
     char const* relative_path = path_relative_path(path);
     if (*relative_path == 0)
     {
@@ -360,8 +359,8 @@ char const* path_extension(char const* path)
 
 char* path_replace_extension(char const* path, char const* ext, Allocator* allocator)
 {
-    assert(path);
-    assert(ext);
+    expect(path, "path is NULL");
+    expect(ext, "ext is NULL");
 
     char const* p = path_extension(path);
     int len = p - path;
@@ -376,7 +375,7 @@ char* path_replace_extension(char const* path, char const* ext, Allocator* alloc
 
 char* path_stem(char const* path, Allocator* allocator)
 {
-    assert(path);
+    expect(path, "path is NULL");
 
     Allocator* temp_allocator = allocator_temp();
     char* filename = path_filename(path, temp_allocator);
@@ -556,8 +555,8 @@ char* path_lexically_normal(char const* path, Allocator* allocator)
 
 char* path_lexically_relative(char const* path, char const* base, Allocator* allocator)
 {
-    assert(path);
-    assert(base);
+    expect(path, "path is NULL");
+    expect(base, "base is NULL");
     // Guess the path separator based on the path and base
     char sep = path_guess_sep(path);
     if (!sep)
@@ -642,7 +641,7 @@ char* path_lexically_relative(char const* path, char const* base, Allocator* all
 
 char* path_combine(Allocator* allocator, char const* path, ...)
 {
-    assert(path);
+    expect(path, "path is NULL");
     char sep = path_guess_sep(path);
     if (!sep)
     {
@@ -752,7 +751,7 @@ PathParser* path_create_parser_with_status(char const* path, PathParseStatus sta
 
 char* path_next_element(PathParser* parser)
 {
-    assert(parser && parser->cursor);
+    expect(parser && parser->cursor, "parser or parser->cursor is NULL");
 
     struct PathElement e;
     e.allocator = parser->allocator;

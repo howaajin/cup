@@ -2,6 +2,7 @@
 
 #include "cup/node.h"
 
+#include "core/macros.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -30,7 +31,7 @@ static inline char const* get_toolchain_string(ToolchainType toolchain_type)
     case TOOLCHAIN_TYPE_LLVM: return "llvm";
     case TOOLCHAIN_TYPE_ZIG: return "zig";
     case TOOLCHAIN_TYPE_GCC: return "gcc";
-    default: assert(false); return NULL;
+    default: fatal("unreachable"); return NULL;
     }
 }
 

@@ -1,11 +1,13 @@
 #include "cup/executor/executor_windows.h"
 #include "core/allocator.h"
 #include "core/codecvt.h"
+#include "core/macros.h"
 #include "core/os.h"
 #include "core/string.h"
 #include "cup/executor/executor.h"
 #include "cup/fmt.h"
 
+#include "core/macros.h"
 #include <assert.h>
 
 void executor_force_kill_task(ExecutorSlot* slot)
@@ -43,7 +45,7 @@ void executor_force_kill_task(ExecutorSlot* slot)
 void executor_platform_init(Executor* executor)
 {
     executor->iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-    assert(executor->iocp != NULL);
+    expect(executor->iocp != NULL, "failed to create IO completion port");
     wchar_t* env = os_get_default_env();
     executor_set_default_env(executor, env);
 }
@@ -96,7 +98,7 @@ static HANDLE executor_create_pipe_pair(ReadPipeContext* ctx)
         0,
         NULL);
 
-    assert(read_pipe != INVALID_HANDLE_VALUE);
+    expect(read_pipe != INVALID_HANDLE_VALUE, "failed to create named pipe");
 
     HANDLE write_pipe = CreateFileA(
         pipe_name,
@@ -107,7 +109,7 @@ static HANDLE executor_create_pipe_pair(ReadPipeContext* ctx)
         0,
         NULL);
 
-    assert(write_pipe != INVALID_HANDLE_VALUE);
+    expect(write_pipe != INVALID_HANDLE_VALUE, "failed to open named pipe");
 
     ctx->read_pipe_handle = read_pipe;
     return write_pipe;
@@ -129,7 +131,7 @@ static void executor_read_pipe(ReadPipeContext* ctx)
         }
         else
         {
-            assert(last_error == ERROR_IO_PENDING);
+            expect(last_error == ERROR_IO_PENDING, "unexpected pipe read error");
         }
     }
 }
@@ -145,7 +147,7 @@ static HANDLE executor_init_read_pipe_context(ReadPipeContext* ctx, HANDLE iocp,
 
     if (!CreateIoCompletionPort(ctx->read_pipe_handle, iocp, key, 0))
     {
-        assert(false && "CreateIoCompletionPort failed!\n");
+        fatal("CreateIoCompletionPort failed!\n");
     }
 
     executor_read_pipe(ctx);
@@ -168,7 +170,7 @@ static HANDLE executor_create_nul_file()
         NULL);
     if (nul == INVALID_HANDLE_VALUE)
     {
-        assert(false && "couldn't open nul");
+        fatal("couldn't open nul");
     }
     return nul;
 }
@@ -364,7 +366,7 @@ Task* executor_update(Executor* executor)
         OVERLAPPED* overlapped;
         if (!GetQueuedCompletionStatus(executor->iocp, &bytes_read, &key, &overlapped, INFINITE))
         {
-            assert(GetLastError() == ERROR_BROKEN_PIPE);
+            expect(GetLastError() == ERROR_BROKEN_PIPE, "GetQueuedCompletionStatus failed");
         }
         ExecutorSlot* slot = (ExecutorSlot*)key;
         executor_update_slot(slot, overlapped);

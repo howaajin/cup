@@ -38,7 +38,7 @@ bool os_file_exists(char const* path)
 char* os_get_cwd(Allocator* allocator)
 {
     char* p = getcwd(NULL, 0);
-    assert(p);
+    expect(p, "getcwd returned NULL");
     char* cwd = string_from_c_str(allocator, p);
     free(p);
     return cwd;

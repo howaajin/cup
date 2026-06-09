@@ -8,6 +8,7 @@
 #include "cup/fmt.h"
 #include "cup/node.h"
 
+#include "core/macros.h"
 #include <assert.h>
 #include <stdbool.h>
 
@@ -47,7 +48,7 @@ static char* get_compile_commands_string(Node* cmd, Allocator* allocator)
     for (uint64_t i = 0; i != array_size(nodes); i++)
     {
         Node* node = nodes[i];
-        assert(node->node_type == NODE_TYPE_VIRTUAL && node->virtual_ext_type == VIRTUAL_EXT_TYPE_MAKE_COMPILE_CMDLINE);
+        expect(node->node_type == NODE_TYPE_VIRTUAL && node->virtual_ext_type == VIRTUAL_EXT_TYPE_MAKE_COMPILE_CMDLINE, "node is not a MAKE_COMPILE_CMDLINE virtual node");
         CompileCmdline* cmdline = (CompileCmdline*)node;
         CCompileCmd* compile_cmd = cmdline->cmd;
         char const* cmd_str = gen_compile_commands_json_escape(compile_cmd->cmdline, temp_allocator);

@@ -1,6 +1,7 @@
 #include "cup/executor/executor_linux.h"
 #include "cup/executor/executor.h"
 
+#include "core/macros.h"
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -72,7 +73,7 @@ void executor_update_process(ExecutorSlot* slot, struct epoll_event* e, ReadPipe
         pid_t pid = waitpid(slot->pid, &status, 0);
         if (pid == -1)
         {
-            assert(false && "waitpid failed");
+            fatal("waitpid failed");
         }
         slot->task->exit_code = WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_FAILURE;
         slot->b_finished = true;
@@ -179,11 +180,11 @@ void executor_execute_slot_thread(ExecutorSlot* slot)
 {
     ExecutorSlot* s = (ExecutorSlot*)slot;
     s->event_fd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
-    assert(s->event_fd != -1);
+    expect(s->event_fd != -1, "eventfd creation failed");
     struct epoll_event e = {.events = EPOLLIN, .data = {.ptr = &s->ctx_thread}};
     if (epoll_ctl(slot->epoll_fd, EPOLL_CTL_ADD, s->event_fd, &e) == -1)
     {
-        assert(false);
+        fatal("epoll_ctl ADD failed");
     }
     pthread_create(&s->thread_id, NULL, executor_callback_thread_warpper, s);
 }
@@ -242,7 +243,7 @@ void executor_execute_slot_process(ExecutorSlot* slot)
 
 void executor_force_kill_task_process(ExecutorSlot* slot)
 {
-    assert(slot->task);
+    expect(slot->task, "slot->task is NULL");
     if (slot->read_stdout_ctx.read_pipe != -1)
     {
         close(slot->read_stdout_ctx.read_pipe);
@@ -262,7 +263,7 @@ void executor_force_kill_task_process(ExecutorSlot* slot)
 
 void executor_force_kill_task_thread(ExecutorSlot* slot)
 {
-    assert(slot->task);
+    expect(slot->task, "slot->task is NULL");
     if (slot->event_fd != -1)
     {
         int result = epoll_ctl(slot->epoll_fd, EPOLL_CTL_DEL, slot->event_fd, NULL);
@@ -295,5 +296,5 @@ void executor_force_kill_task(ExecutorSlot* slot)
 
 void executor_set_task_env_block(Task* task, wchar_t* env_block)
 {
-    assert(false && "Not implemented on Linux.");
+    fatal("Not implemented on Linux.");
 }

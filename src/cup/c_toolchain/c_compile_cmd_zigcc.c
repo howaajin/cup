@@ -3,6 +3,7 @@
 #include "cup/c_toolchain/c_compile_cmd.h"
 #include "cup/node.h"
 
+#include "core/macros.h"
 #include <assert.h>
 
 void c_compile_cmd_prepare_llvm(Node* node, CCompileCmd* cmd);
@@ -129,6 +130,6 @@ void compile_cmdline_node_make_cmdline_zigcc(CompileCmdline* compile_cmdline)
     }
     else
     {
-        assert(false);
+        fatal("unreachable");
     }
 }

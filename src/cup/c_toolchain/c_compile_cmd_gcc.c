@@ -6,6 +6,7 @@
 #include "cup/fmt.h"
 #include "cup/node.h"
 
+#include "core/macros.h"
 #include <assert.h>
 
 extern Allocator* node_allocator;
@@ -114,7 +115,7 @@ void compile_cmdline_node_make_cmdline_gcc(CompileCmdline* compile_cmdline)
     }
     else
     {
-        assert(false);
+        fatal("unreachable");
     }
 }
 

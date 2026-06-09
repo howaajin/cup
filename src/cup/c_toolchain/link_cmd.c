@@ -11,6 +11,8 @@
 #include "cup/fmt.h"
 #include "cup/node.h"
 
+#include "core/macros.h"
+
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -386,7 +388,7 @@ static char const* link_cmd_get_linker_gcc_llvm_zig(LinkCmd* cmd, ToolchainType 
             return "zig cc";
         }
     }
-    assert(false);
+    fatal("unreachable");
     return NULL;
 }
 
@@ -402,7 +404,7 @@ static char const* link_cmd_get_linker(LinkCmd* cmd)
         {
             return link_cmd_get_linker_gcc_llvm_zig(cmd, cmd->toolchain);
         }
-        assert(false && "Unknown linker");
+        fatal("Unknown linker");
     }
     else if (cmd->toolchain == TOOLCHAIN_TYPE_MSVC)
     {
@@ -412,7 +414,7 @@ static char const* link_cmd_get_linker(LinkCmd* cmd)
     {
         return link_cmd_get_linker_gcc_llvm_zig(cmd, cmd->toolchain);
     }
-    assert(false);
+    fatal("unreachable");
     return NULL;
 }
 
@@ -758,7 +760,7 @@ static bool link_cmd_check_dirty(Node* node)
 
 Node* link_cmd_create(Node* output, char const* file, int line)
 {
-    assert(output->build_cmd == NULL);
+    expect(output->build_cmd == NULL, "output already has a build command");
     uint32_t node_type = node_make_cmd_type(CMD_TYPE_EXECUTABLE, C_CMD_LINK);
     Node* cmd = node_create(node_type, fmt("link: {:n}", output), sizeof(LinkCmd));
     LinkCmd* link = (LinkCmd*)cmd;

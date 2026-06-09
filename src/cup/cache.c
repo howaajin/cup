@@ -214,7 +214,7 @@ OpenLog:
         c->b_needs_compaction = true;
     }
     c->log_file = os_fopen(path, "ab");
-    assert(c->log_file);
+    expect(c->log_file, "cache log file is NULL");
     fseek(c->log_file, 0, SEEK_END);
     if (c->log_file && ftell(c->log_file) == 0)
     {
@@ -381,7 +381,7 @@ void cache_merge_cmd_record(Cache* c, CacheRecordCmd const* cmd)
     cache_copy_cmd_record(c->allocator, record, cmd);
     bool b_existed = false;
     i = hash_insert_check(h, record->name, &b_existed);
-    assert(!b_existed);
+    expect(!b_existed, "cache record already existed");
     hash_key(h, i) = record->name;
     hash_value(h, i) = record;
 }

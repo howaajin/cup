@@ -524,7 +524,7 @@ ENTRY(build_cup_res)
         {
             rc_name = "zig rc";
         }
-        assert(rc_name);
+        expect(rc_name, "rc_name is NULL");
         extern ToolchainType self_build_toolchain;
         Node* cmd = CMD(rc_name);
         Node* env = get_toolchain_env_node(self_build_toolchain, get_self_build_arch());

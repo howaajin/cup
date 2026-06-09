@@ -193,7 +193,7 @@ static char* vcxproj_sln_guid_from_file(char const* path, Allocator* allocator)
     char* result = NULL;
     Allocator* arena_allocator = allocator_create_chained();
     FILE* fs = os_fopen(path, "rt");
-    assert(fs);
+    expect(fs, "fs is NULL");
     char tag[] = "SolutionGuid";
     uint64_t tag_len = sizeof(tag) - 1;
     bool found = false;

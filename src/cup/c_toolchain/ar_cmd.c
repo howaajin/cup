@@ -29,7 +29,7 @@ static char const* get_ar_name()
     }
     if (default_toolchain == TOOLCHAIN_TYPE_GCC) return "ar rcs";
     if (default_toolchain == TOOLCHAIN_TYPE_ZIG) return "zig ar rcs";
-    assert(false && "unknown toolchain");
+    fatal("unknown toolchain");
     return NULL;
 }
 
@@ -79,7 +79,7 @@ static void ar_cmd_prepare(Node* node)
 
 Node* ar_cmd_create(Node* output, char const* file, int line)
 {
-    assert(output->build_cmd == NULL);
+    expect(output->build_cmd == NULL, "output already has a build command");
     uint32_t node_type = node_make_cmd_type(CMD_TYPE_EXECUTABLE, C_CMD_AR);
     Node* cmd = node_create(node_type, NULL, sizeof(ArCmd));
     ArCmd* ar_cmd = (ArCmd*)cmd;
