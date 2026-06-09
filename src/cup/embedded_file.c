@@ -1,6 +1,7 @@
 #include "cup/embedded_file.h"
 #include "core/allocator.h"
 #include "core/codecvt.h"
+#include "core/macros.h"
 #include "core/os.h"
 
 #include <stdlib.h>
@@ -17,6 +18,7 @@ static int gen_embedded_files_cb(Node* node)
         return EXIT_FAILURE;
     }
     uint8_t* buf = allocator_malloc(allocator_temp(), *e->size);
+    expect(buf, "allocation failed");
     int n = base64_decode(e->base64, strlen(e->base64), buf, *e->size);
     fwrite(buf, 1, n, file);
     fclose(file);

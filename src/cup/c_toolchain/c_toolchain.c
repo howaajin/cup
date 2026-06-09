@@ -300,6 +300,7 @@ void add_build_script(char const* path)
     if (build_scripts == NULL)
     {
         build_scripts = allocator_calloc(node_allocator, 1, sizeof(StringSet));
+        expect(build_scripts, "allocation failed");
         build_scripts->allocator = node_allocator;
     }
     path = string_from_c_str(node_allocator, path);

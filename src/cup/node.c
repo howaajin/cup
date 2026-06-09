@@ -58,6 +58,7 @@ void init_node(void)
 {
     node_allocator = allocator_create_tiny(4096, 4096 * 4096);
     hash_name_to_node = allocator_calloc(node_allocator, 1, sizeof(StringPtrHash));
+    expect(hash_name_to_node, "allocation failed");
     hash_name_to_node->allocator = node_allocator;
 }
 

@@ -16,6 +16,7 @@ static const uint32_t CACHE_VERSION = 2;
 Cache* cache_create(Allocator* allocator)
 {
     Cache* c = allocator_calloc(allocator, 1, sizeof(Cache));
+    expect(c, "allocation failed");
     c->allocator = allocator;
     cache_init_hash(c->hash_string_to_id);
     cache_init_hash(c->hash_path_to_input_file_record);
@@ -328,6 +329,7 @@ static CacheRecordFile* cache_merge_file_record(Cache* c, char const* path, Stri
         return hash_value(h, i);
     }
     CacheRecordFile* record = allocator_calloc(c->allocator, 1, sizeof(CacheRecordFile));
+    expect(record, "allocation failed");
     record->id = cache_get_or_insert_string(c, path);
     hash_key(h, i) = c->strings[record->id];
     hash_value(h, i) = record;
@@ -378,6 +380,7 @@ void cache_merge_cmd_record(Cache* c, CacheRecordCmd const* cmd)
     }
 
     CacheRecordCmd* record = allocator_calloc(c->allocator, 1, sizeof(CacheRecordCmd));
+    expect(record, "allocation failed");
     cache_copy_cmd_record(c->allocator, record, cmd);
     bool b_existed = false;
     i = hash_insert_check(h, record->name, &b_existed);
@@ -431,6 +434,7 @@ void cache_merge_cpp_module_record(Cache* c, CacheRecordCppModule const* module)
     if (!b_existed)
     {
         record = allocator_calloc(c->allocator, 1, sizeof(CacheRecordCppModule));
+        expect(record, "allocation failed");
         hash_value(h, i) = record;
     }
     cache_copy_cpp_module_record(c->allocator, record, module);
@@ -479,6 +483,7 @@ void cache_merge_test_exe_record(Cache* c, CacheRecordTestExe const* exe)
     if (!b_existed)
     {
         record = allocator_calloc(c->allocator, 1, sizeof(CacheRecordTestExe));
+        expect(record, "allocation failed");
         hash_value(h, i) = record;
     }
     cache_copy_test_exe_record(c->allocator, record, exe);

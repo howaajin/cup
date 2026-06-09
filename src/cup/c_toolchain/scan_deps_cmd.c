@@ -20,6 +20,7 @@ static StringPtrHash* get_default_module_mapper()
     if (module_mapper == NULL)
     {
         module_mapper = allocator_calloc(node_allocator, 1, sizeof(StringPtrHash));
+        expect(module_mapper, "allocation failed");
         module_mapper->allocator = node_allocator;
     }
     return module_mapper;

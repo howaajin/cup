@@ -143,6 +143,7 @@ Allocator* allocator_create_chained(void)
 {
     Allocator* c_allocator = allocator_c();
     ChainedAllocator* allocator = allocator_malloc(c_allocator, sizeof(ChainedAllocator));
+    expect(allocator, "allocation failed");
     *allocator = (ChainedAllocator){
         .malloc = chained_allocator_malloc,
         .calloc = chained_allocator_calloc,

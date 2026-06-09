@@ -31,6 +31,7 @@ Dylib* dylib_load(char const* name)
         name = string_from_c_str(ca, name);
     }
     Dylib* lib = allocator_malloc(ca, sizeof(Dylib));
+    expect(lib, "allocation failed");
     lib->handle = handle;
     lib->name = name;
     return lib;

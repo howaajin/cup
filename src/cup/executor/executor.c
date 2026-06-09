@@ -23,8 +23,10 @@ void executor_platform_set_slot(Executor* executor, uint32_t slot_id, Task* task
 Executor* executor_create(Allocator* allocator, size_t num_slots)
 {
     Executor* executor = allocator_calloc(allocator, 1, sizeof(Executor));
+    expect(executor, "allocation failed");
     executor->allocator = allocator;
     executor->slots = allocator_calloc(allocator, num_slots, sizeof(ExecutorSlot));
+    expect(executor->slots, "allocation failed");
     executor->num_slots = num_slots;
     executor->num_running_tasks = 0;
     executor->pending_tasks = NULL;
@@ -166,6 +168,7 @@ void executor_add_task(Executor* executor, Task* task)
 Task* executor_create_thread_task(Executor* executor, int (*fn)(Task*, void*), void* ctx)
 {
     Task* task = allocator_calloc(executor->allocator, 1, sizeof(Task));
+    expect(task, "allocation failed");
     task->thread_fn = fn;
     task->ctx = ctx;
     task->b_thread = true;
@@ -175,6 +178,7 @@ Task* executor_create_thread_task(Executor* executor, int (*fn)(Task*, void*), v
 Task* executor_create_process_task(Executor* executor, char const* cmdline)
 {
     Task* task = allocator_calloc(executor->allocator, 1, sizeof(Task));
+    expect(task, "allocation failed");
     task->cmdline = string_from_c_str(executor->allocator, cmdline);
     task->b_thread = false;
     task->exit_code = EXIT_FAILURE;

@@ -238,8 +238,10 @@ Node* c_compile_cmd_create(Node* input, Node* out_obj, char const* file, int lin
         SourceType source_type = get_source_type(input->path);
         cmd->toolchain = default_toolchain;
         cmd->includes = allocator_calloc(node_allocator, 1, sizeof(StringSet));
+        expect(cmd->includes, "allocation failed");
         cmd->includes->allocator = node_allocator;
         cmd->defines = allocator_calloc(node_allocator, 1, sizeof(StringSet));
+        expect(cmd->defines, "allocation failed");
         cmd->defines->allocator = node_allocator;
         cmd->src = input;
         cmd->out_obj = out_obj;

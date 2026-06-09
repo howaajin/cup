@@ -78,6 +78,7 @@ static inline void array_reserve_impl(Allocator* allocator, void** ptr, size_t i
     size_t bytes = n * item_size + sizeof(Array);
     Array* h = *ptr ? array_header(*ptr) : NULL;
     h = allocator_realloc(allocator, h, bytes);
+    expect(h, "allocation failed");
     h->capacity = n;
     if (!*ptr) h->size = 0;
     *ptr = h + 1;

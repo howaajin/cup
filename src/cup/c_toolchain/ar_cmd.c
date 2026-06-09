@@ -86,6 +86,7 @@ Node* ar_cmd_create(Node* output, char const* file, int line)
     ar_cmd->toolchain = default_toolchain;
     ar_cmd->output = output;
     ar_cmd->set_inputs = allocator_calloc(node_allocator, 1, sizeof(Set));
+    expect(ar_cmd->set_inputs, "allocation failed");
     ar_cmd->set_inputs->allocator = node_allocator;
     ar_cmd->prepare = ar_cmd_prepare;
     cmd_set_source_location(cmd, file, line);

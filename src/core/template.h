@@ -89,6 +89,7 @@ static void template_array_init(value_t* array, Allocator* allocator)
 static template_t* template_create(Allocator* allocator)
 {
     template_t* t = allocator_calloc(allocator, 1, sizeof(template_t));
+    expect(t, "allocation failed");
     t->allocator = allocator;
     template_dict_init(&t->value, allocator);
     return t;

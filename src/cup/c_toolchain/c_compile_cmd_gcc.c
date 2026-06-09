@@ -186,6 +186,7 @@ static Node* module_mapper_gen_cmd_create(Node* output, CCompileCmd* cmd)
     char const* name = fmt("gen: {:n}", output);
     Node* node = node_create(type, name, sizeof(Node));
     ModuleMapper* mapper = allocator_calloc(node_allocator, 1, sizeof(ModuleMapper));
+    expect(mapper, "allocation failed");
     mapper->cmd = cmd;
     mapper->file = output;
     node->extra_data = mapper;

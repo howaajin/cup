@@ -54,6 +54,7 @@ void init_var(void)
     }
 
     variables = allocator_calloc(allocator_c(), 1, sizeof(StringPtrHash));
+    expect(variables, "allocation failed");
     variables->allocator = allocator_c();
     struct
     {

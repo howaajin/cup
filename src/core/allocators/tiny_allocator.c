@@ -35,6 +35,7 @@ struct TinyAllocator
 static TinyNode* tiny_create_node(Allocator* backend, size_t size)
 {
     TinyNode* node = allocator_malloc(backend, size + sizeof(TinyNode));
+    expect(node, "allocation failed");
     node->p = node->buffer;
     node->next = NULL;
     node->size = size ? size : 1;
@@ -164,6 +165,7 @@ Loop:
             node->p = node->buffer;
         }
         void* result = allocator_malloc(a->backend, size);
+        expect(result, "allocation failed");
         TinyBlock* old_block = (TinyBlock*)ptr - 1;
         size_t copy_size = old_block->size;
         if (copy_size > size) copy_size = size;

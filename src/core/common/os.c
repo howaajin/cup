@@ -221,6 +221,7 @@ LockFileContext* os_lock_file(char const* path, Allocator* allocator, bool b_sha
     }
 
     LockFileContextLinux* ctx = allocator_calloc(allocator, 1, sizeof(LockFileContextLinux));
+    expect(ctx, "allocation failed");
     ctx->fd = fd;
     ctx->allocator = allocator;
     ctx->file = fdopen(fd, "w+");

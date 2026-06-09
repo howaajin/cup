@@ -279,6 +279,7 @@ LockFileContext* os_lock_file(char const* path, Allocator* allocator, bool b_sha
         return NULL;
     }
     LockFileContextWindows* ctx = allocator_calloc(allocator, 1, sizeof(LockFileContextWindows));
+    expect(ctx, "allocation failed");
     ctx->handle = handle;
     DWORD lock_flags = b_shared ? 0 : LOCKFILE_EXCLUSIVE_LOCK;
     BOOL lock_result = LockFileEx(

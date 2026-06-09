@@ -31,6 +31,7 @@ Directory* directory_open(const char* path, Allocator* allocator)
     wchar_t* wpath = utf8_to_wchars(temp_allocator, buffer);
 
     Directory* dir = allocator_malloc(allocator, sizeof(Directory));
+    expect(dir, "allocation failed");
     dir->allocator = allocator;
     dir->handle = FindFirstFileW(wpath, &dir->find_data);
     if (dir->handle == INVALID_HANDLE_VALUE)

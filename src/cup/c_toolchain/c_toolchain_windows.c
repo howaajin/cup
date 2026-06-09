@@ -380,6 +380,7 @@ static bool msvc_gen_env_file_check_dirty(Node* cmd)
             goto Dirty;
         }
         char* old_str = allocator_malloc(allocator, num_bytes);
+        expect(old_str, "allocation failed");
         n = fread(old_str, 1, num_bytes, file);
         if (n != num_bytes || memcmp(p, old_str, num_bytes) != 0)
         {

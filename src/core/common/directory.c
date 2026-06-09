@@ -21,6 +21,7 @@ Directory* directory_open(const char* path, Allocator* allocator)
     if (d)
     {
         Directory* directory = allocator_malloc(allocator, sizeof(Directory));
+        expect(directory, "allocation failed");
         directory->allocator = allocator;
         directory->dir = d;
         directory->current_entry.name = string_from_c_str(allocator, "");

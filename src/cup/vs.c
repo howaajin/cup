@@ -79,16 +79,22 @@ static Vcxproj* vcxproj_create(
     char const** debugger_args)
 {
     Vcxproj* p = allocator_calloc(allocator, 1, sizeof(Vcxproj));
+    expect(p, "allocation failed");
     p->allocator = allocator;
     p->hash_set_files = allocator_calloc(allocator, 1, sizeof(StringSet));
+    expect(p->hash_set_files, "allocation failed");
     p->hash_set_files->allocator = allocator;
     p->hash_set_defines = allocator_calloc(allocator, 1, sizeof(StringSet));
+    expect(p->hash_set_defines, "allocation failed");
     p->hash_set_defines->allocator = allocator;
     p->hash_set_includes = allocator_calloc(allocator, 1, sizeof(StringSet));
+    expect(p->hash_set_includes, "allocation failed");
     p->hash_set_includes->allocator = allocator;
     p->hash_source_to_defines = allocator_calloc(allocator, 1, sizeof(StringPtrHash));
+    expect(p->hash_source_to_defines, "allocation failed");
     p->hash_source_to_defines->allocator = allocator;
     p->hash_source_to_includes = allocator_calloc(allocator, 1, sizeof(StringPtrHash));
+    expect(p->hash_source_to_includes, "allocation failed");
     p->hash_source_to_includes->allocator = allocator;
     p->name = name;
     p->path = path;
@@ -414,6 +420,7 @@ void vcxproj_add_define_for_source(Vcxproj* project, char const* source, char co
     if (!b_existed)
     {
         defines = allocator_calloc(project->allocator, 1, sizeof(StringSet));
+        expect(defines, "allocation failed");
         defines->allocator = project->allocator;
         hash_value(project->hash_source_to_defines, index) = defines;
     }
@@ -437,6 +444,7 @@ void vcxproj_add_include_dir_for_source(Vcxproj* project, char const* source, ch
     if (!b_existed)
     {
         includes = allocator_calloc(project->allocator, 1, sizeof(StringSet));
+        expect(includes, "allocation failed");
         includes->allocator = project->allocator;
         hash_value(project->hash_source_to_includes, index) = includes;
     }
@@ -988,10 +996,13 @@ static SlnFile* sln_from_graph(Allocator* allocator)
 {
     Hash hash_node_to_vcxproj = {.allocator = allocator};
     SlnFile* sln = allocator_calloc(allocator, 1, sizeof(SlnFile));
+    expect(sln, "allocation failed");
     sln->allocator = allocator;
     sln->hash_folder_path_to_guid = allocator_calloc(allocator, 1, sizeof(StringPtrHash));
+    expect(sln->hash_folder_path_to_guid, "allocation failed");
     sln->hash_folder_path_to_guid->allocator = allocator;
     sln->hash_folder_to_parent_guid = allocator_calloc(allocator, 1, sizeof(StringPtrHash));
+    expect(sln->hash_folder_to_parent_guid, "allocation failed");
     sln->hash_folder_to_parent_guid->allocator = allocator;
     Node** nodes = get_all_nodes();
     for (size_t i = 0; i != array_size(nodes); i++)
@@ -1083,6 +1094,7 @@ static VcxprojFilter* vcxproj_add_parent_filters(StringPtrHash* filters, char co
         if (!b_existed)
         {
             filter = allocator_malloc(allocator, sizeof(VcxprojFilter));
+            expect(filter, "allocation failed");
             filter->guid = os_create_guid(allocator, true);
             filter->path = string_from_c_str(allocator, path);
             filter->name = string_from_c_str(allocator, path);

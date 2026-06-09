@@ -11,11 +11,15 @@ extern Allocator* node_allocator;
 Graph* graph_create(Allocator* allocator, Node** targets, size_t num_targets)
 {
     Graph* graph = allocator_calloc(allocator, 1, sizeof(Graph));
+    expect(graph, "allocation failed");
     graph->allocator = allocator;
     graph->sources = NULL;
     graph->hash_node_to_next_set = allocator_calloc(allocator, 1, sizeof(PtrHash));
+    expect(graph->hash_node_to_next_set, "allocation failed");
     graph->hash_node_to_prev_set = allocator_calloc(allocator, 1, sizeof(PtrHash));
+    expect(graph->hash_node_to_prev_set, "allocation failed");
     graph->hash_node_to_b_finished = allocator_calloc(allocator, 1, sizeof(PtrHash));
+    expect(graph->hash_node_to_b_finished, "allocation failed");
     graph->hash_node_to_next_set->allocator = allocator;
     graph->hash_node_to_prev_set->allocator = allocator;
     graph->hash_node_to_b_finished->allocator = allocator;
@@ -55,6 +59,7 @@ static PtrHash* graph_get_node_next_set(Graph* graph, Node* node)
     if (next_set == NULL)
     {
         next_set = allocator_calloc(graph->allocator, 1, sizeof(PtrHash));
+        expect(next_set, "allocation failed");
         next_set->allocator = graph->allocator;
         hash_value(graph->hash_node_to_next_set, i) = next_set;
     }
@@ -68,6 +73,7 @@ static PtrHash* graph_get_node_prev_set(Graph* graph, Node* node)
     if (prev_set == NULL)
     {
         prev_set = allocator_calloc(graph->allocator, 1, sizeof(PtrHash));
+        expect(prev_set, "allocation failed");
         prev_set->allocator = graph->allocator;
         hash_value(graph->hash_node_to_prev_set, i) = prev_set;
     }

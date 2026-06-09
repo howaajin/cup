@@ -28,6 +28,7 @@ char const* json_object(char const* p, JsonValue* v, Allocator* allocator)
 {
     *v = (JsonValue){.type = JSON_TYPE_OBJECT};
     v->object.hash_name_to_index = allocator_calloc(allocator, 1, sizeof(StringHash));
+    expect(v->object.hash_name_to_index, "allocation failed");
     v->object.hash_name_to_index->allocator = allocator;
 
     p += 1;

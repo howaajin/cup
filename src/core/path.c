@@ -734,6 +734,7 @@ char* path_windows_style_to_linux_relative(char const* path, Allocator* allocato
 PathParser* path_create_parser(char const* path, Allocator* allocator)
 {
     PathParser* parser = allocator_malloc(allocator, sizeof(PathParser));
+    expect(parser, "allocation failed");
     parser->allocator = allocator;
     parser->cursor = path;
     parser->status = PARSE_STATUS_BEGIN;
@@ -743,6 +744,7 @@ PathParser* path_create_parser(char const* path, Allocator* allocator)
 PathParser* path_create_parser_with_status(char const* path, PathParseStatus status, Allocator* allocator)
 {
     PathParser* parser = allocator_malloc(allocator, sizeof(PathParser));
+    expect(parser, "allocation failed");
     parser->allocator = allocator;
     parser->cursor = path;
     parser->status = status;
