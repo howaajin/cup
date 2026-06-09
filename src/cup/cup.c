@@ -431,12 +431,12 @@ static int build(Graph* graph)
     int exit_code = EXIT_SUCCESS;
     size_t fail_count = 0;
     Allocator* allocator = allocator_create_tiny(4096, 4096 * 64);
-    size_t num_jobs = max_jobs;
-    if (num_jobs == 0)
+    size_t num_task_slots = max_jobs;
+    if (num_task_slots == 0)
     {
-        num_jobs = os_get_cpu_count();
+        num_task_slots = os_get_cpu_count();
     }
-    Executor* executor = executor_create(allocator, num_jobs);
+    Executor* executor = executor_create(allocator, num_task_slots);
     while (true)
     {
         allocator_reset_temp();
@@ -1393,11 +1393,6 @@ int execute(void)
         return 0;
     }
     init_cache();
-    if (b_clean)
-    {
-        clean();
-        return 0;
-    }
     invoke_entries();
     int exit_code;
     if (b_test_enabled)
