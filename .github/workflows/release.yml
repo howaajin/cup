@@ -106,20 +106,23 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+  
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: _artifacts
-
+      - name: Set GH repo context
+        run: gh repo set-default "$GITHUB_REPOSITORY"
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Ensure release exists
         run: |
           gh release view "$TAG" >/dev/null 2>&1 || \
           gh release create "$TAG" --notes ""
-
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.inputs.tag }}
-
       - name: Upload release assets
         run: |
           gh release upload "$TAG" --clobber \
