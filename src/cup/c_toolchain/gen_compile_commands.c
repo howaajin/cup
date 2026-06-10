@@ -12,8 +12,6 @@
 #include <assert.h>
 #include <stdbool.h>
 
-extern Allocator* node_allocator;
-
 bool b_generate_compile_commands = true;
 char const* compile_commands_json_path = NULL;
 
@@ -81,7 +79,7 @@ static bool gen_compile_commands_check_dirty(Node* cmd)
     }
     char const* path = cmd->outputs[0]->path;
     Allocator* temp_allocator = allocator_create_chained();
-    char* result = get_compile_commands_string(cmd, node_allocator);
+    char* result = get_compile_commands_string(cmd, allocator_c());
     char* old_content = os_read_all(temp_allocator, path);
     bool b_dirty = false;
     if (old_content == NULL || !string_equal(old_content, result))
@@ -91,7 +89,7 @@ static bool gen_compile_commands_check_dirty(Node* cmd)
     }
     else
     {
-        array_free(node_allocator, result);
+        array_free(allocator_c(), result);
     }
     allocator_destroy(temp_allocator);
     return b_dirty;
@@ -107,10 +105,10 @@ static int gen_compile_commands_thread_fn(Node* cmd)
     }
     else
     {
-        compdb = get_compile_commands_string(cmd, node_allocator);
+        compdb = get_compile_commands_string(cmd, allocator_c());
     }
     os_write_all(path, compdb, array_size(compdb));
-    array_free(node_allocator, compdb);
+    array_free(allocator_c(), compdb);
     return EXIT_SUCCESS;
 }
 
