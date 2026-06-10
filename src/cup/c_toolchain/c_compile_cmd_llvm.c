@@ -15,7 +15,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-extern Allocator* node_allocator;
 extern ToolchainType default_toolchain;
 
 void compile_cmdline_node_append_string_set_options(Node* node, char const* option, StringSet* set, OptionType option_type);

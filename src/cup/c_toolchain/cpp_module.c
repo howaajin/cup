@@ -11,7 +11,6 @@
 
 #include <assert.h>
 
-extern Allocator* node_allocator;
 extern ToolchainType default_toolchain;
 
 char const* msvc_find_std_module_source(bool b_compat);

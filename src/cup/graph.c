@@ -6,8 +6,6 @@
 
 extern Node** nodes;
 
-extern Allocator* node_allocator;
-
 Graph* graph_create(Allocator* allocator, Node** targets, size_t num_targets)
 {
     Graph* graph = allocator_calloc(allocator, 1, sizeof(Graph));
