@@ -322,10 +322,6 @@ static char const* link_cmd_get_out_option(LinkerType linker_type)
     {
         return "/out:";
     }
-    if (linker_type == LINKER_LLVM_LINK || (CURRENT_PLATFORM == PLATFORM_WINDOWS && linker_type == LINKER_LLVM_LLD))
-    {
-        return "-Wl,/out:";
-    }
     return "-o ";
 }
 
