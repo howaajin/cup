@@ -216,7 +216,7 @@ void node_ensure_prepared(Node* node)
 
 void node_remove_dependency(Node* node, Node* dependency)
 {
-    array_compact(node->dependencies, array_pointer_compare, &dependency);
+    array_remove_if(node->dependencies, array_pointer_compare, &dependency);
 }
 
 void node_set_check_dirty_fn(Node* node, FnCheckDirty* fn)
@@ -236,7 +236,7 @@ void node_set_extra_data(Node* node, void* extra_data)
 
 void node_remove_edge(Node* tail, Node* head)
 {
-    array_compact(head->dependencies, array_pointer_compare, &tail);
+    array_remove_if(head->dependencies, array_pointer_compare, &tail);
 }
 
 static void file_check_space_and_backslash(Node* file)
@@ -845,13 +845,13 @@ void cmd_add_option_no_sep(Node* node, OptionType type, char const* option)
 void cmd_remove_input(Node* node, Node* file)
 {
     node_remove_dependency(node, file);
-    array_compact(node->inputs, array_pointer_compare, &file);
+    array_remove_if(node->inputs, array_pointer_compare, &file);
 }
 
 void cmd_remove_output(Node* node, Node* file)
 {
     node_remove_dependency(file, node);
-    array_compact(node->outputs, array_pointer_compare, &file);
+    array_remove_if(node->outputs, array_pointer_compare, &file);
 }
 
 char const* cmd_get_description(Node* node)

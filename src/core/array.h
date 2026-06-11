@@ -47,7 +47,7 @@ struct Array
 #define array_remove_n(a, i, n) array_remove_n_impl((void*)(a), sizeof((a)[0]), (i), (n))
 
 #define array_find(a, pred, args) array_find_impl((void*)(a), sizeof((a)[0]), (pred), (args))
-#define array_compact(a, pred, args) array_compact_impl((void*)(a), sizeof((a)[0]), (pred), (args))
+#define array_remove_if(a, pred, args) array_remove_if_impl((void*)(a), sizeof((a)[0]), (pred), (args))
 
 static inline size_t array_calc_capacity(size_t old_capacity, size_t new_size)
 {
@@ -172,21 +172,18 @@ static inline void* array_find_impl(void* a, size_t item_size, int (*pred)(const
     return NULL;
 }
 
-static inline void array_compact_impl(void* a, size_t item_size, int (*pred)(void const* args, void const* elem), void const* args)
+static inline void array_remove_if_impl(void* a, size_t item_size, int (*pred)(void const* args, void const* elem), void const* args)
 {
     void* slot = array_find_impl(a, item_size, pred, args);
     if (!slot) return;
     void* end = (char*)a + array_size(a) * item_size;
-    if (slot != end)
+    for (void* i = (char*)slot + item_size; i != end; i = (char*)i + item_size)
     {
-        for (void* i = (char*)slot + item_size; i != end; i = (char*)i + item_size)
+        if (pred(args, i) != 0)
         {
-            if (pred(args, i) != 0)
-            {
-                memcpy(slot, i, (size_t)item_size);
-                slot = (char*)slot + item_size;
-            }
+            memcpy(slot, i, (size_t)item_size);
+            slot = (char*)slot + item_size;
         }
     }
-    if (a) array_size_lvalue(a) = ((char*)slot - (char*)a) / item_size;
+    array_size_lvalue(a) = ((char*)slot - (char*)a) / item_size;
 }
