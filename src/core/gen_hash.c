@@ -125,10 +125,10 @@ static inline uint32_t hash_hash_func_$key_type$($key_type$ key, uint32_t num_bu
     //$ {
     //$     return 0;
     //$ }
-    //$ int32_t h = (int32_t)key.data[0];
+    //$ uint32_t h = (uint32_t)(unsigned char)key.data[0];
     //$ for (uint64_t i = 1; i != key.len; i++)
     //$ {
-    //$     h = (h << 5) - h + (int32_t)key.data[i];
+    //$     h = (h << 5) - h + (uint32_t)(unsigned char)key.data[i];
     //$ }
     //$ return h & (num_buckets - 1);
     /*$ default -*/
