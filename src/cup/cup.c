@@ -1254,7 +1254,7 @@ static int run_tests()
     }
     if (total)
     {
-        fprintf(stdout, "\nresults: %zu total, %zu passed, %zu failed\n", total, passed, total - passed);
+        fprintf(stdout, "\nTests results: %zu total, %zu passed, %zu failed\n", total, passed, total - passed);
     }
     allocator_destroy(allocator);
     return exit_code;
