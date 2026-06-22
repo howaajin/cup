@@ -125,7 +125,10 @@ static bool run_all_tests()
                     {
                         has_error = true;
                     }
-                    printf("TEST %s:%d EXIT: %d\n", slots[i].file, slots[i].line, exit_code);
+                    if (exit_code != EXIT_SUCCESS)
+                    {
+                        printf("TEST: %s:%d failed, exit code: %d\n", slots[i].file, slots[i].line, exit_code);
+                    }
                     if (slots[i].output_size)
                     {
                         printf("OUTPUT:\n");

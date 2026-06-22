@@ -334,15 +334,6 @@ static void report(Node* cmd)
         }
         fprintf(stderr, "command output: %s:%d:\n", cmd->file, cmd->line);
     }
-    else if (array_size(cmd->std_error) || array_size(cmd->std_output))
-    {
-        fprintf(stderr, "command output: %s:%d:\n", cmd->file, cmd->line);
-        char const* cmdline = cmd_get_cmdline(cmd);
-        if (cmdline)
-        {
-            fprintf(stderr, "%s\n", cmdline);
-        }
-    }
     if (array_size(cmd->std_error))
     {
         fputs(cmd->std_error, stderr);
