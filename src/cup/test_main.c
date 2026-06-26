@@ -148,16 +148,20 @@ static bool run_all_tests()
 }
 
 #ifdef _MSC_VER
+#include <Windows.h>
 #include <crtdbg.h>
 #endif
 
 int main(int argc, char** argv)
 {
 #ifdef _MSC_VER
-    _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
-    _CrtSetReportMode(_CRT_ASSERT, 0);
-    _CrtSetReportMode(_CRT_ERROR, 0);
-    _CrtSetReportMode(_CRT_WARN, 0);
+    if (!IsDebuggerPresent())
+    {
+        _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+        _CrtSetReportMode(_CRT_ASSERT, 0);
+        _CrtSetReportMode(_CRT_ERROR, 0);
+        _CrtSetReportMode(_CRT_WARN, 0);
+    }
 #endif
 
     cur_exe_path = argv[0];
