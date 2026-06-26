@@ -152,6 +152,14 @@ static bool run_all_tests()
 #include <crtdbg.h>
 #endif
 
+bool is_debugging(void)
+{
+#ifdef _MSC_VER
+    return IsDebuggerPresent();
+#endif
+    return false;
+}
+
 int main(int argc, char** argv)
 {
 #ifdef _MSC_VER

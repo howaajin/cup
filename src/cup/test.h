@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +31,7 @@ static inline void test_push_entry(TestEntry entry)
     test_entries[num_test_entries++] = entry;
 }
 #ifndef CONSTRUCTOR
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__clang__)
 #define CONSTRUCTOR(name)                   \
     _Pragma("section(\".CRT$XCU\", read)"); \
     static void name(void);                 \
@@ -59,7 +60,15 @@ static inline void assert_impl(bool cond, char const* msg, char const* file, int
     if (!cond)
     {
         fprintf(stderr, "  ASSERT FAILED: %s:%d: %s\n", file, line, msg);
-        exit(EXIT_FAILURE);
+        bool is_debugging(void);
+        if (is_debugging())
+        {
+            assert(false);
+        }
+        else
+        {
+            exit(EXIT_FAILURE);
+        }
     }
 }
 
